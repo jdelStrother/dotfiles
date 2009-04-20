@@ -57,10 +57,6 @@ done
 
 PR_NO_COLOR="%{$terminfo[sgr0]%}"
 
-#PS1="[$PR_MAGENTA%n$PR_NO_COLOR@$PR_GREEN%U%m%u$PR_NO_COLOR:$PR_RED%2c$PR_NO_COLOR]%(!.#.$) "
-#RPS1="$PR_MAGENTA(%D{%m-%d %H:%M})$PR_NO_COLOR"
-
-#LANGUAGE=
 LC_ALL='en_US.UTF-8'
 LANG='en_US.UTF-8'
 LC_CTYPE=C
@@ -100,20 +96,6 @@ HEADLESS_PROMPT="{$PR_LIGHT_RED%2v$PR_NO_COLOR}"
 # otherwise, use a blank right-prompt.
 export RPS1="%(2v.$HEADLESS_PROMPT.%(1v.$BRANCH_PROMPT.))"
 
-
-# alias	=clear
-
-#chpwd() {
-#     [[ -t 1 ]] || return
-#     case $TERM in
-#     sun-cmd) print -Pn "\e]l%~\e\\"
-#     ;;
-#    *xterm*|screen|rxvt|(dt|k|E)term) print -Pn "\e]2;%~\a"
-#    ;;
-#    esac
-#}
-
-#chpwd
 
 autoload -U compinit
 compinit
@@ -198,7 +180,6 @@ zstyle ':completion::*:git:*' list_aliases true
 # # --------------------------------------------------------------------
 # # aliases
 # # --------------------------------------------------------------------
-#alias man='LC_ALL=C LANG=C man'
 alias dmesg="sudo dmesg"
 alias ls='/bin/ls -FGl'
 alias ll='ls -al'
@@ -230,20 +211,6 @@ autoload -U run-help
 HELPDIR=~/lib/zsh-help
 
 
-
-# -- changing screen colors --
-# ideally we would only do this if we are actually physically
-# in front of this specific macintosh... but i don't know how
-# to check that
-# if [ "${TERM}" != "dumb" ]; then
-#   alias su='colorwrap su'
-#   alias ssh='colorwrap ssh'
-#   alias rlogin='colorwrap rlogin'
-#   alias slogin='colorwrap slogin'
-#   compdef _precommand colorwrap # make zsh completion ignore the 'colorwrap' part
-# fi
-
-
 function trackingBranch() {
 	local MYBRANCH REMOTE BRANCH
 	MYBRANCH="$(git symbolic-ref HEAD)"
@@ -257,24 +224,3 @@ function trackingBranch() {
 
 alias ov='git log --pretty=format:"%Cred%H%Creset %n%Cblue%an%Creset %s%n" --graph HEAD $(trackingBranch) ^$(git merge-base HEAD $(trackingBranch))~3 | git name-rev --stdin'
 
-function killer() {
-  local PROCESS=$1
-  osascript -e "tell application \"$PROCESS\" to quit"
-  while ps aux | grep $PROCESS | grep -v grep >|/dev/null
-    do
-    sleep 0.1
-  done
-}
-
-function syncUp() {
-  /usr/bin/ssh gir.mp.bestbefore.tv "osascript -e \"tell application \\\"Things\\\" to quit\"" &&
-  killer Things &&
-  rsync -vazb --exclude '*~' ~/Library/Application\ Support/Cultured\ Code gir.mp.bestbefore.tv:Library/Application\\\ Support/ &&
-  open -a Things.app
-}
-function syncDown() {
-  /usr/bin/ssh gir.mp.bestbefore.tv "osascript -e \"tell application \\\"Things\\\" to quit\"" &&
-  killer Things &&
-  rsync -vazb --exclude '*~' gir.mp.bestbefore.tv:Library/Application\\\ Support/Cultured\\\ Code ~/Library/Application\ Support &&
-  open -a Things.app
-}
