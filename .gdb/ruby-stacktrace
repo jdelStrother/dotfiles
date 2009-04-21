@@ -1,0 +1,7 @@
+set $ary = (int)backtrace(-1)
+set $count = *($ary+8)
+set $index = 0
+while $index < $count
+  x/1s *((int)rb_ary_entry($ary, $index)+12)
+  set $index = $index + 1
+end

@@ -219,8 +219,40 @@ function trackingBranch() {
 	REMOTE=$(git config --get "branch.$MYBRANCH.remote")
 	BRANCH=$(git config --get "branch.$MYBRANCH.merge")
 	BRANCH=${BRANCH##refs/heads/}
+	if [[ -z $REMOTE ]]; then
+		REMOTE=origin
+	fi
+	if [[ -z $BRANCH ]]; then
+		BRANCH=master
+	fi
 	echo $REMOTE/$BRANCH
 }
 
-alias ov='git log --pretty=format:"%Cred%H%Creset %n%Cblue%an%Creset %s%n" --graph HEAD $(trackingBranch) ^$(git merge-base HEAD $(trackingBranch))~3 | git name-rev --stdin'
+function ov(){
+	eval 'echo "$*"; git log --pretty=format:"%Cred%H%Creset %n%Cblue%an%Creset %s%n" --graph HEAD $(trackingBranch) ^$(git merge-base HEAD $(trackingBranch))~3 $@ | git name-rev --stdin | less -RFX'
+}
 
+
+#gsub on last command  -  s .c .h
+function s() {
+	eval ${${${(f)"$(history -n)"}[-1]}//$1/$2}
+}
+
+
+_opengem () {
+  compadd `COMP_LINE=$words opengem --complete`
+}
+compdef _opengem opengem
+
+if [[ -f ~/bin/j.sh ]]; then
+  source ~/bin/j.sh
+fi
+
+
+
+
+alias gcruby='~/rubygc/bin/ruby'
+alias gcrake='~/rubygc/bin/rake'
+alias gcgem='~/rubygc/bin/gem'
+alias gcirb='~/rubygc/bin/irb'
+alias gcrails='~/rubygc/bin/rails'

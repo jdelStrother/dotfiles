@@ -5,6 +5,6 @@
 	<key>GL_ENABLE_DEBUG_ATTACH</key>
 	<string>YES</string>
 	<key>PATH</key>
-	<string>/opt/local/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin</string>
+	<string>/Users/jon/bin:/opt/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
 </dict>
 </plist>

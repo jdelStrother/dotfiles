@@ -3,25 +3,26 @@
 # #### RUBY STUFF
 
 define eval
-  call((void*)rb_p((void*)rb_eval_string_protect($arg0,(int*)0)))
+  call((void)rb_p((unsigned long)rb_eval_string_protect($arg0,(int*)0)))
 end
 
 define redirect_stdout
-  call (void*)rb_eval_string("$_old_stdout, $stdout = $stdout, File.open('/tmp/ruby-debug.' + Process.pid.to_s, 'a'); $stdout.sync = true")
+  print "Opening /tmp/ruby-debug.* for stdout..."
+  call (unsigned long)rb_eval_string("$_old_stdout, $stdout = $stdout, File.open('/tmp/ruby-debug.' + Process.pid.to_s, 'a'); $stdout.sync = true")
 end
 
 define restore_stdout
-  call (void*)rb_eval_string("$stdout = $_old_stdout")
+  call (unsigned long)rb_eval_string("$stdout = $_old_stdout")
 end
 
 define rb_finish
-  call (void*)rb_eval_string_protect("set_trace_func lambda{|event, file, line, id, binding, classname| if /return/ =~ event; sleep 0; set_trace_func(nil) end}",(int*)0)
+  call (unsigned long)rb_eval_string_protect("set_trace_func lambda{|event, file, line, id, binding, classname| if /return/ =~ event; sleep 0; set_trace_func(nil) end}",(int*)0)
   tbreak rb_f_sleep
   cont
 end
 
 define rb_object_counts
-  call rb_eval_string_protect("counts = Hash.new{|h,k| h[k] = 0}; ObjectSpace.each_object{|o| counts[o.class] += 1}; counts.sort_by{|k,c| c}.reverse.each{|k,c| puts '%7d  %s' % [c, k] } ",(int*)0)
+  call (unsigned long)rb_eval_string_protect("counts = Hash.new{|h,k| h[k] = 0}; ObjectSpace.each_object{|o| counts[o.class] += 1}; counts.sort_by{|k,c| c}.reverse.each{|k,c| puts '%7d  %s' % [c, k] } ",(int*)0)
 end
 
 define rb_locals

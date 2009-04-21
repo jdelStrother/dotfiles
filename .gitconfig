@@ -16,15 +16,25 @@
 	ci = commit
 	co = checkout
 	ss = !git stash && git stash apply
+	up = !git fetch origin && git log HEAD...origin/master --pretty=oneline --reverse --left-right && git checkout origin/master
+	upr = !git fetch origin && git log HEAD...origin/master --pretty=oneline --reverse --left-right && git rebase origin/master
 [merge]
 	tool = opendiff
+[rerere]
+	enabled = 1
 [branch]
-	autosetupmerge = true
-[diff]
-  mnemonicprefix = true
-[init]
-  post-init = /Users/jon/bin/git_post_init
-
+	autosetupmerge = 1
+[instaweb]
+    local = true
+    httpd = webrick
+    port = 4321
+    browser = open
+[sendemail]
+	smtpserver = mail.bestbefore.tv
+	smtpuser = jon.delStrother
+	smtppass = Jade613A
+[apply]
+	whitespace = fix
 
 [mergetool "p4merge"]
     # I put p4merge and DiffMerge in /Applications/Utilities, but you might have them in /Applications.
@@ -37,7 +47,7 @@
     trustExitCode = false
 
 [mergetool "diffmerge"]
-    cmd = /Applications/DiffMerge.app/Contents/MacOS/DiffMerge \
+    cmd = /Applications/Utilities/DiffMerge.app/Contents/MacOS/DiffMerge \
         --nosplash \
         --result="$PWD/$MERGED" \
         "$PWD/$BASE" \
