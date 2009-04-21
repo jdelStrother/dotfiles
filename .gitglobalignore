@@ -1,0 +1,7 @@
+.DS_Store
+.svn
+*~.nib
+*.pbxuser
+*.mode1
+*.mode2
+*.perspective

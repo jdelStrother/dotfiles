@@ -1,0 +1,2 @@
+# Just ignore everything in my home directory, since "git status" is a bit unbearable otherwise
+*

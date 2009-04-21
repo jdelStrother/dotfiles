@@ -8,7 +8,7 @@
 	interactive = auto
 [core]
 	legacyheaders = false
-	excludesfile = /Users/jon/.gitignore
+	excludesfile = /Users/jon/.gitglobalignore
 [repack]
 	usedeltabaseoffset = true
 [alias]
