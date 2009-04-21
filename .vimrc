@@ -9,6 +9,9 @@ set lines=50
 set columns=130
 " set number
 
+" show 3 lines of context around scrolling cursor
+set scrolloff=3
+
 set softtabstop=2
 
 let mapleader=" "
@@ -30,6 +33,13 @@ set wildmenu
 
 " Turn off search highlight temporarily
 nmap <silent> <leader>n :silent :nohlsearch<CR>
+
+" Show trailing spaces
+set listchars=tab:>-,trail:·,eol:$
+nmap <silent> <leader>s :set nolist!<CR>
+
+" don't show unnecessary 'press enter to continue' prompts'
+set shortmess=atI
 
 set sessionoptions=blank,buffers,curdir,folds,help,resize,tabpages,winsize
 map <c-q> :mksession! ~/.vim/.session <cr>
