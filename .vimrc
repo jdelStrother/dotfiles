@@ -21,9 +21,13 @@ let g:fuzzy_matching_limit = 70
 
 map <leader>t :FuzzyFinderTextMate<CR>
 map <leader>b :FuzzyFinderBuffer<CR>
+map <leader>r :ruby finder.rescan!<CR>:FuzzyFinderRemoveCache<CR>:exe ":echo 'rescan complete'"<CR>
 
 map <leader>d :execute 'NERDTreeToggle ' . getcwd()<CR>
 map <leader>D :NERDTree %:h<CR>
+
+map <C-s> :update<CR>
+imap <C-s> <Esc><C-s>
 
 " allow buffers to go to the background without forcing you to save them first
 set hidden
@@ -41,9 +45,9 @@ nmap <silent> <leader>s :set nolist!<CR>
 " don't show unnecessary 'press enter to continue' prompts'
 set shortmess=atI
 
-set sessionoptions=blank,buffers,curdir,folds,help,resize,tabpages,winsize
-map <c-q> :mksession! ~/.vim/.session <cr>
-map <c-s> :source ~/.vim/.session <cr>
+" set sessionoptions=blank,buffers,curdir,folds,help,resize,tabpages,winsize
+" map <c-q> :mksession! ~/.vim/.session <cr>
+" map <c-s> :source ~/.vim/.session <cr>
 
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
