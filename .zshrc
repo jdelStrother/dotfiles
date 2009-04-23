@@ -82,7 +82,7 @@ precmd() {
 		fi
 	fi
 	
-	j --add "$(pwd -P)"
+	functions j > /dev/null && j --add "$(pwd -P)"
 }
 
 
