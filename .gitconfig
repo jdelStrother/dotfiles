@@ -55,3 +55,5 @@
         "$PWD/$LOCAL" 
     keepBackup = false
     trustExitCode = false
+[push]
+	default = matching
