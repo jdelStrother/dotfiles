@@ -26,7 +26,7 @@ map <leader>r :ruby finder.rescan!<CR>:FuzzyFinderRemoveCache<CR>:exe ":echo 're
 map <leader>d :execute 'NERDTreeToggle ' . getcwd()<CR>
 map <leader>D :NERDTree %:h<CR>
 
-map <C-s> :update<CR>
+map <C-s> :write<CR>
 imap <C-s> <Esc><C-s>
 
 " allow buffers to go to the background without forcing you to save them first
