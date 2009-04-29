@@ -50,9 +50,10 @@ set shortmess=atI
 " map <c-s> :source ~/.vim/.session <cr>
 
 set foldmethod=indent
+set foldlevelstart=999 " don't auto-fold on opening files
 nnoremap <leader><space> za
-au BufWinLeave ?* mkview
-au BufWinEnter ?* silent loadview
+au BufWinLeave ?* silent! mkview
+au BufWinEnter ?* silent! loadview
 
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
