@@ -49,6 +49,11 @@ set shortmess=atI
 " map <c-q> :mksession! ~/.vim/.session <cr>
 " map <c-s> :source ~/.vim/.session <cr>
 
+set foldmethod=indent
+nnoremap <leader><space> za
+au BufWinLeave ?* mkview
+au BufWinEnter ?* silent loadview
+
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
 
