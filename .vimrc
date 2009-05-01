@@ -12,7 +12,10 @@ set columns=130
 " show 3 lines of context around scrolling cursor
 set scrolloff=3
 
+set shiftwidth=2
 set softtabstop=2
+set tabstop=2
+set expandtab
 
 let mapleader=" "
 
