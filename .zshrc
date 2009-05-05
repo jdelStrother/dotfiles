@@ -42,7 +42,7 @@ HOSTNAME="`hostname`"
 PAGER='less'
 EDITOR="/usr/bin/vim"
 if [[ -n $DISPLAY ]]; then
-  EDITOR="/opt/local/bin/mvim"
+  EDITOR="/opt/local/bin/mvim -f"
 fi
 
 autoload colors zsh/terminfo
