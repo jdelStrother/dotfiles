@@ -5,6 +5,10 @@
 	<key>GL_ENABLE_DEBUG_ATTACH</key>
 	<string>YES</string>
 	<key>PATH</key>
-	<string>/Users/jon/bin:/opt/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	<string>/Users/jon/bin:/opt/ruby-enterprise-1.8.7-2010.01/bin:/opt/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	<key>GEM_HOME</key>
+	<string>/opt/ruby-enterprise-1.8.7-2010.01/lib/ruby/gems/1.8</string>
+	<key>GEM_PATH</key>
+	<string>/Users/jon/.gem/ruby/1.8EE:/opt/ruby-enterprise-1.8.7-2010.01/lib/ruby/gems/1.8</string>
 </dict>
 </plist>

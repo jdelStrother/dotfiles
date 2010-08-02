@@ -6,5 +6,7 @@ export CLICOLOR=1
 export LSCOLORS=Dxfxcxdxbxegedabagacad
 
 typeset -U path
-path=(~/bin /opt/local/bin $path)
+path=(~/bin $path)
 unset manpath
+cdpath=(~/Developer/AudioBooWeb)
+export KEYSTORE=/Users/jon/Documents/Certificates/keystore.ImportKey

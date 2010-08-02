@@ -7,7 +7,7 @@
 # next lets set some enviromental/shell pref stuff up
 # setopt NOHUP
 #setopt NOTIFY
-#setopt NO_FLOW_CONTROL
+setopt NO_FLOW_CONTROL
 setopt APPEND_HISTORY
 # setopt AUTO_LIST		# these two should be turned off
 # setopt AUTO_REMOVE_SLASH
@@ -44,6 +44,7 @@ EDITOR="/usr/bin/vim"
 if [[ -n $DISPLAY ]]; then
   EDITOR="/opt/local/bin/mvim -f"
 fi
+GEM_EDITOR=$EDITOR
 
 autoload colors zsh/terminfo
 if [[ "$terminfo[colors]" -ge 8 ]]; then
@@ -69,7 +70,12 @@ precmd() {
 	psvar=()
 	branch_ref=$(git symbolic-ref -q HEAD 2>/dev/null)
 	cleanliness=""
-	(git diff-index --name-only --exit-code HEAD 2>&1) > /dev/null || cleanliness="*"
+	# Cleanliness is hard to figure out, and pretty slow, especially from a cold cache.  Only do it for repos that have run "git config --bool jds.showstatus 1"
+	if [[ $(git config --bool --get jds.showstatus) = 'true' ]]; then
+		(git diff-index --name-only --exit-code HEAD 2>&1) > /dev/null || cleanliness="*"
+	else
+		cleanliness="+"
+	fi
 
 	# We might be on a checked out branch:
 	if [[ ! -z "$branch_ref" ]]; then
@@ -101,6 +107,7 @@ export RPS1="%(2v.$HEADLESS_PROMPT.%(1v.$BRANCH_PROMPT.))"
 autoload -U compinit
 compinit
 bindkey '^r' history-incremental-search-backward
+bindkey '^q' history-incremental-search-forward
 bindkey "^[[5~" up-line-or-history
 bindkey "^[[6~" down-line-or-history
 bindkey "^[[H" beginning-of-line
@@ -186,7 +193,9 @@ alias ls='/bin/ls -FGl'
 alias ll='ls -al'
 alias cp='/bin/cp -i'
 alias mv='nocorrect /bin/mv -i'
-alias git='noglob git'
+alias git='nocorrect noglob git'
+alias pstree='pstree -g 2'
+alias bundle='nocorrect bundle'
 
 _ri(){fri -w120 "$*" | less -RFX}
 alias ri='noglob _ri'
@@ -239,25 +248,21 @@ function s() {
 	eval ${${${(f)"$(history -n)"}[-1]}//$1/$2}
 }
 
-
-_opengem () {
-  compadd `COMP_LINE=$words opengem --complete`
-}
-compdef _opengem opengem
-
 if [[ -f ~/bin/j.sh ]]; then
   source ~/bin/j.sh
 fi
 
-
-
+alias man="~/bin/pman"
 
 alias gcruby='~/rubygc/bin/ruby'
 alias gcrake='~/rubygc/bin/rake'
 alias gcgem='~/rubygc/bin/gem'
 alias gcirb='~/rubygc/bin/irb'
 alias gcrails='~/rubygc/bin/rails'
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+
 # Change to most recently used directory:
 if [ -f ~/.lastdir ]; then
     cd "`cat ~/.lastdir`"
 fi
+

@@ -1,12 +1,12 @@
 require 'rubygems'
-require 'hirb'
+# require 'hirb'
 require 'utility_belt'
-
-original_rc = IRB.conf[:IRB_RC]
-IRB.conf[:IRB_RC] = lambda do
-  original_rc.call
-  Hirb::View.enable
-end
+# 
+# original_rc = IRB.conf[:IRB_RC]
+# IRB.conf[:IRB_RC] = lambda do
+#   original_rc.call
+#   Hirb::View.enable
+# end
 
 begin # ANSI codes
   ANSI_BLACK    = "\033[0;30m"
@@ -63,6 +63,12 @@ begin # Custom Prompt
     }
     IRB.conf[:PROMPT_MODE] = :SD
   end
+end
+
+if ENV.include?('RAILS_ENV')
+  script_console_running = IRB.conf[:LOAD_MODULES] && IRB.conf[:LOAD_MODULES].include?('console_with_helpers')
+  require 'logger'
+  Object.const_set(:RAILS_DEFAULT_LOGGER, Logger.new(STDOUT))
 end
 
 
@@ -173,4 +179,132 @@ class MethodFinder
     MethodFinder.show(@obj, result, *@args, &@block)
   end
 
+end
+
+
+
+#  http://gist.github.com/16885
+
+#  $ ./script/console 
+#  Loading development environment (Rails 2.1.0)
+#  >>
+#  >> User.whatis :create!
+#  File: /opt/local/lib/ruby/gems/1.8/gems/activerecord-2.1.0/lib/active_record/validations.rb:876
+#  872:             end  
+#  873:         
+#  874:             # Creates an object just like Base.create but calls save! instead of save  
+#  875:             # so an exception is raised if the record is invalid.  
+#  876: >>>>        def create!(attributes = nil, &block)    <<<<<<<
+#  877:               if attributes.is_a?(Array)  
+#  878:                 attributes.collect { |attr| create!(attr, &block) }  
+#  879:               else  
+#  880:                 object = new(attributes)  
+#  881:                 yield(object) if block_given?  
+#  882:                 object.save!  
+#  883:                 object  
+#  884:               end  
+#  885:             end  
+#  886:         
+#  => #<Method: Class(ActiveRecord::Validations::ClassMethods)#create!>
+#  >> _.tmate
+#  => #<Method: Class(ActiveRecord::Validations::ClassMethods)#create!>
+#  >> 
+#
+#
+#  Examples:
+#  ActionView::Base.new.method(:link_to).whatis
+#  ActionView::Base.new.method(:link_to).tmate       # opens TextMate or E TextEditor 
+#  ActionView::Base.new.whatis :link_to              # instance method of AV::Base
+#  ActionView::Base.whatis :link_sanitizer           # class method of AV::Base
+#  ActionView::Base.whatis :link_to                  # instance method of AV::Base
+#  ActionView::Base.whatis :calendar_date_select     # instance method of AV::Base
+#  whatis ActionView::Base, :link_to                 # instance method of AV::Base
+#  tmate :it                                         # opens source code of methodphitmane
+#  
+#  
+
+module Whatis
+  def self.open_textmate(file, line=1)
+    return unless File.exist?(file)
+    if /mswin32/ =~ RUBY_PLATFORM
+      `start txmt://open?url=file://#{file}^&line=#{line}`
+    else
+      `open 'txmt://open?url=file://#{file}&line=#{line}'`
+    end
+    return
+  end
+  
+  def self.print_file(file, line=1, lines_count = 15)
+    return unless File.exist? file
+    lines = File.read(file).split("\n")
+    start_line = [line - lines_count/3, 0].max
+    selected = (0..lines_count-1).map{|i| 
+      line_no = i+start_line+1
+      title = "#{line_no}: "
+      title << (line_no==line ? '>' : ' ')*(9-title.length)
+      "%s  %s  %s" % [ title, lines[line_no-1].to_s.rstrip ,  ("  <<<<<<<" if line_no==line) ]
+    }
+    puts "File: #{file}:#{line}"
+    puts selected * "\n"
+  end
+  
+  def self.get_method(caller, arg1, arg2)
+    obj, meth = arg2 ? [arg1, arg2] : [caller, arg1]   
+    return meth if meth.is_a? Method
+    if obj.is_a?(Module) && (obj.method(meth) rescue nil).nil? && (get_instance(obj).method(meth) rescue nil)
+      obj = get_instance(obj)
+    end
+    return obj.method(meth)
+  end
+  
+  def self.get_instance(klass)
+    klass = Class.new.send(:include, klass) if !klass.respond_to?(:allocate)
+    return klass.allocate
+  end
+end
+
+class Method
+  SHOW_TRACE = false
+  def trace_func event, file, line, id, binding, classname
+    puts "%8s %s:%-2d %s %8s" % [event, file, line, id, classname] if SHOW_TRACE
+    return unless event == 'call'
+    set_trace_func nil 
+    
+    @file, @line = file, line
+    raise :found
+  end
+  
+  def location
+    if @file.nil?
+      args =[*(1..(arity<-1 ? -arity-1 : arity ))]
+      
+      set_trace_func method(:trace_func).to_proc
+      #begin; call *args; rescue Exception=>e; y e.to_s; y e.backtrace; end
+      call *args rescue nil
+      set_trace_func nil 
+      @file = File.expand_path(@file) if @file && File.exist?(File.expand_path(@file))
+    end
+    return [@file, @line] if File.exist?(@file.to_s)
+  end
+  
+  def whatis;  Whatis.print_file(*location) if location; self end
+  def tmate;  Whatis.open_textmate(*location) if location; self  end
+  
+  alias :tm :tmate
+  alias :wh :whatis
+end
+
+class Object
+  def whatis(arg1, arg2=nil)
+    m = Whatis.get_method(self, arg1, arg2)
+    m.whatis ;  m
+  end
+  
+  def tmate(arg1, arg2=nil)
+    m = Whatis.get_method(self, arg1, arg2)
+    m.tmate ;  m
+  end
+  
+  alias :tm :tmate
+  alias :wh :whatis
 end
