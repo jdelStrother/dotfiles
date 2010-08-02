@@ -19,7 +19,7 @@ set expandtab
 
 let mapleader=" "
 
-let g:fuzzy_ignore = "*.log,tmp/*"
+let g:fuzzy_ignore = "*.log,tmp/*,files/*,public/files/*"
 let g:fuzzy_matching_limit = 70
 
 map <leader>t :FuzzyFinderTextMate<CR>
