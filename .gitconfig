@@ -62,3 +62,27 @@
     trustExitCode = false
 [push]
 	default = matching
+[diff "png"]
+	textconv = exif
+[diff "exif"]
+	textconv = exiftool
+	binary = false
+[diff "sass"]
+	xfuncname = "^ *([^: ].*)$"
+[man]
+	viewer = pman
+[man "pman"]
+  cmd = /Users/jon/bin/pman
+
+[imap]
+	folder = "[Google Mail]/Drafts"
+	host = imaps://imap.gmail.com
+	user = jdelStrother@gmail.com
+	port = 993
+	sslverify = false
+[mailmap]
+	file = /Users/jon/.mailmap
+[path]
+	threads = 4
+[gui]
+	spellingdictionary = none
