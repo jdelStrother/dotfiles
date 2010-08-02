@@ -82,7 +82,8 @@ precmd() {
 		fi
 	fi
 	
-	functions j > /dev/null && j --add "$(pwd -P)"
+	# Remember where we are:
+	pwd >| ~/.lastdir
 }
 
 
@@ -256,3 +257,7 @@ alias gcrake='~/rubygc/bin/rake'
 alias gcgem='~/rubygc/bin/gem'
 alias gcirb='~/rubygc/bin/irb'
 alias gcrails='~/rubygc/bin/rails'
+# Change to most recently used directory:
+if [ -f ~/.lastdir ]; then
+    cd "`cat ~/.lastdir`"
+fi
