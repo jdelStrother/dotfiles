@@ -19,6 +19,7 @@ set expandtab
 
 let mapleader=" "
 
+set wildignore+=files/**,public/files/**,*.log
 let g:fuzzy_ignore = "*.log,tmp/*,files/*,public/files/*"
 let g:fuzzy_matching_limit = 70
 
@@ -124,3 +125,6 @@ if !exists(":DiffOrig")
   command DiffOrig vert new | set bt=nofile | r # | 0d_ | diffthis
 		  \ | wincmd p | diffthis
 endif
+
+
+let g:CommandTMatchWindowAtTop=1
