@@ -35,6 +35,10 @@ set cpo&vim
 " an empty string if no such directory is found.
 function! s:FindRootDirectory()
   let dir_current_file = expand("%:p:h")
+  " don't bother for crazy filesystems (eg fugitive:///stuff/foo/bar)
+  if dir_current_file[0]!="/"
+    return ""
+  endif
   let git_dir = finddir(".git", dir_current_file . ";")
   " If we're at the project root or we can't find one above us
   if git_dir == ".git" || git_dir == ""
