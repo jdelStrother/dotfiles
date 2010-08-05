@@ -25,6 +25,7 @@ let g:fuzzy_matching_limit = 70
 
 map <leader>d :execute 'NERDTreeToggle ' . getcwd()<CR>
 map <leader>D :NERDTree %:h<CR>
+map <unique> <silent> <Leader>t <Plug>PeepOpen
 
 map <C-s> :write<CR>
 imap <C-s> <Esc><C-s>
