@@ -26,6 +26,8 @@ map <unique> <silent> <Leader>t <Plug>PeepOpen
 
 map <C-s> :write<CR>
 imap <C-s> <Esc><C-s>
+map <C-t> Xp
+imap <C-t> <C-o>X<C-o>p
 
 " allow buffers to go to the background without forcing you to save them first
 set hidden
