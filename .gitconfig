@@ -69,10 +69,6 @@
 	binary = false
 [diff "sass"]
 	xfuncname = "^ *([^: ].*)$"
-[man]
-	viewer = pman
-[man "pman"]
-  cmd = /Users/jon/bin/pman
 
 [imap]
 	folder = "[Google Mail]/Drafts"
