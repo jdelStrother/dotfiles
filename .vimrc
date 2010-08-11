@@ -6,10 +6,6 @@ colorscheme reliable
 set backupdir=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set directory=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 
-set lines=50
-set columns=130
-" set number
-
 " show 3 lines of context around scrolling cursor
 set scrolloff=3
 
