@@ -78,6 +78,14 @@ if has('mouse')
   set mouse=a
 endif
 
+" Setup syntastic for syntax checking
+let g:syntastic_enable_signs=1
+let g:syntastic_auto_loc_list=1
+
+let g:rails_statusline=0
+set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
+set laststatus=2 "always show status line
+
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
 if &t_Co > 2 || has("gui_running")
