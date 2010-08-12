@@ -1,4 +1,6 @@
 set nocompatible
+call pathogen#runtime_append_all_bundles()
+
 colorscheme reliable
 
 set backupdir=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
