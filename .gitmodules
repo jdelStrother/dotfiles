@@ -1,0 +1,15 @@
+[submodule ".vim/bundle/rails"]
+	path = .vim/bundle/rails
+	url = http://github.com/tpope/vim-rails.git
+[submodule ".vim/bundle/nerdtree"]
+	path = .vim/bundle/nerdtree
+	url = http://github.com/scrooloose/nerdtree.git
+[submodule ".vim/bundle/fugitive"]
+	path = .vim/bundle/fugitive
+	url = http://github.com/tpope/vim-fugitive.git
+[submodule ".vim/bundle/rooter"]
+	path = .vim/bundle/rooter
+	url = http://github.com/airblade/vim-rooter.git
+[submodule ".vim/bundle/surround"]
+	path = .vim/bundle/surround
+	url = http://github.com/tpope/vim-surround.git

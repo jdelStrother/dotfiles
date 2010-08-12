@@ -1,5 +1,5 @@
 "============================================================================
-"File:        sass.vim
+"File:        php.vim
 "Description: Syntax checking plugin for syntastic.vim
 "Maintainer:  Martin Grenfell <martin.grenfell at gmail dot com>
 "License:     This program is free software. It comes without any warranty,
@@ -9,25 +9,18 @@
 "             See http://sam.zoy.org/wtfpl/COPYING for more details.
 "
 "============================================================================
-if exists("loaded_sass_syntax_checker")
+if exists("loaded_php_syntax_checker")
     finish
 endif
-let loaded_sass_syntax_checker = 1
+let loaded_php_syntax_checker = 1
 
-"bail if the user doesnt have the sass binary installed
-if !executable("sass")
+"bail if the user doesnt have php installed
+if !executable("php")
     finish
 endif
 
-function! SyntaxCheckers_sass_GetLocList()
-    let makeprg='sass --check %'
-    let errorformat = '%Wwarning on line %l:,%Z%m,Syntax %trror on line %l: %m'
-    let loclist = SyntasticMake({ 'makeprg': makeprg, 'errorformat': errorformat })
-
-    let bn = bufnr("")
-    for i in loclist
-        let i['bufnr'] = bn
-    endfor
-
-    return loclist
+function! SyntaxCheckers_php_GetLocList()
+    let makeprg = "php -l %"
+    let errorformat='%-GNo syntax errors detected in%.%#,%-GErrors parsing %.%#,%-G\s%#,%EParse error: syntax error\, %m in %f on line %l'
+    return SyntasticMake({ 'makeprg': makeprg, 'errorformat': errorformat })
 endfunction
