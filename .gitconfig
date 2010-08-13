@@ -27,6 +27,7 @@
 	tool = opendiff
 [rerere]
 	enabled = 1
+	autoupdate = true
 [branch]
 	autosetupmerge = 1
 [instaweb]
