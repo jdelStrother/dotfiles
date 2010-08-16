@@ -14,6 +14,9 @@ set softtabstop=2
 set tabstop=2
 set expandtab
 
+" No toolbar
+set guioptions-=T
+
 let mapleader=" "
 
 set wildignore+=files/**,public/files/**,*.log
