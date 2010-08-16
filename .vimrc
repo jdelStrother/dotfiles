@@ -30,7 +30,9 @@ map <C-t> Xp
 imap <C-t> <C-o>X<C-o>p
 
 " allow buffers to go to the background without forcing you to save them first
-set hidden
+" set hidden
+" auto-write buffers before switching away
+set autowriteall
 
 " show completions on tab
 set wildmenu
