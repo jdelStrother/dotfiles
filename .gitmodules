@@ -22,3 +22,15 @@
 [submodule ".vim/bundle/syntastic"]
 	path = .vim/bundle/syntastic
 	url = http://github.com/scrooloose/syntastic.git
+[submodule ".vim/bundle/cocoa"]
+	path = .vim/bundle/cocoa
+	url = http://github.com/msanders/cocoa.vim.git
+[submodule ".vim/bundle/rdoc"]
+	path = .vim/bundle/rdoc
+	url = http://github.com/hallison/vim-rdoc.git
+[submodule ".vim/bundle/nerdcommenter"]
+	path = .vim/bundle/nerdcommenter
+	url = http://github.com/scrooloose/nerdcommenter.git
+[submodule ".vim/bundle/vim-repeat"]
+	path = .vim/bundle/vim-repeat
+	url = http://github.com/tpope/vim-repeat.git
