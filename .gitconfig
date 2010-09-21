@@ -18,7 +18,7 @@
 	ss = !git stash && git stash apply
 	up = !git fetch origin && git log HEAD...origin/master --pretty=oneline --reverse --left-right && git checkout origin/master
 	upr = !git fetch origin && git log HEAD...origin/master --pretty=oneline --reverse --left-right && git rebase origin/master
-	cleanmerge = "!git ls-files --other --exclude-standard | grep -E '\\.(orig|rej)$|\\.(BACKUP|BASE|LOCAL|REMOTE)\\.' | xargs rm"
+	cleanmerge = !git ls-files --other --exclude-standard | grep -E '\\.(orig|rej)$|\\.(BACKUP|BASE|LOCAL|REMOTE)\\.' | xargs rm
 	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%aN, %cr)%Creset' --abbrev-commit --date=relative
 	lgprod = !git lg HEAD origin/production-live ^$(commonbase=$(git rev-list HEAD ^origin/production-live | tail -n1) echo ${commonbase:-HEAD~1})~3
 	amend = commit --amend -C HEAD
@@ -44,21 +44,12 @@
 
 [mergetool "p4merge"]
     # I put p4merge and DiffMerge in /Applications/Utilities, but you might have them in /Applications.
-    cmd = /Applications/Utilities/p4merge.app/Contents/Resources/launchp4merge \
-        "$PWD/$BASE" \
-        "$PWD/$REMOTE" \
-        "$PWD/$LOCAL" \
-        "$PWD/$MERGED" 
+    cmd = "/Applications/Utilities/p4merge.app/Contents/Resources/launchp4merge  $PWD/$BASE  $PWD/$REMOTE  $PWD/$LOCAL  $PWD/$MERGED"
     keepBackup = false
     trustExitCode = false
 
 [mergetool "diffmerge"]
-    cmd = /Applications/Utilities/DiffMerge.app/Contents/MacOS/DiffMerge \
-        --nosplash \
-        --result="$PWD/$MERGED" \
-        "$PWD/$BASE" \
-        "$PWD/$REMOTE" \
-        "$PWD/$LOCAL" 
+    cmd = "/Applications/Utilities/DiffMerge.app/Contents/MacOS/DiffMerge  --nosplash  --result=$PWD/$MERGED  $PWD/$BASE  $PWD/$REMOTE  $PWD/$LOCAL"
     keepBackup = false
     trustExitCode = false
 [push]
@@ -69,10 +60,10 @@
 	textconv = exiftool
 	binary = false
 [diff "sass"]
-	xfuncname = "^ *([^: ].*)$"
+	xfuncname = ^ *([^: ].*)$
 
 [imap]
-	folder = "[Google Mail]/Drafts"
+	folder = [Google Mail]/Drafts
 	host = imaps://imap.gmail.com
 	user = jdelStrother@gmail.com
 	port = 993
