@@ -1,8 +1,6 @@
 set nocompatible
 call pathogen#runtime_append_all_bundles()
 
-colorscheme reliable
-
 set backupdir=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set directory=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 
@@ -96,6 +94,11 @@ if &t_Co > 2 || has("gui_running")
   syntax on
   set hlsearch
 endif
+if has("gui_running")
+  colorscheme Mustang
+else
+  colorscheme reliable
+end
 
 " Only do this part when compiled with support for autocommands.
 if has("autocmd")
