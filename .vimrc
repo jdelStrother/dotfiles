@@ -1,4 +1,5 @@
 set nocompatible
+filetype off " force reloading of filetype stuff once pathogen kicks in
 call pathogen#runtime_append_all_bundles()
 
 set backupdir=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
@@ -30,6 +31,11 @@ imap <C-s> <Esc><C-s>
 map <C-t> Xp
 imap <C-t> <C-o>X<C-o>p
 
+:imap jj <Esc>
+
+" :w!! for sudo-save
+cmap w!! w !sudo tee % >/dev/null
+
 " allow buffers to go to the background without forcing you to save them first
 " set hidden
 " auto-write buffers before switching away
@@ -48,32 +54,35 @@ nmap <silent> <leader>s :set nolist!<CR>
 " don't show unnecessary 'press enter to continue' prompts'
 set shortmess=atI
 
-" set sessionoptions=blank,buffers,curdir,folds,help,resize,tabpages,winsize
-" map <c-q> :mksession! ~/.vim/.session <cr>
-" map <c-s> :source ~/.vim/.session <cr>
-
 set foldmethod=indent
 set foldlevelstart=999 " don't auto-fold on opening files
 nnoremap <leader><space> za
-au BufWinLeave ?* silent! mkview
-au BufWinEnter ?* silent! loadview
+"au BufWinLeave ?* silent! mkview
+"au BufWinEnter ?* silent! loadview
 
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
 
-if has("vms")
-  set nobackup		" do not keep a backup file, use versions instead
-else
-  set backup		" keep a backup file
-endif
+set nobackup		" do not keep a backup file, use versions instead
+set noswapfile
 set history=1000	" keep 1000 lines of command line history
+set undolevels=1000
 set ruler		" show the cursor position all the time
 set showcmd		" display incomplete commands
 set incsearch		" do incremental searching
+if exists('+undofile')
+  set undofile
+end
 
-" CTRL-U in insert mode deletes a lot.  Use CTRL-G u to first break undo,
-" so that you can undo CTRL-U after inserting a line break.
-" inoremap <C-U> <C-G>u<C-U>
+" ignore case in searching, unless there's a capital letter in the search
+" phrase
+set ignorecase
+set smartcase
+
+" Make macvim take up the entire screen in fullscreen mode
+if exists('+fuoptions')
+  set fuoptions=maxvert,maxhorz
+endif
 
 " In many terminal emulators the mouse works just fine, thus enable it.
 if has('mouse')
@@ -142,5 +151,3 @@ if !exists(":DiffOrig")
 		  \ | wincmd p | diffthis
 endif
 
-
-let g:CommandTMatchWindowAtTop=1
