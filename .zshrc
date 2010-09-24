@@ -41,10 +41,7 @@ SAVEHIST=10000
 HOSTNAME="`hostname`"
 PAGER='less'
 EDITOR="/usr/bin/vim"
-if [[ -n $DISPLAY ]]; then
-  EDITOR="/opt/local/bin/mvim -f"
-fi
-GEM_EDITOR=$EDITOR
+GEM_OPEN_EDITOR=/opt/local/bin/mate
 
 autoload colors zsh/terminfo
 if [[ "$terminfo[colors]" -ge 8 ]]; then
@@ -197,9 +194,6 @@ alias git='nocorrect noglob git'
 alias pstree='pstree -g 2'
 alias bundle='nocorrect bundle'
 
-_ri(){fri -w120 "$*" | less -RFX}
-alias ri='noglob _ri'
-
 # emacs key bindings:
 bindkey -e
 
@@ -260,6 +254,7 @@ alias gcgem='~/rubygc/bin/gem'
 alias gcirb='~/rubygc/bin/irb'
 alias gcrails='~/rubygc/bin/rails'
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+export INLINEDIR=$BUNDLE_PATH/rubyinline
 
 # Change to most recently used directory:
 if [ -f ~/.lastdir ]; then
