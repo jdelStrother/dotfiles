@@ -74,6 +74,7 @@ set showcmd		" display incomplete commands
 set incsearch		" do incremental searching
 if exists('+undofile')
   set undofile
+  set undodir=~/.vim/tmp
 end
 
 " ignore case in searching, unless there's a capital letter in the search
