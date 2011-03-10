@@ -40,10 +40,11 @@ HISTSIZE=10000
 SAVEHIST=10000
 HOSTNAME="`hostname`"
 PAGER='less'
-EDITOR="/usr/bin/vim"
-GEM_OPEN_EDITOR=/opt/local/bin/mate
+EDITOR="vim"
+GEM_OPEN_EDITOR=mate
 
 autoload colors zsh/terminfo
+export TERM=xterm-color
 if [[ "$terminfo[colors]" -ge 8 ]]; then
     colors
 fi
@@ -246,15 +247,13 @@ if [[ -f ~/bin/j.sh ]]; then
   source ~/bin/j.sh
 fi
 
-alias man="~/bin/pman"
-
 alias gcruby='~/rubygc/bin/ruby'
 alias gcrake='~/rubygc/bin/rake'
 alias gcgem='~/rubygc/bin/gem'
 alias gcirb='~/rubygc/bin/irb'
 alias gcrails='~/rubygc/bin/rails'
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-export INLINEDIR=$BUNDLE_PATH/rubyinline
+export INLINEDIR=$MY_RUBY_HOME/rubyinline
 
 # Change to most recently used directory:
 if [ -f ~/.lastdir ]; then
