@@ -23,8 +23,8 @@ set wildignore+=files/**,public/files/**,*.log
 let g:fuzzy_ignore = "*.log,tmp/*,files/*,public/files/*"
 let g:fuzzy_matching_limit = 70
 
-map <leader>d :execute 'NERDTreeToggle ' . getcwd()<CR>
-map <leader>D :NERDTree %:h<CR>
+map <leader>d :execute 'Explore ' . getcwd()<CR>
+map <leader>D :Explore<CR>
 map <unique> <silent> <Leader>t <Plug>PeepOpen
 map <leader>u :GundoToggle<CR>
 
