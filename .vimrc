@@ -50,7 +50,7 @@ set wildmenu
 nmap <silent> <leader>n :silent :nohlsearch<CR>
 
 " Show trailing spaces
-set listchars=tab:>-,trail:·,eol:$
+set listchars=tab:▸\ ,eol:¬,trail:·
 nmap <silent> <leader>s :set nolist!<CR>
 
 " don't show unnecessary 'press enter to continue' prompts'
