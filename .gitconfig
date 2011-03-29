@@ -9,6 +9,7 @@
 [core]
 	legacyheaders = false
 	excludesfile = /Users/jon/.gitglobalignore
+	editor = vim
 [repack]
 	usedeltabaseoffset = true
 [alias]
@@ -41,6 +42,8 @@
 	smtppass = Jade613A
 [apply]
 	whitespace = fix
+[rebase]
+  autosquash = true
 
 [mergetool "p4merge"]
     # I put p4merge and DiffMerge in /Applications/Utilities, but you might have them in /Applications.
