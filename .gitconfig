@@ -25,7 +25,7 @@
 	amend = commit --amend -C HEAD
 	rclone = clone --reference ~/.gitcache
 [merge]
-	tool = opendiff
+	tool = threesome
 [rerere]
 	enabled = 1
 	autoupdate = true
@@ -55,6 +55,13 @@
     cmd = "/Applications/Utilities/DiffMerge.app/Contents/MacOS/DiffMerge  --nosplash  --result=$PWD/$MERGED  $PWD/$BASE  $PWD/$REMOTE  $PWD/$LOCAL"
     keepBackup = false
     trustExitCode = false
+[mergetool "mvim"]
+  cmd = mvim -d -g "$LOCAL" "$MERGED" "$REMOTE"
+  keepbackup=false
+  trustexitcode=false
+[mergetool "threesome"]
+  cmd = "mvim -f $BASE $LOCAL $REMOTE $MERGED -c 'ThreesomeInit'"
+  trustExitCode = true
 [push]
 	default = matching
 [diff "png"]
