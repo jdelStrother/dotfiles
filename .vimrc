@@ -2,6 +2,8 @@ set nocompatible
 filetype off " force reloading of filetype stuff once pathogen kicks in
 let g:pathogen_disabled = ['syntastic']
 call pathogen#runtime_append_all_bundles()
+runtime plugins/matchit.vim
+
 
 set backupdir=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set directory=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
