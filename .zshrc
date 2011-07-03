@@ -253,7 +253,8 @@ alias gcgem='~/rubygc/bin/gem'
 alias gcirb='~/rubygc/bin/irb'
 alias gcrails='~/rubygc/bin/rails'
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-export INLINEDIR=$MY_RUBY_HOME/rubyinline
+# Make sure the rubyinline env var is set up:
+[[ -s "$HOME/.rvm/hooks/after_use" ]] && source "$HOME/.rvm/hooks/after_use"
 
 # Change to most recently used directory:
 if [ -f ~/.lastdir ]; then

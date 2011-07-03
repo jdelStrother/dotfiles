@@ -1,0 +1,5 @@
+if [ $rvm_ruby_home ]; then
+  export INLINEDIR=$rvm_ruby_home/rubyinline
+else
+  export INLINEDIR=$HOME/.rubyinline
+fi
