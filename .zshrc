@@ -41,7 +41,8 @@ SAVEHIST=10000
 HOSTNAME="`hostname`"
 PAGER='less'
 EDITOR="vim"
-GEM_OPEN_EDITOR=mate
+VISUAL=mate
+GEM_EDITOR=mate
 
 autoload colors zsh/terminfo
 export TERM=xterm-color
