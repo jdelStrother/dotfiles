@@ -6,19 +6,19 @@ call pathogen#runtime_append_all_bundles()
 set backupdir=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set directory=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 
-" show 3 lines of context around scrolling cursor
-set scrolloff=3
+set modelines=0
+set scrolloff=3 " show 3 lines of context around scrolling cursor
+set ttyfast
 
 set shiftwidth=2
 set softtabstop=2
 set tabstop=2
 set expandtab
 
-" No toolbar
-set guioptions-=T
-
 let mapleader=" "
+let maplocalleader="\\"
 
+set hidden
 set wildignore+=files/**,public/files/**,*.log
 let g:fuzzy_ignore = "*.log,tmp/*,files/*,public/files/*"
 let g:fuzzy_matching_limit = 70
@@ -33,10 +33,28 @@ imap <C-s> <Esc><C-s>
 map <C-t> Xp
 imap <C-t> <C-o>X<C-o>p
 
-:imap jj <Esc>
+imap jj <Esc>
+
+" very-magic regexp searching (ie, enable modern egrep style regexps by default)
+nnoremap / /\v
+vnoremap / /\v
+
+" Open a Quickfix window for the last search
+nnoremap <silent> <leader>/ :execute 'vimgrep /'.@/.'/g %'<CR>:copen<CR>
 
 " :w!! for sudo-save
 cmap w!! w !sudo tee % >/dev/null
+
+" I keep accidentally middle clicking on my trackpad, which pastes shit
+nnoremap <MiddleMouse> <Nop>
+nnoremap <2-MiddleMouse> <Nop>
+nnoremap <3-MiddleMouse> <Nop>
+nnoremap <4-MiddleMouse> <Nop>
+
+inoremap <MiddleMouse> <Nop>
+inoremap <2-MiddleMouse> <Nop>
+inoremap <3-MiddleMouse> <Nop>
+inoremap <4-MiddleMouse> <Nop>
 
 " allow buffers to go to the background without forcing you to save them first
 " set hidden
@@ -54,7 +72,7 @@ set listchars=tab:▸\ ,eol:¬,trail:·
 nmap <silent> <leader>s :set nolist!<CR>
 
 " don't show unnecessary 'press enter to continue' prompts'
-set shortmess=atI
+" set shortmess=atI
 
 set foldmethod=indent
 set foldlevelstart=999 " don't auto-fold on opening files
@@ -74,18 +92,17 @@ set showcmd		" display incomplete commands
 set incsearch		" do incremental searching
 if exists('+undofile')
   set undofile
-  set undodir=~/.vim/tmp
+  set undodir=~/.vim/tmp/undo
 end
+
+" highlight the cursor's line in the current window:
+autocmd WinEnter * setlocal cursorline
+autocmd WinLeave * setlocal nocursorline
 
 " ignore case in searching, unless there's a capital letter in the search
 " phrase
 set ignorecase
 set smartcase
-
-" Make macvim take up the entire screen in fullscreen mode
-if exists('+fuoptions')
-  set fuoptions=maxvert,maxhorz
-endif
 
 " In many terminal emulators the mouse works just fine, thus enable it.
 if has('mouse')
@@ -95,6 +112,7 @@ endif
 " Setup syntastic for syntax checking
 let g:syntastic_enable_signs=1
 let g:syntastic_auto_loc_list=1
+let g:syntastic_disabled_filetypes = ['haml', 'sass']
 
 let g:rails_statusline=0
 set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
@@ -107,7 +125,27 @@ if &t_Co > 2 || has("gui_running")
   set hlsearch
 endif
 if has("gui_running")
-  colorscheme Mustang
+  set guifont=Menlo:h12
+  colorscheme molokai
+
+  " No toolbar
+  set guioptions-=T
+  " get rid of left/right scrollbars
+  set guioptions-=L
+  set guioptions-=r
+
+  " Use a line-drawing char for pretty verticl splits
+  set fillchars+=vert:│
+
+  " Different cursors for different modes.
+  set guicursor=n-c:block-Cursor-blinkon0
+  set guicursor+=v:block-vCursor-blinkon0
+  set guicursor+=i-ci:ver20-iCursor
+
+  " Make macvim take up the entire screen in fullscreen mode
+  if exists('+fuoptions')
+    set fuoptions=maxvert,maxhorz
+  endif
 else
   colorscheme reliable
 end
@@ -138,11 +176,13 @@ if has("autocmd")
     \   exe "normal! g`\"" |
     \ endif
 
+  autocmd BufNewFile,BufRead *.rbapi set filetype=ruby
+
   augroup END
 
 else
 
-  set autoindent		" always set autoindenting on
+  set autoindent  " always set autoindenting on
 
 endif " has("autocmd")
 
