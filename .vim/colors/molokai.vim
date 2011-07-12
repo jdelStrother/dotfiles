@@ -41,8 +41,8 @@ hi Function        guifg=#A6E22E
 hi Identifier      guifg=#FD971F
 " }}}
 " Diffs {{{
-hi DiffAdd                       guibg=#0F1D0B
-hi DiffChange      guifg=#89807D guibg=#322F2D
+hi DiffAdd                       guibg=#0F320B
+hi DiffChange      guifg=#89807D guibg=#322F8D
 hi DiffDelete      guifg=#960050 guibg=#1E0010
 hi DiffText                      guibg=#4A4340 gui=italic,bold
 " }}}
