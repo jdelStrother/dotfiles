@@ -8,5 +8,6 @@
 .com.apple.timemachine.supported
 *.un~
 ._*
-tags
+doc/tags
 *.pyc
+
