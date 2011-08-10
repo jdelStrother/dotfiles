@@ -27,7 +27,6 @@ let g:fuzzy_matching_limit = 70
 
 map <leader>d :execute 'Explore ' . getcwd()<CR>
 map <leader>D :Explore<CR>
-map <unique> <silent> <Leader>t <Plug>PeepOpen
 map <leader>u :GundoToggle<CR>
 
 map <C-s> :write<CR>
@@ -148,6 +147,9 @@ if has("gui_running")
   if exists('+fuoptions')
     set fuoptions=maxvert,maxhorz
   endif
+
+  map <unique> <silent> <Leader>t <Plug>PeepOpen
+
 else
   colorscheme reliable
 end
