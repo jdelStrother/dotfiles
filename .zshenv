@@ -7,4 +7,4 @@ export LSCOLORS=Dxfxcxdxbxegedabagacad
 typeset -U path
 path=(~/bin $path)
 unset manpath
-export KEYSTORE=/Users/jon/Documents/Certificates/keystore.ImportKey
+export KEYSTORE=/Users/jon/Documents/Certificates/javaKeystore.ImportKey
