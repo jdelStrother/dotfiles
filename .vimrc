@@ -13,14 +13,16 @@ set scrolloff=3 " show 3 lines of context around scrolling cursor
 set ttyfast
 
 set shiftwidth=2
+set shiftround
 set softtabstop=2
 set tabstop=2
 set expandtab
 
+set virtualedit+=block
+
 let mapleader=" "
 let maplocalleader="\\"
 
-set hidden
 set wildignore+=files/**,public/files/**,*.log
 let g:fuzzy_ignore = "*.log,tmp/*,files/*,public/files/*"
 let g:fuzzy_matching_limit = 70
@@ -28,6 +30,8 @@ let g:fuzzy_matching_limit = 70
 map <leader>d :execute 'Explore ' . getcwd()<CR>
 map <leader>D :Explore<CR>
 map <leader>u :GundoToggle<CR>
+" fold everything except the current block
+nnoremap <leader>z zMzv
 
 map <C-s> :write<CR>
 imap <C-s> <Esc><C-s>
@@ -36,9 +40,7 @@ imap <C-t> <C-o>X<C-o>p
 
 imap jj <Esc>
 
-" very-magic regexp searching (ie, enable modern egrep style regexps by default)
-nnoremap / /\v
-vnoremap / /\v
+let g:EasyMotion_leader_key = '\'
 
 " Open a Quickfix window for the last search
 nnoremap <silent> <leader>/ :execute 'vimgrep /'.@/.'/g %'<CR>:copen<CR>
@@ -74,6 +76,9 @@ nmap <silent> <leader>s :set nolist!<CR>
 
 " don't show unnecessary 'press enter to continue' prompts'
 " set shortmess=atI
+
+" Open :help documents in a nice, big vertical split instead of a horizontal one:
+au FileType help wincmd L
 
 set foldmethod=indent
 set foldlevelstart=999 " don't auto-fold on opening files
@@ -126,8 +131,11 @@ if &t_Co > 2 || has("gui_running")
   set hlsearch
 endif
 if has("gui_running")
-  set guifont=Menlo:h12
+  set guifont=Menlo:h11
   colorscheme molokai
+
+  " I can't get 'hi link EasyMotionShade  Comment' to work :(
+  hi EasyMotionShade term=bold ctermfg=11 guifg=#5c7176
 
   " No toolbar
   set guioptions-=T
@@ -153,6 +161,7 @@ if has("gui_running")
 else
   colorscheme reliable
 end
+" needs to be run after loading the color scheme
 
 " Only do this part when compiled with support for autocommands.
 if has("autocmd")
