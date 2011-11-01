@@ -86,11 +86,7 @@ precmd() {
 			psvar[2]="$cleanliness${branchless_ref#(refs/heads/|remotes/)}"
 		fi
 	fi
-	
-	# Remember where we are:
-	pwd >| ~/.lastdir
 }
-
 
 export PS1="[$PR_GREEN%n$PR_WHITE@$PR_GREEN%U%m%u$PR_NO_COLOR:$PR_RED%2c$PR_NO_COLOR]%(?.$.!) "	# username, underlined host, 2 levels of current directory, '$' if last command succeeded, '!' otherwise.
 
@@ -257,8 +253,14 @@ alias gcrails='~/rubygc/bin/rails'
 # Make sure the rubyinline env var is set up:
 [[ -s "$HOME/.rvm/hooks/after_use" ]] && source "$HOME/.rvm/hooks/after_use"
 
-# Change to most recently used directory:
-if [ -f ~/.lastdir ]; then
-    cd "`cat ~/.lastdir`"
-fi
+if [[ $TERM_PROGRAM == "Apple_Terminal" ]] && [[ -z "$INSIDE_EMACS" ]] {
+  function chpwd {
+    local SEARCH=' '
+    local REPLACE='%20'
+    local PWD_URL="file://$HOSTNAME${PWD//$SEARCH/$REPLACE}"
+    printf '\e]7;%s\a' "$PWD_URL"
+  }
+
+  chpwd
+}
 
