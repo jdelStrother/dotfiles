@@ -1,8 +1,35 @@
 set nocompatible
-filetype off " force reloading of filetype stuff once pathogen kicks in
-let g:pathogen_disabled = ['syntastic']
-call pathogen#runtime_append_all_bundles()
-runtime macros/matchit.vim
+filetype off " force reloading of filetyp set rtp+=~/.vim/bundle/vundle/
+
+set rtp+=~/.vim/bundle/vundle/
+call vundle#rc()
+
+" let Vundle manage Vundle
+Bundle 'gmarik/vundle'
+
+" repos on github
+Bundle 'AndrewRadev/linediff.vim'
+Bundle 'airblade/vim-rooter'
+Bundle 'kana/vim-textobj-user'
+Bundle 'msanders/cocoa.vim'
+Bundle 'nelstrom/vim-textobj-rubyblock'
+Bundle 'sjl/gundo.vim'
+Bundle 'sjl/threesome.vim'
+Bundle 'topfunky/PeepOpen-EditorSupport', {'rtp': 'vim-peepopen/'}
+Bundle 'tpope/vim-commentary'
+Bundle 'tpope/vim-cucumber'
+Bundle 'tpope/vim-fugitive'
+Bundle 'tpope/vim-haml'
+Bundle 'tpope/vim-rails'
+Bundle 'tpope/vim-repeat'
+Bundle 'tpope/vim-surround'
+
+" repos on Vim-Scripts
+Bundle 'bufexplorer.zip'
+Bundle 'EasyMotion'
+Bundle 'taglist.vim'
+Bundle 'vim-coffee-script'
+Bundle 'YankRing.vim'
 
 
 set backupdir=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
