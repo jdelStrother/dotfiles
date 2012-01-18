@@ -23,6 +23,8 @@ Bundle 'tpope/vim-haml'
 Bundle 'tpope/vim-rails'
 Bundle 'tpope/vim-repeat'
 Bundle 'tpope/vim-surround'
+Bundle 'altercation/vim-colors-solarized'
+Bundle 'Lokaltog/vim-powerline'
 
 " repos on Vim-Scripts
 Bundle 'bufexplorer.zip'
@@ -39,6 +41,9 @@ set modelines=0
 set scrolloff=3 " show 3 lines of context around scrolling cursor
 set ttyfast
 
+set background=dark
+colorscheme solarized
+
 set shiftwidth=2
 set shiftround
 set softtabstop=2
@@ -53,6 +58,7 @@ let maplocalleader="\\"
 set wildignore+=files/**,public/files/**,*.log
 let g:fuzzy_ignore = "*.log,tmp/*,files/*,public/files/*"
 let g:fuzzy_matching_limit = 70
+let g:Powerline_symbols = 'fancy'
 
 map <leader>d :execute 'Explore ' . getcwd()<CR>
 map <leader>D :Explore<CR>
@@ -144,11 +150,6 @@ if has('mouse')
   set mouse=a
 endif
 
-" Setup syntastic for syntax checking
-let g:syntastic_enable_signs=1
-let g:syntastic_auto_loc_list=1
-let g:syntastic_disabled_filetypes = ['haml', 'sass']
-
 let Tlist_Ctags_Cmd="/opt/local/bin/ctags"
 
 let g:rails_statusline=0
@@ -165,8 +166,7 @@ if &t_Co > 2 || has("gui_running")
   set hlsearch
 endif
 if has("gui_running")
-  set guifont=Menlo:h11
-  colorscheme molokai
+  set guifont=Menlo\ Regular\ for\ Powerline:h11
 
   " I can't get 'hi link EasyMotionShade  Comment' to work :(
   hi EasyMotionShade term=bold ctermfg=11 guifg=#5c7176
@@ -193,7 +193,7 @@ if has("gui_running")
   map <unique> <silent> <Leader>t <Plug>PeepOpen
 
 else
-  colorscheme reliable
+  " terminal-only stuff
 end
 " needs to be run after loading the color scheme
 
