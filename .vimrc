@@ -107,11 +107,13 @@ nmap <silent> <leader>s :set nolist!<CR>
 " Open :help documents in a nice, big vertical split instead of a horizontal one:
 au FileType help wincmd L
 
+" autoread changed files on switching back to vim
+set autoread
+
 set foldmethod=indent
 set foldlevelstart=999 " don't auto-fold on opening files
+set foldminlines=0 " When folding, hide 1-line methods just like everything else
 nnoremap <leader><space> za
-"au BufWinLeave ?* silent! mkview
-"au BufWinEnter ?* silent! loadview
 
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
@@ -147,9 +149,14 @@ let g:syntastic_enable_signs=1
 let g:syntastic_auto_loc_list=1
 let g:syntastic_disabled_filetypes = ['haml', 'sass']
 
+let Tlist_Ctags_Cmd="/opt/local/bin/ctags"
+
 let g:rails_statusline=0
 set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
 set laststatus=2 "always show status line
+
+" Lose the context-sensitive coloring, it's really slow
+let ruby_no_expensive = 1
 
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
@@ -217,6 +224,10 @@ if has("autocmd")
     \ endif
 
   autocmd BufNewFile,BufRead *.rbapi set filetype=ruby
+
+
+  autocmd FocusLost *   :hi StatusLine guifg=#808080 guibg=#080808
+  autocmd FocusGained * :hi StatusLine guifg=#CD5907 guibg=fg
 
   augroup END
 
