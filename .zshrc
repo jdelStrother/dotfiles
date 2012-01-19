@@ -126,10 +126,8 @@ zstyle ':completion:*:processes' command 'ps -aU$USER'
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 # list of completers to use
 zstyle ':completion:*::::' completer _expand _complete _ignored _approximate
-
-# allow one error for every three characters typed in approximate completer
-zstyle -e ':completion:*:approximate:*' max-errors \
-    'reply=( $(( ($#PREFIX+$#SUFFIX)/2 )) numeric )'
+zstyle -e ':completion:*:approximate:*' \
+  max-errors 'reply=( $(( ($#PREFIX:t+$#SUFFIX:h)/3 )) )'
     
 # insert all expansions for expand completer
 zstyle ':completion:*:expand:*' tag-order all-expansions
