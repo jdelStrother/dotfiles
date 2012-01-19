@@ -10,4 +10,4 @@
 ._*
 doc/tags
 *.pyc
-
+.netrwhist
