@@ -225,10 +225,6 @@ if has("autocmd")
 
   autocmd BufNewFile,BufRead *.rbapi set filetype=ruby
 
-
-  autocmd FocusLost *   :hi StatusLine guifg=#808080 guibg=#080808
-  autocmd FocusGained * :hi StatusLine guifg=#CD5907 guibg=fg
-
   augroup END
 
 else
