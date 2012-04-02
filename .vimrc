@@ -166,6 +166,7 @@ if &t_Co > 2 || has("gui_running")
   set hlsearch
 endif
 if has("gui_running")
+  " https://gist.github.com/1627888
   set guifont=Menlo\ Regular\ for\ Powerline:h11
 
   " I can't get 'hi link EasyMotionShade  Comment' to work :(

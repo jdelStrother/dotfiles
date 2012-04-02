@@ -45,7 +45,6 @@ VISUAL=mate
 GEM_EDITOR=mate
 
 autoload colors zsh/terminfo
-export TERM=xterm-color
 if [[ "$terminfo[colors]" -ge 8 ]]; then
     colors
 fi
