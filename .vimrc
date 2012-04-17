@@ -33,7 +33,6 @@ Bundle 'taglist.vim'
 Bundle 'vim-coffee-script'
 Bundle 'YankRing.vim'
 
-
 set backupdir=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set directory=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 
@@ -202,6 +201,15 @@ else
     let &t_SI = "\<Esc>]50;CursorShape=1\x7"
     let &t_EI = "\<Esc>]50;CursorShape=0\x7"
   endif
+
+  function! PeepOpen()
+    let file=system("peep")
+    if strlen(file)
+      edit `=file`
+    endif
+  endfunction
+
+  map <unique> <Leader>t :call PeepOpen()<CR>
 end
 " needs to be run after loading the color scheme
 
@@ -232,6 +240,7 @@ if has("autocmd")
     \ endif
 
   autocmd BufNewFile,BufRead *.rbapi set filetype=ruby
+  autocmd BufNewFile,BufRead Gemfile set filetype=ruby
 
   augroup END
 
