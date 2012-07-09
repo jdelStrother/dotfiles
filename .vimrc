@@ -25,6 +25,7 @@ Bundle 'tpope/vim-repeat'
 Bundle 'tpope/vim-surround'
 Bundle 'altercation/vim-colors-solarized'
 Bundle 'Lokaltog/vim-powerline'
+Bundle 'ciaranm/securemodelines'
 
 " repos on Vim-Scripts
 Bundle 'bufexplorer.zip'
@@ -36,7 +37,7 @@ Bundle 'YankRing.vim'
 set backupdir=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 set directory=~/.vim/tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 
-set modelines=0
+set modelines=5
 set scrolloff=3 " show 3 lines of context around scrolling cursor
 set ttyfast
 
