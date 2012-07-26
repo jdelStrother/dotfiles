@@ -1,0 +1,24 @@
+# ~/.tmuxinator/web.yml
+# you can make as many tabs as you wish...
+
+project_name: Web
+project_root: ~/Developer/web
+# rvm: 1.9.3@abweb
+# pre: sudo /etc/rc.d/mysqld start
+tabs:
+  - editor:
+      layout: main-vertical
+      panes:
+        - vim
+        - #empty, will just run plain bash
+  - shell: git fetch
+  - db: bin/rails db
+  - server:
+      layout: main-horizontal
+      panes:
+        - bin/unicorn --c unicorn_dev.rb
+        - tail -f log/development.log
+  - console: bin/rails c
+  - test: 
+  - dj2: ssh -p2223 deploy@audioboo.everycity.co.uk
+  - irc: irssi

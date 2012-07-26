@@ -1,0 +1,11 @@
+# ~/.tmuxinator/default.yml
+# you can make as many tabs as you wish...
+
+project_name: Default
+project_root: ~/Developer/iphone
+# socket_name: tmux-default # Not needed.  Remove to use default socket
+# rvm: 1.9.2@rails_project
+# pre: sudo /etc/rc.d/mysqld start
+tabs:
+  - irssi: irssi
+  - shell: 
