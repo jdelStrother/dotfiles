@@ -254,3 +254,6 @@ if [[ $TERM_PROGRAM == "Apple_Terminal" ]] && [[ -z "$INSIDE_EMACS" ]] {
   chpwd
 }
 
+
+[[ -s "$HOME/.scm_breeze/scm_breeze.sh" ]] && . "$HOME/.scm_breeze/scm_breeze.sh"
+source "/Users/jon/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
