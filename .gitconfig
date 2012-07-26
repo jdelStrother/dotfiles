@@ -92,3 +92,9 @@
 	threads = 4
 [gui]
 	spellingdictionary = none
+[browser "gitscm"]
+	cmd = /bin/sh -c 'open http://git-scm.com/docs/$(basename $1 .html)' --
+[help]
+	browser = gitscm
+[init]
+	templatedir = ~/.git_template
