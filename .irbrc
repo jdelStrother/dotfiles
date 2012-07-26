@@ -1,12 +1,4 @@
 require 'rubygems'
-# require 'hirb'
-require 'utility_belt'
-# 
-# original_rc = IRB.conf[:IRB_RC]
-# IRB.conf[:IRB_RC] = lambda do
-#   original_rc.call
-#   Hirb::View.enable
-# end
 
 begin # ANSI codes
   ANSI_BLACK    = "\033[0;30m"

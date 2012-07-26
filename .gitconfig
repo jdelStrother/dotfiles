@@ -40,8 +40,6 @@
 	smtpserver = mail.bestbefore.tv
 	smtpuser = jon.delStrother
 	smtppass = Jade613A
-[apply]
-	whitespace = fix
 [rebase]
   autosquash = true
 

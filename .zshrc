@@ -5,17 +5,11 @@
 ######################################################################
 
 # next lets set some enviromental/shell pref stuff up
-# setopt NOHUP
-#setopt NOTIFY
 setopt NO_FLOW_CONTROL
 setopt APPEND_HISTORY
-# setopt AUTO_LIST		# these two should be turned off
-# setopt AUTO_REMOVE_SLASH
-# setopt AUTO_RESUME		# tries to resume command of same name
 unsetopt BG_NICE		# do NOT nice bg commands
 setopt CORRECT			# command CORRECTION
 setopt EXTENDED_HISTORY		# puts timestamps in the history
-# setopt HASH_CMDS		# turns on hashing
 setopt HIST_ALLOW_CLOBBER
 setopt HIST_REDUCE_BLANKS
 setopt INC_APPEND_HISTORY SHARE_HISTORY
@@ -32,7 +26,6 @@ unsetopt bgnice autoparamslash
 # Autoload zsh modules when they are referenced
 zmodload -a zsh/zpty zpty
 zmodload -a zsh/zprof zprof
-zmodload -ap zsh/mapfile mapfile
 
 TZ="Europe/London"
 HISTFILE=$HOME/.zhistory
@@ -49,7 +42,7 @@ if [[ "$terminfo[colors]" -ge 8 ]]; then
     colors
 fi
 for color in RED GREEN YELLOW BLUE MAGENTA CYAN WHITE; do
-    eval PR_$color='%{$terminfo[bold]$fg[${(L)color}]%}'
+    eval PR_$color='%{$fg[${(L)color}]%}'
     eval PR_LIGHT_$color='%{$fg[${(L)color}]%}'
     (( count = $count + 1 ))
 done
