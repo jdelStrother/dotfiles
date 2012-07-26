@@ -5,6 +5,9 @@ export CLICOLOR=1
 export LSCOLORS=Dxfxcxdxbxegedabagacad
 
 typeset -U path
-path=(~/bin $path)
+path=(~/bin /usr/local/bin $path)
 unset manpath
 export KEYSTORE=/Users/jon/Documents/Certificates/javaKeystore.ImportKey
+
+export NODE_PATH=/usr/local/lib/node_modules:$NODE_PATH
+PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
