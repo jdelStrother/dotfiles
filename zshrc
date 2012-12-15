@@ -188,7 +188,7 @@ bindkey -e
 # fix forward-delete key : 
 bindkey "[3~" delete-char
 
-source ~/.cap_completion.zsh
+source ~/.zsh/cap_completion.zsh
 
 # Do not exit on end-of-file (^D).
 setopt IGNORE_EOF
@@ -197,11 +197,6 @@ export GREP_OPTIONS='--color=auto'
 
 # Unset MANPATH (set by path_helper), it's not needed on newer man
 unset MANPATH
-
-unalias run-help
-autoload -U run-help
-HELPDIR=~/lib/zsh-help
-
 
 function trackingBranch() {
 	local MYBRANCH REMOTE BRANCH
@@ -234,11 +229,6 @@ if [[ -f ~/bin/j.sh ]]; then
   source ~/bin/j.sh
 fi
 
-alias gcruby='~/rubygc/bin/ruby'
-alias gcrake='~/rubygc/bin/rake'
-alias gcgem='~/rubygc/bin/gem'
-alias gcirb='~/rubygc/bin/irb'
-alias gcrails='~/rubygc/bin/rails'
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 # Make sure the rubyinline env var is set up:
 [[ -s "$HOME/.rvm/hooks/after_use" ]] && source "$HOME/.rvm/hooks/after_use"
@@ -257,3 +247,6 @@ if [[ $TERM_PROGRAM == "Apple_Terminal" ]] && [[ -z "$INSIDE_EMACS" ]] {
 
 [[ -s "$HOME/.scm_breeze/scm_breeze.sh" ]] && . "$HOME/.scm_breeze/scm_breeze.sh"
 source "/Users/jon/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"

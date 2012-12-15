@@ -6,13 +6,13 @@ _cap_does_task_list_need_generating () {
   if [ ! -f .cap_tasks ]; then return 0;
   else
     accurate=$(stat -f%m .cap_tasks)
-    changed=$(stat -f%m config/deploy.rb)
+    changed=$(stat -f%m deploy/**/* | sort -rn | head -n1)
     return $(expr $accurate '>=' $changed)
   fi
 }
 
 _cap () {
-  if [ -f config/deploy.rb ]; then
+  if [ -f Capfile ]; then
     if _cap_does_task_list_need_generating; then
       cap -vT | cut -d " " -f 2 | sed -e '/^ *$/D' -e '1,2D' >! .cap_tasks
     fi

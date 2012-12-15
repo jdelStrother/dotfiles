@@ -5,7 +5,7 @@
 	<key>GL_ENABLE_DEBUG_ATTACH</key>
 	<string>YES</string>
 	<key>PATH</key>
-  <string>/Users/jon/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  <string>/Users/jon/.bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin</string>
 	<key>GEM_HOME</key>
   <string>/Users/jon/.gem</string>
 	<key>GEM_PATH</key>

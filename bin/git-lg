@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+args=$@
+echo $args
+if [[ "$args" == *"--all"* ]]
+then
+  # don't show notes with the --all flag
+  args="$args ^refs/notes/commits"
+fi
+
+
+git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s <<<NOTE>>> %Cgreen(%aN, %cr)%Creset' --abbrev-commit --date=relative $args | git-logger-notes.rb | LESS=FRSX less

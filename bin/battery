@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+io_out = `ioreg -c AppleSmartBattery -w0 | grep -o '"[^"]*" = [^ ]*' | sed -e 's/= //g' -e 's/"//g'`
+io = Hash[*io_out.split]
+
+capacity = io['CurrentCapacity'].to_f / io['MaxCapacity'].to_f
+
+puts("%d%%" % (capacity*100))
+

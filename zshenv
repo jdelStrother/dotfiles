@@ -5,7 +5,7 @@ export CLICOLOR=1
 export LSCOLORS=Dxfxcxdxbxegedabagacad
 
 typeset -U path
-path=(~/bin /usr/local/bin $path)
+path=(~/.bin /usr/local/bin $path)
 unset manpath
 export KEYSTORE=/Users/jon/Documents/Certificates/javaKeystore.ImportKey
 
