@@ -166,9 +166,7 @@ zstyle ':completion:*:ssh:*' group-order \
    hosts-domain hosts-host users hosts-ipaddr
 zstyle '*' single-ignored show
 
-zstyle ':completion::complete:git(|-help):*' commands all
-zstyle ':completion::complete:git:*' verbose false
-zstyle ':completion::*:git:*' list_aliases true
+fpath=(~/.zsh/completion $fpath)
 
 # # --------------------------------------------------------------------
 # # aliases
@@ -178,7 +176,6 @@ alias ls='/bin/ls -FGl'
 alias ll='ls -al'
 alias cp='/bin/cp -i'
 alias mv='nocorrect /bin/mv -i'
-alias git='nocorrect noglob git'
 alias pstree='pstree -g 2'
 alias bundle='nocorrect bundle'
 
@@ -246,7 +243,10 @@ if [[ $TERM_PROGRAM == "Apple_Terminal" ]] && [[ -z "$INSIDE_EMACS" ]] {
 
 
 [[ -s "$HOME/.scm_breeze/scm_breeze.sh" ]] && . "$HOME/.scm_breeze/scm_breeze.sh"
+alias git='nocorrect noglob git'
+
 source "/Users/jon/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
+
