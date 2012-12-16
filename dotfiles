@@ -4,14 +4,13 @@ require 'thor'
 class DotFiles < Thor
   desc "install", "install the dot files into user's home directory"
   def install
+    create_tmp_dirs
+
     replace_all = false
     Dir.chdir File.dirname(__FILE__)
 
     files = Dir["*"] - [File.basename(__FILE__), '.git']
     files.each do |file|
-      puts file
-      next
-
       destination = File.join(ENV['HOME'], ".#{file}")
       system %Q{mkdir -p "#{destination}"} if file =~ /\//
 
@@ -64,6 +63,13 @@ class DotFiles < Thor
     puts "linking ~/.#{file}"
     # system %Q{rm "$HOME/.#{file}"}
     system %Q{ln -s "$PWD/#{file}" "$HOME/.#{file}"}
+  end
+  
+  def create_tmp_dirs
+    # wish vim created these for you...
+    %w{backup swap undo}.each do |f|
+      `mkdir -p $HOME/.tmp/vim/#{f}`
+    end
   end
 end
 

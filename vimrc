@@ -42,15 +42,15 @@ Bundle 'Mark--Karkat'
 " }}}
 " Backups --------------------------------------------------------------------------------------{{{1
 " purposefully not using .vim/tmp because our .vim dir is in Dropbox
-set backupdir=~/.tmp,~/tmp,/var/tmp,/tmp
-set directory=~/.tmp,~/tmp,/var/tmp,/tmp
+set backupdir=~/.tmp/vim/backup,~/tmp,/var/tmp,/tmp
+set directory=~/.tmp/vim/swap,~/tmp,/var/tmp,/tmp
 
-set nobackup		" do not keep a backup file, use versions instead
-set noswapfile
+set backup
+set swapfile
 
 if exists('+undofile')
   set undofile
-  set undodir=~/.vim/tmp/undo
+  set undodir=~/.tmp/vim/undo
 end
 
 
