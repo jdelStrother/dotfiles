@@ -169,133 +169,13 @@ let g:ctrlp_max_height = 20
 " output, at least the files at the top level will show up.
 let g:ctrlp_user_command = {
   \ 'types': {
-    \ 1: ['.git', 'cd %s && git ls-files . -co --exclude-standard | grep -v -E "\.(gif|png|jpe?g|svg|psd|ai|gem)\$" '],
+    \ 1: ['.git', 'cd %s && git ls-files . -co --exclude-standard | grep -v -E "\.(gif|png|jpe?g|svg|psd|ai|gem)\$" ; conf=config/environments/_local_config.rb; [ -e $conf ] && echo $conf '],
     \ },
   \ 'fallback': 'cd %s; (find -L . -type f -maxdepth 1 && find -E -L . -type f -mindepth 1 ! -regex "(^|.*/)(\.bundler|\.rvm|\.Trash)(/.*|$)") | head -1000'
   \ }
-  "\ 'fallback': 'cd %s; (find . -type f -follow -maxdepth 1 && find . -type f -follow -mindepth 1) | grep -v -E "(^|/)(\.bundler|\.rvm|\.Trash)" | head -5000'
-let g:ctrlp_match_func = { 'match': 'MatchFunc3' }
+let g:ctrlp_match_func = { 'match': 'MatchFunc' }
+
 function! MatchFunc(items, str, limit, mmode, ispath, crfile, regex)
-  let script = "
-        \  # we'll get invoked with the arguments '<LIMIT> <MANIFEST_PATH> <SEARCH TERMS>'                                       \n
-        \  search_limit = ARGV[0].to_i                                                                                           \n
-        \  cache_file = ARGV[1]                                                                                                  \n
-        \  search_term = ARGV[2..-1].join(\" \")                                                                                 \n
-        \                                                                                                                        \n
-        \  if search_term.length==0                                                                                              \n
-        \    puts File.read(cache_file)                                                                                          \n
-        \    exit(0)                                                                                                             \n
-        \  end                                                                                                                   \n
-        \                                                                                                                        \n
-        \                                                                                                                        \n
-        \  # take each individual character and regex-escape it.  Spaces will match both literal space and a directory slash.    \n
-        \  search_letters = search_term.split('').map{|l| Regexp.escape(l.gsub(/ /,'[ /]'))}                                     \n
-        \  greedy_matcher = Regexp.new(search_letters.join('.*'))                                                                \n
-        \  matcher =        Regexp.new(search_letters.join('.*?'))                                                               \n
-        \  lookahead_matcher = Regexp.new(\"#{search_letters[0]}.*(?=#{search_letters[1..-1].join('.*')})\")                     \n
-        \                                                                                                                        \n
-        \  # Greedy matching ('.*') is much faster than non-greedy ('.*?')                                                       \n
-        \  # Pre-filter the paths to find ones that match the overall regex using the greedy match:                              \n
-        \  matching_paths = File.read(cache_file).split(\"\\n\").select{|p,m| p=~greedy_matcher}                               \n
-        \  # matching_paths = File.read(cache_file).scan(Regexp.new(\"^.*#{search_letters.join('.*')}.*$\"))                       \n
-        \                                                                                                                        \n
-        \  # Determine a 'score' for each path that shows how suitable each is, then print the best scoring paths.               \n
-        \  # A lower score is better.                                                                                            \n
-        \  puts matching_paths.map{|path|                                                                                    \n
-        \    # using the non-greedy match, sort the matching paths by their minimum match range.                                 \n
-        \    # eg, if we search for 'ac' in abcd and abdc, the former should score higher because the                            \n
-        \    # match only spans 3 characters rather than 4.                                                                      \n
-        \    length = path.enum_for(:scan, lookahead_matcher).map{ ($&+$')[matcher].length}.min \n
-        \    start_match,end_match = *matcher.match(path).offset(0)                                                              \n
-        \    score = length # end_match - start_match                                                                                     \n
-        \    # Paths where the match intersects the filename are better (eg when searching for 'foo',                            \n
-        \    # 'dir/foo.c' should score higher than 'dir/foo/bar.c')                                                             \n
-        \    end_of_match_is_in_file_component = File.dirname(path).length < end_match                                           \n
-        \    score -= 5 if end_of_match_is_in_file_component                                                                     \n
-        \                                                                                                                        \n
-        \    [\"#{path} (#{length})\", score]                                                                                                        \n
-        \  }.sort_by{|p,s| s}.map{|p,score| \"#{p}\"}[0..search_limit]                                               \n
-        \"
-  try
-    " Create a cache file
-    let cachefile = ctrlp#utils#cachedir().'/custom.cache'
-    call writefile(a:items, cachefile)
-    let cmd = '/Users/jon/.rvm/rubies/ruby-1.9.3-p194/bin/ruby -- - '.a:limit.' '.cachefile.' '.a:str
-    let result = split(system(cmd, script), "\n")
-    return result
-  catch
-    return v:exception
-  endtry
-endfunction
-
-
-function! MatchFunc2(items, str, limit, mmode, ispath, crfile, regex)
-
-  keepa edit foobar
-  set nobuflisted 
-  set buftype=nofile 
-  set bufhidden=hide 
-  call append(0,items)
-
-"ruby << RUBY
-"
-"  # we'll get invoked with the arguments '<LIMIT> <MANIFEST_PATH> <SEARCH TERMS>'
-"  search_term = "mod/user"
-"
-"  #   buffer = VIM::Buffer.current
-"  #   file_list = 1.upto(buffer.length-1).map{|l| buffer[l]}
-"  #   while buffer.length>1
-"  #     buffer.delete(1)
-"  #   end
-"  # 
-"  #   puts __LINE__
-"  #   # if search_term.length==0
-"  #   #   puts File.read(cache_file)
-"  #   #   exit(0)
-"  #   # end
-"  # 
-"  # 
-"  #   # take each individual character and regex-escape it.  spaces will match both literal space and a directory slash.
-"  #   search_letters = search_term.split('').map{|l| regexp.escape(l.gsub(/ /,'[ /]'))}
-"  #   greedy_matcher = Regexp.new(search_letters.join('.*'))
-"  #   matcher =        Regexp.new(search_letters.join('.*?'))
-"  # 
-"  #   # greedy matching ('.*') is much faster than non-greedy ('.*?')
-"  #   # pre-filter the paths to find ones that match the overall regex using the greedy match:
-"  #   # matching_paths = File.read(cache_file).split("\n").select{|p,m| p=~greedy_matcher}
-"  #   matching_paths = file_list.scan(Regexp.new("^.*#{search_letters.join('.*')}.*$"))
-"  # 
-"  #   puts __LINE__
-"  #   # determine a 'score' for each path that shows how suitable each is, then print the best scoring paths.
-"  #   # a lower score is better.
-"  #   results = matching_paths.sort_by{|path|
-"  #     # using the non-greedy match, sort the matching paths by their minimum match range.
-"  #     # eg, if we search for 'ac' in abcd and abdc, the former should score higher because the
-"  #     # match only spans 3 characters rather than 4.
-"  #     start_match,end_match = *matcher.match(path).offset(0)
-"  #     score = end_match - start_match
-"  #     # paths where the match intersects the filename are better (eg when searching for 'foo',
-"  #     # 'dir/foo.c' should score higher than 'dir/foo/bar.c')
-"  #     end_of_match_is_in_file_component = File.dirname(path).length < end_match
-"  #     score -= 5 if end_of_match_is_in_file_component
-"  # 
-"  #     score
-"  #   }.map{|p,m| p}[0..search_limit]
-"  # 
-"  #   puts __LINE__
-"  #   results.each do |result|
-"  #     buffer.append(buffer.length-1, result)
-"  #   end
-"RUBY
-"  
- let l:result = getline(1, line('$'))
- echo l:result
- " bd!
- silent execute "normal \<C-^>"
- return l:result
-endfunction
-
-function! MatchFunc3(items, str, limit, mmode, ispath, crfile, regex)
   let cachefile = ctrlp#utils#cachedir().'/custom.cache'
   if !exists("g:itemCache") || g:itemCache!=a:items
     let g:itemCache = a:items
