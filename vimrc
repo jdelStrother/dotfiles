@@ -30,15 +30,17 @@ Bundle 'altercation/vim-colors-solarized'
 Bundle 'Lokaltog/vim-powerline'
 Bundle 'ciaranm/securemodelines'
 Bundle 'tpope/vim-endwise'
-Bundle 'maxbrunsfeld/vim-yankstack'
 Bundle 'kien/ctrlp.vim'
 Bundle 'vim-ruby/vim-ruby'
+Bundle 'tpope/vim-dispatch'
 " repos on Vim-Scripts
 Bundle 'bufexplorer.zip'
 Bundle 'EasyMotion'
 Bundle 'taglist.vim'
 Bundle 'vim-coffee-script'
 Bundle 'Mark--Karkat'
+Bundle 'nginx.vim'
+Bundle 'LargeFile'
 " }}}
 " Backups --------------------------------------------------------------------------------------{{{1
 " purposefully not using .vim/tmp because our .vim dir is in Dropbox
@@ -137,14 +139,6 @@ let g:EasyMotion_leader_key = '\'
 let g:fuzzy_ignore = "*.log,tmp/*,files/*,public/files/*"
 let g:fuzzy_matching_limit = 70
 let g:Powerline_symbols = 'fancy'
-
-let g:yankstack_map_keys = 0
-nmap <C-p> <Plug>yankstack_substitute_older_paste
-xmap <C-p> <Plug>yankstack_substitute_older_paste
-imap <C-p> <Plug>yankstack_substitute_older_paste
-nmap <C-P> <Plug>yankstack_substitute_newer_paste
-xmap <C-P> <Plug>yankstack_substitute_newer_paste
-imap <C-P> <Plug>yankstack_substitute_newer_paste
 
 " Don't let the Mark plugin map <leader>r
 map <leader>M <Plug>MarkClear
