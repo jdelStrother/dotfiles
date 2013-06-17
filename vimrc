@@ -176,14 +176,18 @@ let g:ctrlp_user_command = {
 let g:ctrlp_match_func = { 'match': 'MatchFunc' }
 
 function! MatchFunc(items, str, limit, mmode, ispath, crfile, regex)
-  let cachefile = ctrlp#utils#cachedir().'/custom.cache'
-  if !exists("g:itemCache") || g:itemCache!=a:items
+  if !exists("g:cachefile_path")
+    let g:cachefile_path = ctrlp#utils#cachedir().'/custom-'.getpid().'.cache'
+  endif
+  let no_cache = !exists("g:itemCache")
+  let stale_cache = g:itemCache!=a:items
+  if no_cache || stale_cache
     let g:itemCache = a:items
-    call writefile(a:items, cachefile)
+    call writefile(a:items, g:cachefile_path)
   endif
   let ruby = '/Users/jon/.rvm/rubies/ruby-1.9.3-p194/bin/ruby'
   let script = '/Users/jon/.bin/ctrlp_matcher.rb'
-  let cmd = ruby.' '.script.' '.a:limit.' '.cachefile.' '.a:str
+  let cmd = ruby.' '.script.' '.a:limit.' '.g:cachefile_path.' '.a:str
   let result = split(system(cmd), "\n")
   return result
 endfunction
