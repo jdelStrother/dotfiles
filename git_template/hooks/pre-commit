@@ -1,3 +1,3 @@
 #!/bin/sh
 set -e
-.git/hooks/spec_focus
+$GIT_DIR/hooks/spec_focus
