@@ -8,6 +8,5 @@
 .com.apple.timemachine.supported
 *.un~
 ._*
-tags
 *.pyc
 .netrwhist
