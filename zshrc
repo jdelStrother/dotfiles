@@ -90,7 +90,7 @@ HEADLESS_PROMPT="{$PR_LIGHT_RED%2v$PR_NO_COLOR}"
 # otherwise, use a blank right-prompt.
 export RPS1="%(2v.$HEADLESS_PROMPT.%(1v.$BRANCH_PROMPT.))"
 
-
+fpath=(~/.zsh/completion $fpath)
 autoload -U compinit
 compinit
 bindkey '^r' history-incremental-search-backward
@@ -198,12 +198,15 @@ if [[ $TERM_PROGRAM == "Apple_Terminal" ]] && [[ -z "$INSIDE_EMACS" ]] {
   chpwd
 }
 
+# Restore our path from the mangled paths_helper version
+# http://openradar.appspot.com/14630658
+# See zshenv
+PATH=$FINALPATH
 
 [[ -s "$HOME/.scm_breeze/scm_breeze.sh" ]] && . "$HOME/.scm_breeze/scm_breeze.sh"
 alias git='nocorrect noglob git'
 
 source "/Users/jon/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
-### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
 
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
