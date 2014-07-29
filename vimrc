@@ -30,11 +30,18 @@ Bundle 'altercation/vim-colors-solarized'
 Bundle 'Lokaltog/vim-powerline'
 Bundle 'ciaranm/securemodelines'
 Bundle 'tpope/vim-endwise'
-Bundle 'kien/ctrlp.vim'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'tpope/vim-dispatch'
+Bundle 'Shougo/unite.vim'
+Bundle 'Shougo/vimproc.vim'
+Bundle 'Shougo/vimfiler.vim'
+Bundle 'Shougo/unite-outline'
+Bundle 'Shougo/unite-help'
+Bundle 'Shougo/unite-session'
+Bundle 'tsukkee/unite-tag'
+Bundle 'Shougo/neomru.vim'
+
 " repos on Vim-Scripts
-Bundle 'bufexplorer.zip'
 Bundle 'EasyMotion'
 Bundle 'taglist.vim'
 Bundle 'vim-coffee-script'
@@ -160,60 +167,33 @@ let g:netrw_preview   = 1
 let g:netrw_winsize   = 30
 
 
-" CtrlP ----------------------------------------------------------------------------------------{{{1
-let g:ctrlp_map = '<c-t>'
-let g:ctrlp_extensions = ['mixed']
-let g:ctrlp_max_height = 20
-" the multiple uses of find in the fallback are to ensure that everything in the current
-" directory get listed before descending into deeper directories
-" That way, even if we run this in our home directory and get truncated
-" output, at least the files at the top level will show up.
-let g:ctrlp_user_command = {
-  \ 'types': {
-    \ 1: ['.git', 'cd %s && git ls-files . -co --exclude-standard | grep -v -E "\.(gif|png|jpe?g|svg|psd|ai|gem)\$" ; conf=config/environments/_local_config.rb; [ -e $conf ] && echo $conf '],
-    \ },
-  \ 'fallback': 'cd %s; (find -L . -type f -maxdepth 1 && find -E -L . -type f -mindepth 1 ! -regex "(^|.*/)(\.bundler|\.rvm|\.Trash)(/.*|$)") | head -1000'
-  \ }
-let g:ctrlp_match_func = { 'match': 'MatchFunc' }
+" Unite.vim ----------------------------------------------------------------------------------------{{{1
+let g:unite_source_tag_max_fname_length = 45
+" Use the fuzzy matcher for everything
+call unite#filters#matcher_default#use(['matcher_fuzzy'])
+" Use the rank sorter for everything
+" call unite#filters#sorter_default#use(['sorter_rank'])
 
-function! MatchFunc(items, str, limit, mmode, ispath, crfile, regex)
-  try
-  if !exists("g:cachefile_path")
-    let g:cachefile_path = ctrlp#utils#cachedir().'/custom-'.getpid().'.cache'
-  endif
-  let no_cache = !exists("g:itemCache")
-  let stale_cache = no_cache || g:itemCache!=a:items
-  if stale_cache
-    let g:itemCache = a:items
-    call writefile(a:items, g:cachefile_path)
-    " return ["Updated", no_cache, stale_cache, g:cachefile_path]
-  " else
-    " return ["nope", no_cache, stale_cache, g:cachefile_path]
-  endif
-  let script = '/Users/jon/bin/ctrlp_matcher.rb'
-  let result = ['-!']
-  if has("ruby")
-    if !exists("g:loaded_ctrlp_matcher")
-      ruby load(VIM::evaluate("script"))
-      let g:loaded_ctrlp_matcher = 1
-    endif
-    ruby vim_ctrlp_matches(VIM::evaluate("a:limit"), VIM::evaluate("g:cachefile_path"), VIM::evaluate("a:mmode"), VIM::evaluate("a:str"))
-    return result
-  else
-    let rubypath = '/Users/jon/.rvm/rubies/ruby-2.0.0-p353/bin/ruby'
-    let cmd = rubypath.' '.script.' '.a:limit.' '.g:cachefile_path.' '.a:mmode.' '.a:str
-    let result = split(system(cmd), "\n")
-  endif
-  return result
-catch
-  return ["oh no ".v:exception]
-  " system("ls")
-  " system(v:exception." >> /Users/jon/cp.log")
-  " throw v:exception
-finally
-  " system("echo done >> /Users/jon/cp.log")
-endtry
-endfunction
+" Set up some custom ignores
+call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
+      \ 'ignore_pattern', join([
+      \ '\.git/',
+      \ 'app/assets/images',
+      \ 'tmp/',
+      \ '.sass-cache',
+      \ ], '\|'))
+let g:unite_source_history_yank_enable = 1
+
+if executable('ag')
+  let g:unite_source_rec_async_command = 'ag --follow --nocolor --nogroup -g ""'
+  let g:unite_source_grep_command='ag'
+  let g:unite_source_grep_default_opts='--nocolor --line-numbers --nogroup -S -C0'
+  let g:unite_source_grep_recursive_opt=''
+elseif executable('ack')
+  let g:unite_source_grep_command='ack'
+  let g:unite_source_grep_default_opts='--no-heading --no-color'
+  let g:unite_source_grep_recursive_opt=''
+endif
 
 " Mappings & Commands --------------------------------------------------------------------------{{{1
 let mapleader=" "
@@ -237,6 +217,14 @@ imap jj <Esc>
 
 " Open a Quickfix window for the last search
 nnoremap <silent> <leader>/ :execute 'vimgrep /'.@/.'/g %'<CR>:copen<CR>
+
+nnoremap <Leader>ff :<C-u>Unite -no-split -buffer-name=files -auto-resize -start-insert buffer file_mru file_rec/async<cr>
+nnoremap <Leader>ft :<C-u>Unite -no-split -buffer-name=tags -auto-resize -start-insert tag<cr>
+nnoremap <Leader>fb :<C-u>Unite -no-split -buffer-name=buffers -quick-match buffer<cr>
+nnoremap <Leader>fo :<C-u>Unite -no-split -buffer-name=outline -start-insert outline<cr>
+nnoremap <Leader>fy :<C-u>Unite history/yank<cr>
+nnoremap <Leader>fg :<C-u>Unite grep:.<cr>
+nnoremap <Leader>fd :<C-u>VimFilerBufferDir<cr>
 
 " :w!! for sudo-save
 cmap w!! w !sudo tee % >/dev/null
@@ -353,6 +341,11 @@ if has("autocmd")
   " highlight the cursor's line in the current window:
   autocmd WinEnter * setlocal cursorline
   autocmd WinLeave * setlocal nocursorline
+  autocmd FileType unite call s:configure_unite()
+	function! s:configure_unite()
+	  " Overwrite settings.
+	  imap <silent><buffer><expr> <C-s> unite#do_action('split')
+	endfunction
 
   autocmd FileType ruby iab rw attr_accessor
 
