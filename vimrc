@@ -162,6 +162,7 @@ let g:netrw_winsize   = 30
 
 " CtrlP ----------------------------------------------------------------------------------------{{{1
 let g:ctrlp_map = '<c-t>'
+let g:ctrlp_extensions = ['mixed']
 let g:ctrlp_max_height = 20
 " the multiple uses of find in the fallback are to ensure that everything in the current
 " directory get listed before descending into deeper directories
@@ -176,20 +177,42 @@ let g:ctrlp_user_command = {
 let g:ctrlp_match_func = { 'match': 'MatchFunc' }
 
 function! MatchFunc(items, str, limit, mmode, ispath, crfile, regex)
+  try
   if !exists("g:cachefile_path")
     let g:cachefile_path = ctrlp#utils#cachedir().'/custom-'.getpid().'.cache'
   endif
   let no_cache = !exists("g:itemCache")
-  let stale_cache = g:itemCache!=a:items
-  if no_cache || stale_cache
+  let stale_cache = no_cache || g:itemCache!=a:items
+  if stale_cache
     let g:itemCache = a:items
     call writefile(a:items, g:cachefile_path)
+    " return ["Updated", no_cache, stale_cache, g:cachefile_path]
+  " else
+    " return ["nope", no_cache, stale_cache, g:cachefile_path]
   endif
-  let ruby = '/Users/jon/.rvm/rubies/ruby-1.9.3-p194/bin/ruby'
-  let script = '/Users/jon/.bin/ctrlp_matcher.rb'
-  let cmd = ruby.' '.script.' '.a:limit.' '.g:cachefile_path.' '.a:str
-  let result = split(system(cmd), "\n")
+  let script = '/Users/jon/bin/ctrlp_matcher.rb'
+  let result = ['-!']
+  if has("ruby")
+    if !exists("g:loaded_ctrlp_matcher")
+      ruby load(VIM::evaluate("script"))
+      let g:loaded_ctrlp_matcher = 1
+    endif
+    ruby vim_ctrlp_matches(VIM::evaluate("a:limit"), VIM::evaluate("g:cachefile_path"), VIM::evaluate("a:mmode"), VIM::evaluate("a:str"))
+    return result
+  else
+    let rubypath = '/Users/jon/.rvm/rubies/ruby-2.0.0-p353/bin/ruby'
+    let cmd = rubypath.' '.script.' '.a:limit.' '.g:cachefile_path.' '.a:mmode.' '.a:str
+    let result = split(system(cmd), "\n")
+  endif
   return result
+catch
+  return ["oh no ".v:exception]
+  " system("ls")
+  " system(v:exception." >> /Users/jon/cp.log")
+  " throw v:exception
+finally
+  " system("echo done >> /Users/jon/cp.log")
+endtry
 endfunction
 
 " Mappings & Commands --------------------------------------------------------------------------{{{1
