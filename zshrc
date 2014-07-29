@@ -143,16 +143,12 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 # offer indexes before parameters in subscripts
 zstyle ':completion:*:*:-subscript-:*' tag-order indexes parameters
 
-# command for process lists, the local web server details and host completion
-#zstyle ':completion:*:processes' command 'ps -o pid,s,nice,stime,args'
-#zstyle ':completion:*:urls' local 'www' '/var/www/htdocs' 'public_html'
+# ssh host completion
 zstyle '*' hosts $hosts
 
 # Filename suffixes to ignore during completion (except after rm command)
 zstyle ':completion:*:*:(^rm):*:*files' ignored-patterns '*?.o' '*?.c~' \
     '*?.old' '*?.pro'
-# the same for old style completion
-#fignore=(.o .c~ .old .pro)
 
 # ignore completion functions (until the _ignored completer)
 zstyle ':completion:*:functions' ignored-patterns '_*'
@@ -166,17 +162,12 @@ zstyle ':completion:*:ssh:*' group-order \
    hosts-domain hosts-host users hosts-ipaddr
 zstyle '*' single-ignored show
 
-fpath=(~/.zsh/completion $fpath)
-
 # # --------------------------------------------------------------------
 # # aliases
 # # --------------------------------------------------------------------
-alias dmesg="sudo dmesg"
 alias ls='/bin/ls -FGl'
-alias ll='ls -al'
 alias cp='/bin/cp -i'
 alias mv='nocorrect /bin/mv -i'
-alias pstree='pstree -g 2'
 alias bundle='nocorrect bundle'
 
 # emacs key bindings:
@@ -195,40 +186,6 @@ export GREP_OPTIONS='--color=auto'
 # Unset MANPATH (set by path_helper), it's not needed on newer man
 unset MANPATH
 
-function trackingBranch() {
-	local MYBRANCH REMOTE BRANCH
-	MYBRANCH="$(git symbolic-ref HEAD)"
-	MYBRANCH=${MYBRANCH##refs/heads/}
-
-	REMOTE=$(git config --get "branch.$MYBRANCH.remote")
-	BRANCH=$(git config --get "branch.$MYBRANCH.merge")
-	BRANCH=${BRANCH##refs/heads/}
-	if [[ -z $REMOTE ]]; then
-		REMOTE=origin
-	fi
-	if [[ -z $BRANCH ]]; then
-		BRANCH=master
-	fi
-	echo $REMOTE/$BRANCH
-}
-
-function ov(){
-	eval 'echo "$*"; git log --pretty=format:"%Cred%H%Creset %n%Cblue%an%Creset %s%n" --graph HEAD $(trackingBranch) ^$(git merge-base HEAD $(trackingBranch))~3 $@ | git name-rev --stdin | less -RFX'
-}
-
-
-#gsub on last command  -  s .c .h
-function s() {
-	eval ${${${(f)"$(history -n)"}[-1]}//$1/$2}
-}
-
-if [[ -f ~/bin/j.sh ]]; then
-  source ~/bin/j.sh
-fi
-
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-# Make sure the rubyinline env var is set up:
-[[ -s "$HOME/.rvm/hooks/after_use" ]] && source "$HOME/.rvm/hooks/after_use"
 
 if [[ $TERM_PROGRAM == "Apple_Terminal" ]] && [[ -z "$INSIDE_EMACS" ]] {
   function chpwd {
