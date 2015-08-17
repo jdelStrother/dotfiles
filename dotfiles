@@ -11,7 +11,7 @@ class DotFiles < Thor
 
     files = Dir["*"] - [File.basename(__FILE__), '.git']
     files.each do |file|
-      destination = File.join(ENV['HOME'], ".#{file}")
+      destination = destination_for_source_file(file)
       system %Q{mkdir -p "#{destination}"} if file =~ /\//
 
       if File.exist?(destination)
@@ -69,6 +69,15 @@ class DotFiles < Thor
     # wish vim created these for you...
     %w{backup swap undo}.each do |f|
       `mkdir -p $HOME/.tmp/vim/#{f}`
+    end
+  end
+
+  def destination_for_source_file(file)
+    # don't prepend bin or lib with a dot
+    if %w{bin lib}.include?(file)
+      File.join(ENV['HOME'], file)
+    else
+      File.join(ENV['HOME'], ".#{file}")
     end
   end
 end
