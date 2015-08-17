@@ -120,3 +120,5 @@
 	textconv = less
   binary = false
 
+[include]
+  path = ./.gitconfig-private
