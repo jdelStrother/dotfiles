@@ -10,3 +10,7 @@
 ._*
 *.pyc
 .netrwhist
+TAGS
+tags-emacs.*
+.tern-port
+.projectile

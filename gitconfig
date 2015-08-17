@@ -20,12 +20,13 @@
 	ss = !git stash && git stash apply
 	up = !git fetch origin && git log HEAD...origin/master --pretty=oneline --reverse --left-right && git checkout origin/master
 	upr = !git fetch origin && git log HEAD...origin/master --pretty=oneline --reverse --left-right && git rebase origin/master
-	cleanmerge = !git ls-files --other --exclude-standard | grep -E '\\.(orig|rej)$|\\.(BACKUP|BASE|LOCAL|REMOTE)\\.' | tr '\\n' '\\0' | xargs -0 rm
+	cleanmerge = !git ls-files --other --exclude-standard | grep -E '\\.(orig|rej)$|(\\.|_)(BACKUP|BASE|LOCAL|REMOTE)(\\.|_)' | tr '\\n' '\\0' | xargs -0 rm
 	lgprod = !git lg HEAD origin/production-live ^$(commonbase=$(git rev-list HEAD ^origin/production-live | tail -n1) echo ${commonbase:-HEAD~1})~3
 	amend = commit --amend -C HEAD
 	rclone = clone --reference ~/.gitcache
-  recent =  "!git for-each-ref --count=10 --sort=-committerdate --format='ref=%(refname);sub=%(subject)' --shell refs/heads | while read -r entry; do eval \"$entry\"; printf \"%-30s %s\n\" \"${ref/refs\\/heads\\/}\" \"$sub\"; done"
-  rrecent = "!git for-each-ref --count=10 --sort=-committerdate --format='ref=%(refname);sub=%(subject)' --shell refs/remotes/origin | while read -r entry; do eval \"$entry\"; printf \"%-30s %s\n\" \"${ref/refs\\/remotes\\/}\" \"$sub\"; done"
+  rrecent = "!git recent refs/remotes/origin"
+  fetchall = "!git fetch origin & git fetch github; wait"
+  pushall = "!f() { git push origin $@ & git push github $@; wait; }; f"
 	ff = pull --ff-only -v
 [merge]
 	tool = OpenDiff
@@ -112,5 +113,10 @@
 	prompt = false
 [mergetool "Kaleidoscope"]
 	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustExitCode = true
 [mergetool]
 	prompt = false
+[diff "request"]
+	textconv = less
+  binary = false
+

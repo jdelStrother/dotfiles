@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 case "$1" in
-  rebase) exec $GIT_DIR/hooks/post-merge ;;
+  rebase) exec ${BASH_SOURCE%/*}/post-merge ;;
 esac
