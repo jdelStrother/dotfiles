@@ -1,10 +1,12 @@
 " vim: set foldmethod=marker
 
 set nocompatible
+
 " Load Vundle & Plugins ------------------------------------------------------------------------{{{1
 filetype off " force reloading of filetype
 set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
+call vundle#begin()
+
 runtime macros/matchit.vim
 
 " let Vundle manage Vundle
@@ -17,21 +19,31 @@ Bundle 'kana/vim-textobj-user'
 Bundle 'msanders/cocoa.vim'
 Bundle 'nelstrom/vim-textobj-rubyblock'
 Bundle 'sjl/gundo.vim'
-Bundle 'sjl/threesome.vim'
+" Bundle 'sjl/threesome.vim'
 Bundle 'sjl/badwolf'
 Bundle 'tpope/vim-commentary'
-Bundle 'tpope/vim-cucumber'
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-haml'
-Bundle 'tpope/vim-rails'
+" Bundle 'tpope/vim-rails'
 Bundle 'tpope/vim-repeat'
 Bundle 'tpope/vim-surround'
-Bundle 'altercation/vim-colors-solarized'
-Bundle 'Lokaltog/vim-powerline'
+Bundle 'bling/vim-airline'
 Bundle 'ciaranm/securemodelines'
 Bundle 'tpope/vim-endwise'
+Bundle 'tpope/vim-vinegar'
 Bundle 'vim-ruby/vim-ruby'
 Bundle 'tpope/vim-dispatch'
+Bundle 'rking/vim-detailed'
+Bundle 'dahu/vimple'
+Bundle 'mxw/vim-jsx'
+" Bundle 'airblade/vim-gitgutter'
+Bundle "pangloss/vim-javascript"
+" Bundle "scrooloose/syntastic"
+Bundle 'christoomey/vim-tmux-navigator'
+
+Bundle "benekastah/neomake"
+Bundle "thoughtbot/vim-rspec"
+
 Bundle 'Shougo/unite.vim'
 Bundle 'Shougo/vimproc.vim'
 Bundle 'Shougo/vimfiler.vim'
@@ -43,23 +55,34 @@ Bundle 'Shougo/neomru.vim'
 
 " repos on Vim-Scripts
 Bundle 'EasyMotion'
+
 Bundle 'taglist.vim'
 Bundle 'vim-coffee-script'
 Bundle 'Mark--Karkat'
 Bundle 'nginx.vim'
 Bundle 'LargeFile'
+" Run :AnsiEsc to colorize ansi-filled log files
+Bundle 'AnsiEsc.vim'
+
+" Unused:
+" Bundle 'tpope/vim-cucumber'
+" Bundle 'altercation/vim-colors-solarized'
+
+call vundle#end()
+filetype plugin indent on
+
 " }}}
 " Backups --------------------------------------------------------------------------------------{{{1
 " purposefully not using .vim/tmp because our .vim dir is in Dropbox
-set backupdir=~/.tmp/vim/backup,~/tmp,/var/tmp,/tmp
-set directory=~/.tmp/vim/swap,~/tmp,/var/tmp,/tmp
+set backupdir=~/.tmp/vim/backup//,~/tmp//,/var/tmp//,/tmp//
+set directory=~/.tmp/vim/swap//,~/tmp//,/var/tmp//,/tmp////
 
 set backup
 set swapfile
 
 if exists('+undofile')
   set undofile
-  set undodir=~/.tmp/vim/undo
+  set undodir=~/.tmp/vim/undo//
 end
 
 
@@ -68,7 +91,6 @@ set showcmd		" display incomplete commands
 set modelines=5
 set scrolloff=3 " show 3 lines of context around scrolling cursor
 set ttyfast
-set showcmd		" display incomplete commands
 " allow buffers to go to the background without forcing you to save them first
 " set hidden
 " auto-write buffers before switching away
@@ -83,7 +105,8 @@ set listchars=tab:▸\ ,eol:¬,trail:·
 set autoread
 
 " set foldmethod=syntax
-" set foldlevelstart=1 " don't auto-fold on opening files
+set foldmethod=indent
+set foldlevelstart=1 " don't auto-fold on opening files
 " set foldminlines=0 " When folding, hide 1-line methods just like everything else
 
 " allow backspacing over everything in insert mode
@@ -121,6 +144,8 @@ endif
 " Solarized's default is to add an underline to folded lines, which is excessive
 hi Folded term=bold cterm=bold
 
+  " Use a line-drawing char for pretty vertical splits
+set fillchars+=vert:│
 
 " Tabs & Spaces --------------------------------------------------------------------------------{{{1
 set shiftwidth=2
@@ -140,17 +165,32 @@ set incsearch
 
 set virtualedit+=block
 
+" add audioboom's webpack path.  Look into lvimrc if I ever add anything else...
+set path+=webpack/assets/javascripts
+
+
 " Plugin Settings ------------------------------------------------------------------------------{{{1
 
-let g:EasyMotion_leader_key = '\'
+"#let g:EasyMotion_leader_key = '\'
 let g:fuzzy_ignore = "*.log,tmp/*,files/*,public/files/*"
 let g:fuzzy_matching_limit = 70
-let g:Powerline_symbols = 'fancy'
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#whitespace#enabled = 1
+
+" Since we're using airline, the extra mode description is redundant
+set noshowmode
 
 " Don't let the Mark plugin map <leader>r
 map <leader>M <Plug>MarkClear
 map <Plug>IgnoreMarkRegex <Plug>MarkRegex
 map <Plug>IgnoreMarkSearchAnyNext <Plug>MarkSearchAnyNext
+
+" add a binding just so that vimple doesn't try to create it's own (<leader>gu by default)
+map <leader>xx <Plug>VimpleMRU
+
+" and for cecutil, imported by AnsiEsc
+map <leader>xx1 <Plug>SaveWinPosn
+map <leader>xx2 <Plug>RestoreWinPosn
 
 let Tlist_Ctags_Cmd="/usr/local/bin/ctags"
 
@@ -166,6 +206,9 @@ set laststatus=2 "always show status line
 let g:netrw_preview   = 1
 let g:netrw_winsize   = 30
 
+" let g:syntastic_javascript_checkers = ['eslint']
+
+let g:neomake_javascript_enabled_makers = ['eslint']
 
 " Unite.vim ----------------------------------------------------------------------------------------{{{1
 let g:unite_source_tag_max_fname_length = 45
@@ -175,13 +218,19 @@ call unite#filters#matcher_default#use(['matcher_fuzzy'])
 " call unite#filters#sorter_default#use(['sorter_rank'])
 
 " Set up some custom ignores
-call unite#custom_source('file_rec,file_rec/async,file_mru,file,buffer,grep',
+" call unite#custom#source('file_rec,file_rec/async,neomru/file,file,buffer,grep',
+call unite#custom#source('file_rec/git,neomru/file,file,buffer,grep',
       \ 'ignore_pattern', join([
       \ '\.git/',
       \ 'app/assets/images',
+      \ 'app/assets/stylesheets/images',
+      \ 'files',
+      \ 'lib/radioplayer/img',
+      \ 'public/assets-*',
       \ 'tmp/',
       \ '.sass-cache',
       \ ], '\|'))
+call unite#custom#source('neomru/file,buffer', 'matchers', ['matcher_project_files', 'matcher_fuzzy', 'converter_relative_word'])
 let g:unite_source_history_yank_enable = 1
 
 if executable('ag')
@@ -208,9 +257,20 @@ map <leader>u :GundoToggle<CR>
 " fold everything except the current block
 nnoremap <leader>z zMzv
 
-map <C-s> :write<CR>
-imap <C-s> <Esc><C-s>
-" map <C-t> Xp
+" very magic mode for searching, for sane regexps
+nnoremap / /\v
+vnoremap / /\v
+
+" when searching, keep the match in the middle of the screen
+nnoremap n nzzzv
+nnoremap N Nzzzv
+
+" Make ctrl-a & e work properly on the command line
+cnoremap <C-a> <home>
+cnoremap <C-e> <end>
+
+" map <C-s> :write<CR>
+" imap <C-s> <Esc><C-s>
 imap <C-t> <C-o>X<C-o>p
 
 imap jj <Esc>
@@ -218,18 +278,28 @@ imap jj <Esc>
 " Open a Quickfix window for the last search
 nnoremap <silent> <leader>/ :execute 'vimgrep /'.@/.'/g %'<CR>:copen<CR>
 
-nnoremap <Leader>ff :<C-u>Unite -no-split -buffer-name=files -auto-resize -start-insert buffer file_mru file_rec/async<cr>
+nnoremap <Leader>ff :<C-u>Unite -no-split -buffer-name=files -auto-resize -start-insert buffer neomru/file file_rec/git<cr>
 nnoremap <Leader>ft :<C-u>Unite -no-split -buffer-name=tags -auto-resize -start-insert tag<cr>
 nnoremap <Leader>fb :<C-u>Unite -no-split -buffer-name=buffers -quick-match buffer<cr>
 nnoremap <Leader>fo :<C-u>Unite -no-split -buffer-name=outline -start-insert outline<cr>
 nnoremap <Leader>fy :<C-u>Unite history/yank<cr>
 nnoremap <Leader>fg :<C-u>Unite grep:.<cr>
-nnoremap <Leader>fd :<C-u>VimFilerBufferDir<cr>
+" nnoremap <Leader>fd :<C-u>VimFilerBufferDir<cr>
+nnoremap <leader>fd :Explore<CR>
+
+nnoremap <leader>g :let @/="\\<<C-R><C-W>\\>"<CR>:set hls<CR>:silent Ggrep -w "<C-R><C-W>"<CR>:cw<CR><CR>
+vnoremap <leader>g "oy:let @/=@o<CR>:set hls<CR>:silent Ggrep -w "<C-R>o"<CR>:cw<CR><CR>
+" Vimple adds a <space>gu command that slows down the above, get rid of it.
+silent! unmap <Space>gu
+
 
 " :w!! for sudo-save
 cmap w!! w !sudo tee % >/dev/null
 
-command! Q q " Bind :Q to :q
+command! -bang Q q<bang>
+command! -bang W w<bang>
+command! -bang Wq wq<bang>
+command! -bang WQ wq<bang>
 
 " @h to convert {:x=>1} to {x:1}
 let @h='/:xepldf>'
@@ -246,7 +316,10 @@ inoremap <2-MiddleMouse> <Nop>
 inoremap <3-MiddleMouse> <Nop>
 inoremap <4-MiddleMouse> <Nop>
 
-nnoremap <leader><space> za
+nnoremap <left>  :cprev<cr>zvzz
+nnoremap <right> :cnext<cr>zvzz
+
+" nnoremap <leader><space> za
 
 " Convenient command to see the difference between the current buffer and the
 " file it was loaded from, thus the changes you made.
@@ -260,8 +333,9 @@ nmap <silent> <leader>s :set nolist!<CR>
 
 " Environments ---------------------------------------------------------------------------------{{{1
 if has("gui_running")
+
   " https://gist.github.com/1627888
-  set guifont=Menlo\ Regular\ for\ Powerline:h11
+  set guifont=Meslo\ LG\ S\ Regular\ for\ Powerline:h11
 
   " I can't get 'hi link EasyMotionShade  Comment' to work :(
   hi EasyMotionShade term=bold ctermfg=11 guifg=#5c7176
@@ -271,9 +345,6 @@ if has("gui_running")
   " get rid of left/right scrollbars
   set guioptions-=L
   set guioptions-=r
-
-  " Use a line-drawing char for pretty verticl splits
-  set fillchars+=vert:│
 
   " Different cursors for different modes.
   set guicursor=n-c:block-Cursor-blinkon0
@@ -301,7 +372,7 @@ end
 if has('mouse')
   set mouse=a
 endif
-
+let g:netrw_nobeval=1
 
 " AutoCmd --------------------------------------------------------------------------------------{{{1
 if has("autocmd")
@@ -332,8 +403,16 @@ if has("autocmd")
     \   exe "normal! g`\"" |
     \ endif
 
+  autocmd BufNewFile,BufRead *.jsx.erb set filetype=javascript
+  autocmd BufNewFile,BufRead *.es6* set filetype=javascript
   autocmd BufNewFile,BufRead *.rbapi set filetype=ruby
   autocmd BufNewFile,BufRead Gemfile set filetype=ruby
+  autocmd BufNewFile,BufRead *.jbuilder set filetype=ruby
+  autocmd BufNewFile,BufRead *.nokogiri set filetype=ruby
+  " join commented lines with J
+  if v:version > 703 || v:version == 703 && has("patch541")
+    autocmd BufNewFile,BufRead * set formatoptions+=j
+  endif
 
   " Open :help documents in a nice, big vertical split instead of a horizontal one:
   au FileType help wincmd L
@@ -341,13 +420,34 @@ if has("autocmd")
   " highlight the cursor's line in the current window:
   autocmd WinEnter * setlocal cursorline
   autocmd WinLeave * setlocal nocursorline
+
+  " don't override jj
+  imap ± <plug>vimple_completers_trigger
+
+  autocmd FileType javascript set suffixesadd=.js,.jsx,.js.es6
+
+  autocmd FileType ruby call s:configure_ruby()
+  autocmd FileType erb call s:configure_ruby()
+  function! s:configure_ruby()
+    iab rw attr_accessor
+    if expand("%") =~# '_spec\.rb$'
+      compiler rspec | set makeprg=bin/rspec\ --format\ progress\ $*"
+    endif
+    " ruby.vim does a lame mouseover popup splurge in ruby files
+    if has('balloon_eval') && exists('+balloonexpr')
+      setlocal balloonexpr=''
+    endif
+  endfunction
+
   autocmd FileType unite call s:configure_unite()
 	function! s:configure_unite()
 	  " Overwrite settings.
 	  imap <silent><buffer><expr> <C-s> unite#do_action('split')
+    " call gitgutter#disable()
 	endfunction
-
-  autocmd FileType ruby iab rw attr_accessor
+  
+  " eslint syntax checking
+  autocmd! BufWritePost *.js,*.jsx,*.es6 Neomake
 
   augroup END
 
@@ -358,47 +458,58 @@ else
 endif " has("autocmd")
 
 
+
 " SpinTest -------------------------------------------------------------------------------------{{{1
-function! s:first_readable_file(files) abort
-  let files = type(a:files) == type([]) ? copy(a:files) : split(a:files,"\n")
-  for file in files
-    if filereadable(rails#app().path(file))
-      return file
-    endif
-  endfor
-  return ''
-endfunction
-function! SpinTest(file, linenumber)
-  let linenumber = a:linenumber
-  if a:file =~# '\(\<test_.*\|\(_test\|_spec\)\)\.rb$'
-    let test_file = a:file
-  else
-    let test_file = s:first_readable_file(rails#buffer(a:file).related())
-    let linenumber=""
-  endif
-  if test_file != ""
-    let g:SpinLastFile = test_file
-  else
-    " fall back to the previously used file
-    let test_file = g:SpinLastFile
-  endif
-  let command = "!spin push " . shellescape(test_file)
-  if linenumber!=""
-    let command = command . ":" . a:linenumber
-  endif
-  silent exe command
-endfunction
-nnoremap <silent> <leader>r :call SpinTest(expand('%'), "")<CR>
-nnoremap <silent> <leader>R :call SpinTest(expand('%'), line('.'))<CR>
+" function! s:first_readable_file(files) abort
+"   let files = type(a:files) == type([]) ? copy(a:files) : split(a:files,"\n")
+"   for file in files
+"     if filereadable(rails#app().path(file))
+"       return file
+"     endif
+"   endfor
+"   return ''
+" endfunction
+" function! SpinTest(file, linenumber)
+"   let linenumber = a:linenumber
+"   if a:file =~# '\(\<test_.*\|\(_test\|_spec\)\)\.rb$'
+"     let test_file = a:file
+"   else
+"     let test_file = s:first_readable_file(rails#buffer(a:file).related())
+"     let linenumber=""
+"   endif
+"   if test_file != ""
+"     let g:SpinLastFile = test_file
+"   else
+"     " fall back to the previously used file
+"     let test_file = g:SpinLastFile
+"   endif
+"   " let command = "Make " . shellescape(test_file)
+"   let command = "!spin push " . shellescape(test_file)
+"   if linenumber!=""
+"     let command = command . ":" . a:linenumber
+"   endif
+"   silent exe command
+" endfunction
+" nnoremap <silent> <leader>r :call SpinTest(expand('%'), "")<CR>
+" nnoremap <silent> <leader>R :call SpinTest(expand('%'), line('.'))<CR>
+
+" let g:rspec_command = 'call Send_to_Tmux("bin/rspec {spec}\n")'
+" nnoremap <silent> <leader>r :call RunCurrentSpecFile()<CR>
+" nnoremap <silent> <leader>R :call RunNearestSpec()<CR>
+
+
+let g:rspec_command = "Dispatch bin/rspec {spec}"
+nnoremap <leader>r :call RunCurrentSpecFile()<CR>
+nnoremap <leader>R :call RunNearestSpec()<CR>
 
 
 " hacking --------------------------------------------------------------------------------------{{{1
 function! RubyTest()
   let l:list = ['x', 'z', 'a','b','c']
   silent hide enew
-  set nobuflisted 
-  set buftype=nofile 
-  set bufhidden=hide 
+  set nobuflisted
+  set buftype=nofile
+  set bufhidden=hide
   call append(0,l:list)
 ruby << RUBY
   buffer = VIM::Buffer.current
@@ -416,3 +527,6 @@ RUBY
   silent execute "normal \<C-^>"
   echo l:result
 endfunction
+
+
+let @l=':%s/;$//e:%s/,\(\w\)/, \1/e:%s/){/) {/e:%s/function (/function(/e:%s/\s\+$//e:%g/^[^'']*$/s/"/''/e:%s/if(/if (/e:%s/( /(/e:%s/ )/)/e:%s/for(/for (/e'
