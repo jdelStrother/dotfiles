@@ -15,4 +15,4 @@ fi
 
 # git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s <<<NOTE>>> %Cgreen(%aN, %cr)%Creset' --abbrev-commit --date=relative $args | git-logger-notes.rb | LESS=FRSX less
 # we're not using git-notes at the moment, don't waste time on it
-git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s <<<NOTE>>> %Cgreen(%aN, %cr)%Creset' --abbrev-commit --date=relative $args | LESS=FRSX less
+git log --graph --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%aN, %cr)%Creset' --abbrev-commit --date=relative $args | LESS=FRSX less
