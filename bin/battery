@@ -5,6 +5,7 @@ io = Hash[*io_out.split]
 exit 1 unless io['CurrentCapacity'] && io['MaxCapacity']
 
 capacity = io['CurrentCapacity'].to_f / io['MaxCapacity'].to_f
+is_connected = io['IsCharging']=='Yes'
 
-puts("%d%%" % (capacity*100))
+puts("%s %d%%" % [is_connected ? "⌁" : " ", capacity*100])
 
