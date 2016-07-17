@@ -59,8 +59,13 @@ precmd() {
 	local branch_ref branchless_ref
 
 	psvar=()
-	branch_ref=$(git symbolic-ref -q HEAD 2>/dev/null)
+  stashstate=""
 	cleanliness=""
+	branch_ref=$(git symbolic-ref -q HEAD 2>/dev/null)
+  if git rev-parse --verify --quiet refs/stash >/dev/null 2>/dev/null
+  then
+    stashstate="-\$\$"
+  fi
 	# Cleanliness is hard to figure out, and pretty slow, especially from a cold cache.  Only do it for repos that have run "git config --bool jds.showstatus 1"
 	if [[ $(git config --bool --get jds.showstatus) = 'true' ]]; then
 		(git diff-index --name-only --exit-code HEAD 2>&1) > /dev/null || cleanliness="*"
@@ -70,12 +75,12 @@ precmd() {
 
 	# We might be on a checked out branch:
 	if [[ ! -z "$branch_ref" ]]; then
-		psvar[1]="$cleanliness${branch_ref#refs/heads/}"
+		psvar[1]="$cleanliness${branch_ref#refs/heads/}$stashstate"
 	else
 		branchless_ref=$(git name-rev --name-only HEAD 2>/dev/null)
 		if [[ ! -z "$branchless_ref" ]]; then
 			# Or we might happen to be on the same commit as (eg) master, but not have it checked out
-			psvar[2]="$cleanliness${branchless_ref#(refs/heads/|remotes/)}"
+			psvar[2]="$cleanliness${branchless_ref#(refs/heads/|remotes/)}$stashstate"
 		fi
 	fi
 }
@@ -185,7 +190,6 @@ export GREP_OPTIONS='--color=auto'
 
 # Unset MANPATH (set by path_helper), it's not needed on newer man
 unset MANPATH
-
 
 if [[ $TERM_PROGRAM == "Apple_Terminal" ]] && [[ -z "$INSIDE_EMACS" ]] {
   function chpwd {
