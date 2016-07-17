@@ -4,12 +4,15 @@ export CLICOLOR=1
 # use yellow for directories
 export LSCOLORS=Dxfxcxdxbxegedabagacad
 
-typeset -U path
-path=(~/bin /usr/local/bin $path)
-unset manpath
-export KEYSTORE=/Users/jon/Documents/Certificates/javaKeystore.ImportKey
+if [[ -z $TMUX ]]; then # tmux's reattach-to-user-namespace command causes this file to get sourced twice, which makes rvm complain about path ordering
+  typeset -U path
+  path=(~/bin /usr/local/bin $path)
+  unset manpath
+  export KEYSTORE=/Users/jon/Documents/Certificates/javaKeystore.ImportKey
 
-export NODE_PATH=/usr/local/lib/node_modules:$NODE_PATH
+  export NODE_PATH=/usr/local/lib/node_modules:$NODE_PATH
+
+fi
 
 # VirtualBox Docker:
 # export DOCKER_HOST=tcp://192.168.59.103:2376
