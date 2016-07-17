@@ -1,6 +1,6 @@
 [user]
 	name = Jonathan del Strother
-	email = jon.delStrother@audioboo.fm
+	email = jdelStrother@gmail.com
 [color]
 	diff = auto
 	status = auto
@@ -25,7 +25,7 @@
 	amend = commit --amend -C HEAD
 	rclone = clone --reference ~/.gitcache
   rrecent = "!git recent refs/remotes/origin"
-  fetchall = "!git fetch origin & git fetch github; wait"
+  fetchall = "!git -c 'gc.auto=0' fetch origin & git -c 'gc.auto=0' fetch github; wait"
   pushall = "!f() { git push origin $@ & git push github $@; wait; }; f"
 	ff = pull --ff-only -v
 [merge]
@@ -109,6 +109,7 @@
 	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
 [diff]
 	tool = Kaleidoscope
+  compactionHeuristic = true
 [difftool]
 	prompt = false
 [mergetool "Kaleidoscope"]
