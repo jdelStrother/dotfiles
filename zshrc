@@ -212,5 +212,20 @@ alias git='nocorrect noglob git'
 
 source "/Users/jon/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
+if which peco &> /dev/null; then
+  function peco_select_history() {
+    local tac
+    (which gtac &> /dev/null && tac="gtac") || \
+      (which tac &> /dev/null && tac="tac") || \
+      tac="tail -r"
+    BUFFER=$(fc -l -n 1 | eval $tac | \
+      peco --layout=bottom-up --query "$LBUFFER")
+    CURSOR=$#BUFFER # move cursor
+    zle -R -c       # refresh
+  }
+
+  zle -N peco_select_history
+  bindkey '^R' peco_select_history
+fi
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
