@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+#
+# this is a slightly smarter version of the git alias
+# "!git for-each-ref --count=10 --sort=-committerdate --format='ref=%(refname);sub=%(subject)' --shell refs/heads | while read -r entry; do eval \"$entry\"; printf \"%-30s %s\n\" \"${ref/refs\\/heads\\/}\" \"$sub\"; done"
+# which groups by sha1
+
+class Head
+  attr_accessor :sha, :ref, :subject
+  def initialize(sha,ref,subject)
+    @sha=sha
+    @ref=ref
+    @subject=subject
+  end
+end
+
+pattern = ARGV[0] || 'refs/heads'
+recent = `git for-each-ref --count=10 --sort=-committerdate --format='sha=%(objectname:short);ref=%(refname);sub=%(subject)' --python #{pattern}`
+heads = recent.split("\n").map do |r|
+  eval("#{r}; Head.new(sha,ref,sub)")
+end
+
+deduped_heads = heads.group_by{|h| h.sha}.map do |sha, heads|
+  Head.new(sha, heads.map{|h| h.ref.sub(%r{refs/[^/]+/}, '')}.join(', '), heads[0].subject)
+end
+
+max_ref_length = deduped_heads.map{|h| h.ref.length}.max
+deduped_heads.each do |head|
+  puts "#{head.ref}#{' '*(max_ref_length-head.ref.length)}  #{head.subject}"
+end
+
