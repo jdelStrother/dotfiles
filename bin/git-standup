@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'date'
+today = Date.today
+previous_day = if today.cwday == 1
+                 today - 3
+               else
+                 today - 1
+               end
+
+puts "Since #{previous_day}"
+exec("git lg --author=Jon --since={#{previous_day}} --all")
