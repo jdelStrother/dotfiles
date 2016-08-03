@@ -69,7 +69,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(haml-mode scss-mode rvm)
+   dotspacemacs-additional-packages '(haml-mode scss-mode rvm flycheck-flow)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be install and loaded.
@@ -225,7 +225,7 @@ values."
    dotspacemacs-loading-progress-bar t
    ;; If non nil the frame is fullscreen when Emacs starts up. (default nil)
    ;; (Emacs 24.4+ only)
-   dotspacemacs-fullscreen-at-startup t
+   dotspacemacs-fullscreen-at-startup nil
    ;; If non nil `spacemacs/toggle-fullscreen' will not use native fullscreen.
    ;; Use to disable fullscreen animations in OSX."
    dotspacemacs-fullscreen-use-non-native t
@@ -293,6 +293,8 @@ values."
 It is called immediately after `dotspacemacs/init'.  You are free to put almost any
 user code here.  The exception is org related code, which should be placed in
 `dotspacemacs/user-config'."
+  ;; https://github.com/syl20bnr/spacemacs/issues/3920
+  (setq exec-path-from-shell-arguments '("-l"))
   )
 
 (defun dotspacemacs/user-config ()
@@ -318,13 +320,15 @@ layers configuration. You are free to put any user code."
   (setq js2-basic-offset 2)
   (setq js2-indent-switch-body 1)
 
+  ;; stop asking about following symlinks when editing home-dir-dotfiles
+  (setq vc-follow-symlinks nil)
+
   (load-file ".emacs.d/sgml-mode-patch.el")
   (require 'sgml-mode)
-  (require 'flycheck-flow)
 
   (load-file ".emacs.d/flow-types.el")
 
-  ; fix copy-paste? https://github.com/syl20bnr/spacemacs/issues/2032
+  ;; fix copy-paste? https://github.com/syl20bnr/spacemacs/issues/2032
   (fset 'evil-visual-update-x-selection 'ignore)
 
   (defun my-web-mode-hook ()
@@ -352,6 +356,13 @@ layers configuration. You are free to put any user code."
                           scss
                           scss-lint
                           )))
+  (with-eval-after-load 'flycheck
+    (require 'flycheck-flow)
+    (flycheck-add-next-checker 'javascript-eslint 'javascript-flow)
+    ;; make it work in react-mode as well as js modes
+    (push 'react-mode (flycheck-checker-get 'javascript-flow 'modes))
+  )
+
   ;; (setq-default flycheck-idle-change-delay 2.5)
   (setq-default flycheck-check-syntax-automatically '(mode-enabled save))
 
