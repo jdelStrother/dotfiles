@@ -236,6 +236,15 @@ export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 # Make my custom git aliases use the right completion:
 function _git_lg () { _git_log }
+
+function github-clean () {
+  local branches
+	branches=$(git branch -r --merged | grep github | grep -v /pull/ | sed "s/  github\\//:/" | peco)
+	if [[ ! -z "$branches" ]]; then
+    git push github $branches
+  fi
+}
+
 ###-begin-npm-completion-###
 #
 # npm command completion script
