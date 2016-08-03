@@ -33,8 +33,8 @@ HISTSIZE=100000
 SAVEHIST=100000
 HOSTNAME="`hostname`"
 PAGER='less'
-EDITOR="vim"
-VISUAL=mate
+EDITOR="emacsclient -t"
+VISUAL="mate -w"
 GEM_EDITOR=mate
 
 autoload colors zsh/terminfo
