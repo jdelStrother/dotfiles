@@ -229,3 +229,6 @@ if which peco &> /dev/null; then
 fi
 
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
+
+# Make my custom git aliases use the right completion:
+function _git_lg () { _git_log }
