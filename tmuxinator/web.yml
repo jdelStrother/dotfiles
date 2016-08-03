@@ -1,24 +1,39 @@
-# ~/.tmuxinator/web.yml
-# you can make as many tabs as you wish...
+# ~/.tmuxinator/w3.yml
 
-project_name: Web
-project_root: ~/Developer/web
-# rvm: 1.9.3@abweb
-# pre: sudo /etc/rc.d/mysqld start
-tabs:
-  - editor:
-      layout: main-vertical
-      panes:
-        - vim
-        - #empty, will just run plain bash
-  - shell: git fetch
-  - db: bin/rails db
-  - server:
+name: w3
+root: ~/Developer/web
+
+# Runs before everything. Use it to start daemons etc.
+pre: sudo nginx
+
+# Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
+# pre_window: rbenv shell 2.0.0-p247
+
+# Pass command line options to tmux. Useful for specifying a different tmux.conf.
+# tmux_options: -f ~/.tmux.mac.conf
+
+# Change the command to call tmux.  This can be used by derivatives/wrappers like byobu.
+# tmux_command: byobu
+
+# Specifies (by name or index) which window will be selected on project startup. If not set, the first window is used.
+# startup_window: logs
+
+# Controls whether the tmux session should be attached to automatically. Defaults to true.
+# attach: false
+
+# Runs after everything. Use it to attach to tmux with custom options etc.
+# post: tmux -CC attach -t w3
+
+windows:
+  - web:
       layout: main-horizontal
       panes:
-        - bin/unicorn --c unicorn_dev.rb
-        - tail -f log/development.log
-  - console: bin/rails c
-  - test: 
-  - dj2: ssh -p2223 deploy@audioboo.everycity.co.uk
-  - irc: irssi
+        - cd webpack && npm run watch
+        -
+  - ngrok:
+      layout: main-horizontal
+      panes:
+        - ngrok start --all
+        - NGROK=1 bin/rails s
+  - dj2: ssh -At dj2 'tmux attach || tmux'
+  - web-sh:
