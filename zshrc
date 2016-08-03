@@ -167,6 +167,8 @@ zstyle ':completion:*:ssh:*' group-order \
    hosts-domain hosts-host users hosts-ipaddr
 zstyle '*' single-ignored show
 
+source "$HOME/.zsh/kapow.zsh"
+
 # # --------------------------------------------------------------------
 # # aliases
 # # --------------------------------------------------------------------
