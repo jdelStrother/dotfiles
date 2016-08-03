@@ -14,17 +14,6 @@ if [[ -z $TMUX ]]; then # tmux's reattach-to-user-namespace command causes this 
 
 fi
 
-# VirtualBox Docker:
-# export DOCKER_HOST=tcp://192.168.59.103:2376
-# export DOCKER_CERT_PATH=/Users/jon/.boot2docker/certs/boot2docker-vm
-# export DOCKER_TLS_VERIFY=1
-
-# VMWare Docker:
-export DOCKER_TLS_VERIFY="1"
-export DOCKER_HOST="tcp://192.168.70.133:2376"
-export DOCKER_CERT_PATH="/Users/jon/.docker/machine/machines/dev"
-export DOCKER_MACHINE_NAME="dev"
-
 # Save our path to avoid paths_helper mangling it
 # http://openradar.appspot.com/14630658
 # See zshrc
