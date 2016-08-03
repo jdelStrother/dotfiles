@@ -220,11 +220,10 @@ export PATH=$PATH:/usr/local/Cellar/go/1.2.1/libexec/bin:$GOPATH/bin
 if which peco &> /dev/null; then
   function peco_select_history() {
     local tac
-    (which gtac &> /dev/null && tac="gtac") || \
-      (which tac &> /dev/null && tac="tac") || \
+    { which gtac &> /dev/null && tac="gtac" } || \
+      { which tac &> /dev/null && tac="tac" } || \
       tac="tail -r"
-    BUFFER=$(fc -l -n 1 | eval $tac | \
-      peco --layout=bottom-up --query "$LBUFFER")
+    BUFFER=$(fc -l -n 1 | eval $tac | peco --layout=bottom-up --query "$LBUFFER")
     CURSOR=$#BUFFER # move cursor
     zle -R -c       # refresh
   }
