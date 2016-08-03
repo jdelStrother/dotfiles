@@ -212,6 +212,9 @@ alias git='nocorrect noglob git'
 
 source "/Users/jon/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
+export GOPATH=$HOME/.go
+export PATH=$PATH:/usr/local/Cellar/go/1.2.1/libexec/bin:$GOPATH/bin
+
 if which peco &> /dev/null; then
   function peco_select_history() {
     local tac
