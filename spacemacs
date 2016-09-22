@@ -308,7 +308,6 @@ layers configuration. You are free to put any user code."
   (setq evil-ex-substitute-global t)
 
 
-  (setq x-select-enable-clipboard nil)
   ;; sane indentation
   (setq-default standard-indent 2)
   (setq-default indent-tabs-mode nil)
@@ -343,9 +342,6 @@ layers configuration. You are free to put any user code."
   ;; web-mode's js indentation is awful if you're not using semicolons
   (add-to-list 'auto-mode-alist '("\\.es6" . js2-mode))
 
-  (global-set-key (kbd "M-x") 'clipboard-kill-region)
-  (global-set-key (kbd "M-c") 'clipboard-kill-ring-save)
-  (global-set-key (kbd "M-v") 'clipboard-yank)
 
 
   ;; make it work in react-mode askwell as js modes
