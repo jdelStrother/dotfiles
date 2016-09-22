@@ -348,19 +348,21 @@ layers configuration. You are free to put any user code."
   (global-set-key (kbd "M-v") 'clipboard-yank)
 
 
-  ;; disable jshint since we prefer eslint checking
-  (require 'flycheck)
-  (setq-default flycheck-disabled-checkers
-                (append flycheck-disabled-checkers
-                        '(javascript-jshint
-                          scss
-                          scss-lint
-                          )))
+  ;; make it work in react-mode askwell as js modes
   (with-eval-after-load 'flycheck
+    ;; disable jshint since we prefer eslint checking
+    (setq-default flycheck-disabled-checkers
+                  (append flycheck-disabled-checkers
+                          '(javascript-jshint
+                            scss
+                            scss-lint
+                            )))
+
+
     (require 'flycheck-flow)
+    (custom-set-variables '(flycheck-javascript-flow-args (quote ("--respect-pragma"))))
+    (flycheck-add-mode 'javascript-flow 'react-mode)
     (flycheck-add-next-checker 'javascript-eslint 'javascript-flow)
-    ;; make it work in react-mode as well as js modes
-    (push 'react-mode (flycheck-checker-get 'javascript-flow 'modes))
   )
 
   ;; (setq-default flycheck-idle-change-delay 2.5)
