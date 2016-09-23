@@ -1,0 +1,15 @@
+#+TITLE: flow-type layer
+
+* Table of Contents                                        :TOC_4_gh:noexport:
+ - [[#description][Description]]
+ - [[#install][Install]]
+
+* Description
+This layer prints the flow-type of the object under the cursor to Emacs' echo area.
+Adapted from @almost's work at https://gist.github.com/almost/5547b7f3a79604d85ac6
+
+* Install
+To use this configuration layer, add it to your =~/.spacemacs=. You will need to
+add =flow-type= to the existing =dotspacemacs-configuration-layers= list in this
+file.
+
