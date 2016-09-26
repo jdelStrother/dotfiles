@@ -340,12 +340,8 @@ layers configuration. You are free to put any user code."
   )
   (add-hook 'web-mode-hook 'my-web-mode-hook)
 
-  ;; web-mode's js indentation is awful if you're not using semicolons
   (add-to-list 'auto-mode-alist '("\\.es6" . js2-mode))
 
-
-
-  ;; make it work in react-mode askwell as js modes
   (with-eval-after-load 'flycheck
     ;; disable jshint since we prefer eslint checking
     (setq-default flycheck-disabled-checkers
@@ -411,16 +407,17 @@ layers configuration. You are free to put any user code."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ahs-case-fold-search nil)
- '(ahs-default-range (quote ahs-range-whole-buffer))
- '(ahs-idle-interval 0.25)
+ '(ahs-case-fold-search nil t)
+ '(ahs-default-range (quote ahs-range-whole-buffer) t)
+ '(ahs-idle-interval 0.25 t)
  '(ahs-idle-timer 0 t)
- '(ahs-inhibit-face-list nil)
+ '(ahs-inhibit-face-list nil t)
  '(enh-ruby-add-encoding-comment-on-save nil)
  '(enh-ruby-deep-indent-paren nil)
  '(enh-ruby-hanging-paren-deep-indent-level 2)
+ '(flycheck-javascript-flow-args (quote ("--respect-pragma")))
  '(git-commit-summary-max-length 80)
- '(js2-mode-show-strict-warnings nil t)
+ '(js2-mode-show-strict-warnings nil)
  '(magit-revert-buffers nil t)
  '(org-agenda-files (quote ("~/notes.org")))
  '(org-babel-load-languages (quote ((emacs-lisp . t) (ruby . t) (js . t))))
@@ -428,12 +425,17 @@ layers configuration. You are free to put any user code."
    (quote
     (("t" "TODO" entry
       (file "~/notes.org")
-      "* TODO %?\n  %i\n  %a"))))
- '(ring-bell-function (quote ignore) t)
+      "* TODO %?
+  %i
+  %a"))))
+ '(package-selected-packages
+   (quote
+    (org log4e gntp skewer-mode gitignore-mode pos-tip tablist docker-tramp json-snatcher json-reformat web-completion-data inf-ruby packed auto-complete with-editor groovy-mode undo-tree ht hydra f js2-mode simple-httpd s dumb-jump which-key web-mode use-package spacemacs-theme spaceline rspec-mode persp-mode org-pomodoro org-plus-contrib org-download neotree markdown-toc markdown-mode js-doc highlight-numbers helm-ag expand-region evil-mc evil-matchit evil-magit company-tern tern anzu iedit smartparens flycheck go-mode company helm helm-core yasnippet multiple-cursors avy gh marshal pcache projectile magit magit-popup async yaml-mode ws-butler window-numbering web-beautify volatile-highlights vi-tilde-fringe uuidgen toc-org tagedit sql-indent smeargle slim-mode scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop robe restart-emacs rbenv rake rainbow-delimiters quelpa powerline popwin pkg-info parent-mode paradox orgit org-projectile org-present org-bullets open-junk-file nginx-mode move-text monokai-theme mmm-mode magit-gitflow magit-gh-pulls macrostep lorem-ipsum logito livid-mode linum-relative link-hint less-css-mode json-mode js2-refactor jade-mode info+ indent-guide ido-vertical-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-indentation help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet google-translate golden-ratio go-eldoc gnuplot github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gist gh-md flycheck-pos-tip flycheck-flow flx-ido fill-column-indicator fancy-battery eyebrowse exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu emmet-mode elisp-slime-nav dockerfile-mode docker diminish define-word dash-functional company-web company-statistics company-quickhelp company-go column-enforce-mode coffee-mode clean-aindent-mode chruby bundler bind-key auto-yasnippet auto-highlight-symbol auto-compile alert aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+ '(ring-bell-function (quote ignore))
  '(rspec-autosave-buffer t)
  '(rspec-use-opts-file-when-available nil)
  '(rspec-use-rake-when-possible nil)
- '(rspec-use-rvm t)
+ '(rspec-use-rvm t t)
  '(rspec-use-zeus-when-possible nil)
  '(ruby-insert-encoding-magic-comment nil))
 (custom-set-faces
