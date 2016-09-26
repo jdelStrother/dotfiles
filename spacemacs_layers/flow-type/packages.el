@@ -10,16 +10,18 @@
 ;;; License: GPLv3
 
 (defconst flow-type-packages
-  '(flycheck-flow))
+  '(flycheck
+    flycheck-flow))
+
 
 (defun flow-type/init-flycheck-flow()
-  (use-package flycheck-flow
-    :defer t
-    :config
-    (progn
-      ;; Don't run flow if there's no @flow pragma
-      (custom-set-variables '(flycheck-javascript-flow-args (quote ("--respect-pragma"))))
-      ;; Run flow in react-mode files
-      (flycheck-add-mode 'javascript-flow 'react-mode)
-      ;; Run flow after eslint
-      (flycheck-add-next-checker 'javascript-eslint 'javascript-flow))))
+  (with-eval-after-load 'flycheck
+    (use-package flycheck-flow
+      :config
+      (progn
+        ;; Don't run flow if there's no @flow pragma
+        (custom-set-variables '(flycheck-javascript-flow-args (quote ("--respect-pragma"))))
+        ;; Run flow in react-mode files
+        (flycheck-add-mode 'javascript-flow 'react-mode)
+        ;; Run flow after eslint
+        (flycheck-add-next-checker 'javascript-eslint 'javascript-flow)))))
