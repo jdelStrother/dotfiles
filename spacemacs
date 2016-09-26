@@ -296,6 +296,8 @@ user code here.  The exception is org related code, which should be placed in
 `dotspacemacs/user-config'."
   ;; https://github.com/syl20bnr/spacemacs/issues/3920
   (setq exec-path-from-shell-arguments '("-l"))
+
+  (setq default-frame-alist '((height . 50) (width . 160)))
   )
 
 (defun dotspacemacs/user-config ()
