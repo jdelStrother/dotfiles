@@ -45,6 +45,7 @@ values."
      ;; better-defaults
      docker
      emacs-lisp
+     flow-type
      (git :variables
           git-use-magit-next t
           )
@@ -69,7 +70,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(haml-mode scss-mode rvm flycheck-flow)
+   dotspacemacs-additional-packages '(haml-mode scss-mode rvm)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be install and loaded.
@@ -325,8 +326,6 @@ layers configuration. You are free to put any user code."
   (load-file ".emacs.d/sgml-mode-patch.el")
   (require 'sgml-mode)
 
-  (load-file ".emacs.d/flow-types.el")
-
   ;; fix copy-paste? https://github.com/syl20bnr/spacemacs/issues/2032
   (fset 'evil-visual-update-x-selection 'ignore)
 
@@ -353,12 +352,6 @@ layers configuration. You are free to put any user code."
                             scss
                             scss-lint
                             )))
-
-
-    (require 'flycheck-flow)
-    (custom-set-variables '(flycheck-javascript-flow-args (quote ("--respect-pragma"))))
-    (flycheck-add-mode 'javascript-flow 'react-mode)
-    (flycheck-add-next-checker 'javascript-eslint 'javascript-flow)
   )
 
   ;; (setq-default flycheck-idle-change-delay 2.5)

@@ -9,54 +9,17 @@
 ;;
 ;;; License: GPLv3
 
-;;; Commentary:
-
-;; See the Spacemacs documentation and FAQs for instructions on how to implement
-;; a new layer:
-;;
-;;   SPC h SPC layers RET
-;;
-;;
-;; Briefly, each package to be installed or configured by this layer should be
-;; added to `flow-type-packages'. Then, for each package PACKAGE:
-;;
-;; - If PACKAGE is not referenced by any other Spacemacs layer, define a
-;;   function `flow-type/init-PACKAGE' to load and initialize the package.
-
-;; - Otherwise, PACKAGE is already referenced by another Spacemacs layer, so
-;;   define the functions `flow-type/pre-init-PACKAGE' and/or
-;;   `flow-type/post-init-PACKAGE' to customize the package as it is loaded.
-
-;;; Code:
-
 (defconst flow-type-packages
-  '()
-  "The list of Lisp packages required by the flow-type layer.
+  '(flycheck-flow))
 
-Each entry is either:
-
-1. A symbol, which is interpreted as a package to be installed, or
-
-2. A list of the form (PACKAGE KEYS...), where PACKAGE is the
-    name of the package to be installed or loaded, and KEYS are
-    any number of keyword-value-pairs.
-
-    The following keys are accepted:
-
-    - :excluded (t or nil): Prevent the package from being loaded
-      if value is non-nil
-
-    - :location: Specify a custom installation location.
-      The following values are legal:
-
-      - The symbol `elpa' (default) means PACKAGE will be
-        installed using the Emacs package manager.
-
-      - The symbol `local' directs Spacemacs to load the file at
-        `./local/PACKAGE/PACKAGE.el'
-
-      - A list beginning with the symbol `recipe' is a melpa
-        recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
-
-
-;;; packages.el ends here
+(defun flow-type/init-flycheck-flow()
+  (use-package flycheck-flow
+    :defer t
+    :config
+    (progn
+      ;; Don't run flow if there's no @flow pragma
+      (custom-set-variables '(flycheck-javascript-flow-args (quote ("--respect-pragma"))))
+      ;; Run flow in react-mode files
+      (flycheck-add-mode 'javascript-flow 'react-mode)
+      ;; Run flow after eslint
+      (flycheck-add-next-checker 'javascript-eslint 'javascript-flow))))
