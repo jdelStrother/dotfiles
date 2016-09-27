@@ -16,10 +16,10 @@
     react-mode))
 
 (defun flow-type/post-init-js2-mode()
-  (flow-type/setup-timer))
+  (push 'flow-type/init-mode js2-mode-hook))
 
 (defun flow-type/post-init-react-mode()
-  (flow-type/setup-timer))
+  (push 'flow-type/init-mode react-mode-hook))
 
 (defun flow-type/init-flycheck-flow()
   (with-eval-after-load 'flycheck

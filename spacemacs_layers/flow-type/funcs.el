@@ -9,28 +9,12 @@
           (if (> (length reasons) 0) (alist-get 'desc (aref reasons 0))))
       type)))
 
-(defun flow-type/show-type-at-cursor ()
-  (interactive)
+(defun flow-type/type-at-cursor ()
   (let* ((info (json-read-from-string
                 (flow-type/call-process-on-buffer-to-string
-                 (format "flow type-at-pos --json  %d %d" (line-number-at-pos) (+ (current-column) 1)))))
-         (type (flow-type/type-description info)))
-    (if type (spacemacs/echo "%s" type))))
+                (format "flow type-at-pos --json  %d %d" (line-number-at-pos) (+ (current-column) 1)))))
+        (type (flow-type/type-description info)))
+    type))
 
-(defun flow-type/pragma-exists ()
-  (save-excursion
-    (save-match-data
-      (goto-char (point-min))
-      (not (null (search-forward "@flow" 200 t))))))
-
-(defvar flow-type-global-timer nil
-  "Timer to trigger flow-typing.")
-
-(defun flow-type/idle-hook ()
-  (when (flow-type/pragma-exists)
-    (flow-type/show-type-at-cursor)))
-
-(defun flow-type/setup-timer ()
-  (unless flow-type-global-timer
-    (setq flow-type-global-timer
-          (run-with-idle-timer 0.5 :repeat 'flow-type/idle-hook))))
+(defun flow-type/init-mode ()
+  (set (make-local-variable 'eldoc-documentation-function) 'flow-type/type-at-cursor))

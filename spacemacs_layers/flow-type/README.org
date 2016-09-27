@@ -2,7 +2,7 @@
 
 * Description
 This layer adds some [[https://flowtype.org/][flow]] related functionality to Emacs.
- - It prints the flow-type of the object under the cursor to Emacs' echo area.  (Adapted from @almost's work at https://gist.github.com/almost/5547b7f3a79604d85ac6)
+ - It shows the flow-type of the object under the cursor using Eldoc
  - It adds flow checking to flycheck (based on the flycheck-flow package)
 
 * Install
