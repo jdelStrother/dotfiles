@@ -10,16 +10,36 @@
 ;;; License: GPLv3
 
 (defconst flow-type-packages
-  '(flycheck
-    flycheck-flow
+  '(company
+    (company-flow :toggle (configuration-layer/package-usedp 'company))
+    (flycheck-flow :toggle (configuration-layer/package-usedp 'flycheck))
     js2-mode
-    react-mode))
+    web-mode))
 
 (defun flow-type/post-init-js2-mode()
   (push 'flow-type/init-mode js2-mode-hook))
 
-(defun flow-type/post-init-react-mode()
+(defun flow-type/post-init-web-mode()
   (push 'flow-type/init-mode react-mode-hook))
+
+(defun flow-type/post-init-company()
+  (spacemacs|add-company-hook js2-mode)
+  (when (configuration-layer/layer-usedp 'react)
+    (spacemacs|add-company-hook react-mode)))
+
+(defun flow-type/init-company-flow ()
+  (use-package company-flow
+    :defer t
+    :init
+    (progn
+       (push 'company-flow company-backends-js2-mode)
+       (when (configuration-layer/package-usedp 'web-mode)
+         (push 'company-flow company-backends-react-mode))
+    )
+    :config
+    (when (configuration-layer/package-usedp 'web-mode)
+      (push 'react-mode company-flow-modes)))
+  )
 
 (defun flow-type/init-flycheck-flow()
   (with-eval-after-load 'flycheck
@@ -31,4 +51,5 @@
         ;; Run flow in react-mode files
         (flycheck-add-mode 'javascript-flow 'react-mode)
         ;; Run flow after eslint
-        (flycheck-add-next-checker 'javascript-eslint 'javascript-flow)))))
+        (flycheck-add-next-checker 'javascript-eslint 'javascript-flow))
+      )))
