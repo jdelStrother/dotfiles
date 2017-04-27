@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-io_out = `ioreg -c AppleSmartBattery -w0 | grep -o '"[^"]*" = [^ ]*' | sed -e 's/= //g' -e 's/"//g'`
+io_out = `/usr/sbin/ioreg -c AppleSmartBattery -w0 | grep -o '"[^"]*" = [^ ]*' | sed -e 's/= //g' -e 's/"//g'`
 io = Hash[*io_out.split]
 exit 1 unless io['CurrentCapacity'] && io['MaxCapacity']
 
