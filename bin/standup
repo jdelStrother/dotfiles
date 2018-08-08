@@ -1,12 +1,45 @@
-#!/bin/bash -e
+#!/usr/bin/env ruby
+require "open3"
+require "date"
+require "pathname"
 
-DIRS="/Users/jon/Developer/web /Users/jon/Developer/terraform /Users/jon/Developer/imgn /Users/jon/Developer/jenkins-docker /Users/jon/Developer/ansible"
-STANDUP_ARGS=("$@")
+today = Date.today
+previous_day = if today.cwday == 1
+                 today - (ARGV[0] || 3).to_i
+               else
+                 today - (ARGV[0] || 1).to_i
+               end
+puts "Since #{previous_day}"
 
-for dir in $DIRS; do
-  cd "$dir"
-  work=$(git standup "${STANDUP_ARGS[@]}")
-  if [[ ${work} ]]; then
-    printf "==== %s =====\\n%s\\n" "$dir" "$work"
-  fi
-done
+dirs=%w[/Users/jon/Developer/web /Users/jon/Developer/terraform /Users/jon/Developer/imgn /Users/jon/Developer/jenkins-docker /Users/jon/Developer/ansible]
+File.foreach(File.expand_path("~/.local/share/z/data")) do |line|
+  name, score, time = line.split("|")
+  time = Time.at(time.to_i)
+  if time > previous_day.to_time
+    dirs << name
+  end
+end
+dirs = dirs.sort.uniq
+
+dirs_with_git_history = {}
+dirs.each do |dir|
+  next unless File.exist?("#{dir}/.git")
+  work = nil
+  Dir.chdir(dir) do
+    work = Open3.capture2("git", "lg", "--author=Jon", "--since={#{previous_day}}", "--all")[0].strip
+  end
+  unless work.empty?
+    dirs_with_git_history[dir] = work
+  end
+end
+
+dirs_with_git_history.each do |dir, work|
+  puts "==== #{dir} =====\n#{work}\n\n"
+end
+# ignore subdirectories of the git directories we've already reported
+project_paths = dirs_with_git_history.keys.map{|d| File.join(d, "**")}
+other_visited_dirs = (dirs - dirs_with_git_history.keys).select{|dir| project_paths.any?{|pp| !Pathname.new(dir).fnmatch?(pp) }}
+unless other_visited_dirs.empty?
+  puts "==== Other visited directories: ====="
+  puts other_visited_dirs
+end
