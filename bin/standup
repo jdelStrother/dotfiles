@@ -1,0 +1,12 @@
+#!/bin/bash -e
+
+DIRS="/Users/jon/Developer/web /Users/jon/Developer/terraform /Users/jon/Developer/imgn /Users/jon/Developer/jenkins-docker /Users/jon/Developer/ansible"
+STANDUP_ARGS=("$@")
+
+for dir in $DIRS; do
+  cd "$dir"
+  work=$(git standup "${STANDUP_ARGS[@]}")
+  if [[ ${work} ]]; then
+    printf "==== %s =====\\n%s\\n" "$dir" "$work"
+  fi
+done

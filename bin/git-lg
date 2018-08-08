@@ -6,7 +6,7 @@ args=$@
 if [[ "$args" == *"--all"* ]]
 then
   # don't show notes with the --all flag
-  if git rev-parse --verify -q refs/notes/commits
+  if git rev-parse --verify -q refs/notes/commits > /dev/null
   then
     args="$args ^refs/notes/commits"
   fi
