@@ -11,7 +11,9 @@ previous_day = if today.cwday == 1
                end
 puts "Since #{previous_day}"
 
-dirs=%w[/Users/jon/Developer/web /Users/jon/Developer/terraform /Users/jon/Developer/imgn /Users/jon/Developer/jenkins-docker /Users/jon/Developer/ansible]
+# Common directories always get checked even if they're not in the recent history, just in case we edited them via emacs or something
+COMMON_DIRECTORIES = %w[/Users/jon/Developer/web /Users/jon/Developer/terraform /Users/jon/Developer/imgn /Users/jon/Developer/jenkins-docker /Users/jon/Developer/ansible]
+dirs=[]
 File.foreach(File.expand_path("~/.local/share/z/data")) do |line|
   name, score, time = line.split("|")
   time = Time.at(time.to_i)
@@ -22,7 +24,7 @@ end
 dirs = dirs.sort.uniq
 
 dirs_with_git_history = {}
-dirs.each do |dir|
+(COMMON_DIRECTORIES + dirs).uniq.each do |dir|
   next unless File.exist?("#{dir}/.git")
   work = nil
   Dir.chdir(dir) do
@@ -37,8 +39,8 @@ dirs_with_git_history.each do |dir, work|
   puts "==== #{dir} =====\n#{work}\n\n"
 end
 # ignore subdirectories of the git directories we've already reported
-project_paths = dirs_with_git_history.keys.map{|d| File.join(d, "**")}
-other_visited_dirs = (dirs - dirs_with_git_history.keys).select{|dir| project_paths.any?{|pp| !Pathname.new(dir).fnmatch?(pp) }}
+project_paths = dirs_with_git_history.keys.map { |d| File.join(d, "**") }
+other_visited_dirs = (dirs - dirs_with_git_history.keys).select { |dir| project_paths.any? { |pp| !Pathname.new(dir).fnmatch?(pp) } }
 unless other_visited_dirs.empty?
   puts "==== Other visited directories: ====="
   puts other_visited_dirs
