@@ -14,3 +14,5 @@ TAGS
 tags-emacs.*
 .tern-port
 .projectile
+.#*
+*.agignore

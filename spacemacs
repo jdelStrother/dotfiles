@@ -50,7 +50,7 @@ values."
      (git :variables
           git-use-magit-next t
           )
-     github
+     (github :variables magithub-cache t)
      go
      helm
      html
