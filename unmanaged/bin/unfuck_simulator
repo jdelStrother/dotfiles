@@ -1,0 +1,7 @@
+jobs=`launchctl list | grep -E -i "iPhoneSimulator|UIKitApplication" | awk '{print $3}'` 
+
+for job in $jobs 
+do 
+    echo "launchctl remove $job" 
+    launchctl remove "$job" 
+done

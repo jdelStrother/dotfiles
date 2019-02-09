@@ -1,0 +1,97 @@
+#!/bin/bash
+
+STUD_DIR="$HOME/.stud"
+CA_DIR="$STUD_DIR/ca"
+
+if [ ! -d "$STUD_DIR" ]; then
+  # Make folder for stud config and keys
+  mkdir -p $CA_DIR/newcerts
+  stud --default-config                                                \
+  | sed "s%frontend = .*%frontend = \"[*]:443\"%"                      \
+  | sed "s%backend = .*%backend = \"[127.0.0.1]:80\"%"                 \
+  | sed "s%user = .*%user = \"`id -un`\"%"                             \
+  | sed "s%group = .*%group = \"`id -gn`\"%"                           \
+  | sed "s%pem-file = .*%pem-file= \"$STUD_DIR/keypair.pem\"%"         \
+  | sed "s%# ssl = .*%ssl= on%"                                        \
+  > $STUD_DIR/config
+
+  echo "Setup openssl config"
+  config_start=$(grep --text --line-number '^OPENSSL_CONFIG:$' $0 | cut -d ':' -f 1)
+  tail -n +$((config_start + 1)) $0 | sed "s%\$CA_DIR%$CA_DIR%" > $CA_DIR/openssl.cnf
+  touch $CA_DIR/index.txt
+  echo "01" > $CA_DIR/serial
+
+  echo "Creating ssl keypair for signing *.dev certificate."
+  openssl req -newkey rsa:2048 -batch -x509 -nodes -subj "/C=US/O=Developer Certificate/CN=*.dev Domain CA" -keyout $CA_DIR/key.pem -out $CA_DIR/cert.pem -days 9999 &> /dev/null
+  echo "Adding certificate to login keychain as trusted."
+  security add-trusted-cert -d -r trustRoot -k $HOME/Library/Keychains/login.keychain $CA_DIR/cert.pem
+  echo "================================================================================"
+  echo -e "To use the certificate without a warning in Firefox you must add the\n\"$CA_DIR/cert.pem\" certificate to your Firefox root certificates."
+  echo "================================================================================"
+fi
+
+
+SAVE_IFS=$IFS
+IFS=","
+for domain in $HOME/.pow/*; do
+  domain="${domain##*/}.dev"
+  domains=("${domains[@]}""DNS:$domain,")
+  domains=("${domains[@]}""DNS:*.$domain,")
+done
+export SAN="${domains[@]%,}"
+unset IFS
+
+if [ "$(cat $STUD_DIR/domains)" != "$SAN" ]; then
+  config_start=$(grep --text --line-number '^OPENSSL_CONFIG:$' $0 | cut -d ':' -f 1)
+  tail -n +$((config_start + 1)) $0 | sed "s%\$CA_DIR%$CA_DIR%" > $CA_DIR/openssl.cnf
+
+  echo "Generating new *.dev certificate"
+  openssl req -newkey rsa:2048 -batch -nodes -subj "/C=US/O=Developer Certificate/CN=*.dev" -keyout $STUD_DIR/key.pem -out $STUD_DIR/csr.pem -days 9999 &> /dev/null
+  echo "Signing *.dev certificate"
+  openssl ca -config $CA_DIR/openssl.cnf -policy policy_anything -batch -days 9999 -out $STUD_DIR/cert.pem -infiles $STUD_DIR/csr.pem &> /dev/null
+  cat $STUD_DIR/key.pem $STUD_DIR/cert.pem > $STUD_DIR/keypair.pem
+  echo $SAN > $STUD_DIR/domains
+fi
+
+echo "Starting Stud (using sudo to open ports < 1024)"
+exec sudo stud --config $STUD_DIR/config
+exit 0
+
+OPENSSL_CONFIG:
+[ ca ]
+default_ca      = CA_default
+
+[ CA_default ]
+dir              = $CA_DIR
+certs            = $dir/certs
+crl_dir          = $dir/crl
+database         = $dir/index.txt
+unique_subject  = no
+new_certs_dir    = $dir/newcerts
+certificate      = $dir/cert.pem
+serial           = $dir/serial
+crlnumber        = $dir/crlnumber
+crl              = $dir/crl.pem
+private_key      = $dir/key.pem
+RANDFILE         = $dir/.rand
+default_days     = 365     # how long to certify for
+default_crl_days = 30      # how long before next CRL
+default_md       = sha1      # which md to use.
+x509_extensions  = usr_cert
+
+[ policy_anything ]
+countryName            = optional
+stateOrProvinceName    = optional
+localityName           = optional
+organizationName       = optional
+organizationalUnitName = optional
+commonName             = supplied
+emailAddress           = optional
+
+[ usr_cert ]
+basicConstraints       = CA:FALSE
+nsCertType             = server
+nsComment              = "OpenSSL Generated Certificate"
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid,issuer
+subjectAltName         = ${ENV::SAN}

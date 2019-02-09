@@ -1,0 +1,20 @@
+#!/bin/bash
+
+target="$(git rev-parse $1)"
+rebase_target=$target~1
+
+if ! git merge-base --is-ancestor $rebase_target HEAD && [[ $(git rev-list --count --merges $rebase_target..HEAD) = 0 ]]; then
+  echo "can't autofix past a merge commit"
+  exit 1
+fi
+
+if ! git commit --fixup=$target ; then
+  echo "commit fail, aborting"
+  exit 1
+fi
+
+dirty="$(git diff --name-only --exit-code HEAD)"
+( test -z "$dirty" || git stash ) &&
+GIT_EDITOR=cat git rebase --quiet --interactive --autosquash $rebase_target &&
+( test -z "$dirty" || git stash pop )
+

@@ -1,0 +1,95 @@
+#!/bin/bash
+#
+# Version  1.2
+#  A simple wrapper to make accessing iPhone projects easier.
+##
+#  Created by Theodore Campbell on 2009-06-11.
+#  Copyright (c) 2009 Theodore Campbell. All rights reserved.
+##
+# Based on opensim by Craig Hockenberry
+# http://furbo.org/2009/03/03/open-sesame/
+###
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+###
+
+function show_usage {
+    echo "usage: ${0} [ <app_name> | updateLinks <link_dir> [ Preferences | Documents | <cmd> <file> ]"
+    echo "  ex: ${0} updateLinks ~/iPhoneSimulatorApps"
+    echo "      Creats symlinks for all installed apps in ~/iPhoneSimulatorApps"
+    echo "      Note: <link_dir> must already exist."
+    echo "  ex: ${0} SomeApp Preferences"
+    echo "      Opens the Preferences folder"
+    echo "  ex: ${0} SomeApp Documents"
+    echo "      Opens the Documents folder"
+    echo "  ex: ${0} SomeApp sqlite3 some_sqlite_database.sqlite"
+    echo "      Opens runs sqlite3 with the full path to some_sqlite_database.sqlite as its first arguement"
+}
+
+# If no arguments are specified show the usage message.
+if [ -z "${1}" ]; then
+    show_usage
+    exit 1
+else
+    # If the first argument is updateLinks
+    if [ "${1}" = "updateLinks" ]; then
+        if [ -z "${2}" ] || [ ! -d "${2}" ]; then
+            echo
+            echo "Error: '${2}' is not a directory"
+            echo
+            show_usage
+            exit 1
+        fi
+
+        # Remove all existing links.
+        find ${2} -type l -exec unlink {} \;
+
+        # Reset the Internal Field Separator to only a newline caharacter
+        oIFS=$IFS
+        IFS=$'\n'
+        # Loop through the iPhone Simulator Applications and create symlinks.
+        for file in ~/Library/Application\ Support/iPhone\ Simulator/*/Applications/*/*.app
+        do
+            file_name=`echo ${file} | awk -F/ {'print $NF'}`
+            echo "Creating link for ${file_name}"
+            ln -s "${file}" "${2}"
+        done
+    # First argument was not updateLinks
+    else
+        app=`ls -1td ~/Library/Application\ Support/iPhone\ Simulator/*/Applications/*/${1}.app | sort | tail -n1`
+        dir=`dirname "$app"`
+
+        # If just an <app_name> was specified open the App's main directory.
+        if [ -z "${2}" ]; then
+            open "${dir}"
+            exit 
+        fi
+
+        # If <app_name> Preferences was specified open the application
+        # Preferences directory.
+        if [ "${2}" = "Preferences" ]; then
+            open "${dir}/Library/Preferences"
+
+        # If <app_name> Documents was specified open the application Preferences
+        # directory.
+        elif [ "${2}" = "Documents" ]; then
+            open "${dir}/Documents"
+
+        # Everything else is a command, look in the application's root directory
+        # for the regex specified in ${3} and spawn the program specified in
+        # ${2} with the full path of the found filename as its first argument
+        else
+            find -E "${dir}" -regex '.*'${3} -exec ${2} {} \;
+        fi
+    fi
+fi

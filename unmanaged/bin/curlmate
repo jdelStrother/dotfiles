@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+scheme, url, line, column = ARGV[0].split(":")
+exec("curl '#{scheme}:#{url}' | mate -e -l#{line}:#{column}")

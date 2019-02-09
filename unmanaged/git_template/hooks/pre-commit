@@ -1,0 +1,3 @@
+#!/bin/bash
+set -e
+${BASH_SOURCE%/*}/spec_focus

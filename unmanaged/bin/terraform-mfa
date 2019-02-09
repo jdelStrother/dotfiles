@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+# From https://github.com/kubernetes/AWS/issues/226#issuecomment-278879348
+# and https://github.com/kubernetes/AWS/blob/master/docs/mfa.md
+
+set -euo pipefail
+
+main() {
+	local role_arn="${AWS_MFA_ROLE_ARN:-}"
+	local serial_number="${AWS_MFA_ARN:-}"
+	local token_code
+
+	if [ -z "${role_arn}" ]; then
+		echo "Set the AWS_MFA_ROLE_ARN environment variable" 1>&2
+		return 1
+	fi
+
+	if [ -z "${serial_number}" ]; then
+		echo "Set the AWS_MFA_ARN environment variable" 1>&2
+		return 1
+	fi
+
+	echo -n "Enter MFA Code: "
+	read -s token_code
+
+	# NOTE: The keys should not be exported as AWS_ACCESS_KEY_ID
+	# or AWS_SECRET_ACCESS_KEY_ID. This will not work. They
+	# should be exported as other names which can be used below. This prevents
+	# them from incorrectly being picked up from libraries or commands.
+	temporary_credentials="$(aws \
+		sts assume-role \
+		--role-arn="${role_arn}" \
+		--serial-number="${serial_number}" \
+		--token-code="${token_code}" \
+		--role-session-name="terraform-access"
+	)"
+
+	unset AWS_PROFILE
+
+	export "AWS_ACCESS_KEY_ID=$(echo "${temporary_credentials}" | jq -re '.Credentials.AccessKeyId')"
+	export "AWS_SECRET_ACCESS_KEY=$(echo "${temporary_credentials}" | jq -re '.Credentials.SecretAccessKey')"
+	export "AWS_SESSION_TOKEN=$(echo "${temporary_credentials}" | jq -re '.Credentials.SessionToken')"
+
+	exec terraform "$@"
+}
+
+
+main "$@"

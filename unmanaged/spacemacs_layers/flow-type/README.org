@@ -1,0 +1,13 @@
+#+TITLE: flow-type layer
+
+* Description
+This layer adds some [[https://flowtype.org/][flow]] related functionality to Emacs:
+ - Show the flow-type of the object under the cursor using Eldoc
+ - Add flow checking to flycheck (based on the flycheck-flow package)
+ - company-mode completion using company-flow
+
+* Install
+To use this configuration layer, add it to your =~/.spacemacs=. You will need to
+add =flow-type= to the existing =dotspacemacs-configuration-layers= list in this
+file.
+

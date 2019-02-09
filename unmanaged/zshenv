@@ -1,0 +1,38 @@
+export RI="--no-pager --format ansi --width 100"
+export LC_CTYPE=en_US.UTF-8 # This is the 21st century, assume UTF8
+export CLICOLOR=1
+# use yellow for directories
+export LSCOLORS=Dxfxcxdxbxegedabagacad
+
+if [[ -z $TMUX ]]; then # tmux's reattach-to-user-namespace command causes this file to get sourced twice, which makes rvm complain about path ordering
+  typeset -U path
+  path=(~/bin /usr/local/bin $path)
+  unset manpath
+  export KEYSTORE=/Users/jon/Documents/Certificates/javaKeystore.ImportKey
+
+  export NODE_PATH=/usr/local/lib/node_modules:$NODE_PATH
+
+  # shit for AWS
+  PATH=$HOME/Developer/ec2-api-tools-1.6.7.3/bin:$PATH
+  EC2_HOME=$HOME/Developer/ec2-api-tools-1.6.7.3
+  #AWS_ACCESS_KEY=AKIAI67TXILXICUT6LMQ
+  #AWS_SECRET_KEY=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
+  JAVA_HOME=/Library/Java/Home
+fi
+
+# kill -0 checks to see if the pid exists
+# if test -f $HOME/.gpg-agent-info && kill -0 `cut -d: -f 2 $HOME/.gpg-agent-info` 2>/dev/null; then
+#     GPG_AGENT_INFO=`cat $HOME/.gpg-agent-info | cut -c 16-`
+# else
+# # No, gpg-agent not available; start gpg-agent
+#     eval `gpg-agent --daemon --no-grab --write-env-file $HOME/.gpg-agent-info`
+# fi
+# export GPG_TTY=`tty`
+# export GPG_AGENT_INFO
+
+# Save our path to avoid paths_helper mangling it
+# http://openradar.appspot.com/14630658
+# See zshrc
+# FINALPATH=$PATH
+
+# export AWS_PROFILE=power

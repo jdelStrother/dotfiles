@@ -1,2 +1,0 @@
-#!/bin/bash
-${BASH_SOURCE%/*}/ctags >/dev/null 2>&1 &

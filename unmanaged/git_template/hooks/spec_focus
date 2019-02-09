@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# :focus=>true shouldn't occur anywhere but spec_helper.rb
+output=`git grep --cached -E 'focus.{0,4}true|:focus do' -- spec | grep -v spec_helper.rb`
+if [ $? -eq 0 ]; then
+  echo "Found :focus=>true in specs:\n" $output
+  exit 1
+fi

@@ -1,0 +1,306 @@
+require 'rubygems'
+require 'irb/ext/save-history'
+#History configuration
+IRB.conf[:SAVE_HISTORY] = 1000
+IRB.conf[:HISTORY_FILE] = "#{ENV['HOME']}/.irb-save-history"
+
+begin # ANSI codes
+  ANSI_BLACK    = "\033[0;30m"
+  ANSI_GRAY     = "\033[1;30m"
+  ANSI_LGRAY    = "\033[0;37m"
+  ANSI_WHITE    = "\033[1;37m"
+  ANSI_RED      = "\033[0;31m"
+  ANSI_LRED     = "\033[1;31m"
+  ANSI_GREEN    = "\033[0;32m"
+  ANSI_LGREEN   = "\033[1;32m"
+  ANSI_BROWN    = "\033[0;33m"
+  ANSI_YELLOW   = "\033[1;33m"
+  ANSI_BLUE     = "\033[0;34m"
+  ANSI_LBLUE    = "\033[1;34m"
+  ANSI_PURPLE   = "\033[0;35m"
+  ANSI_LPURPLE  = "\033[1;35m"
+  ANSI_CYAN     = "\033[0;36m"
+  ANSI_LCYAN    = "\033[1;36m"
+
+  ANSI_BACKBLACK  = "\033[40m"
+  ANSI_BACKRED    = "\033[41m"
+  ANSI_BACKGREEN  = "\033[42m"
+  ANSI_BACKYELLOW = "\033[43m"
+  ANSI_BACKBLUE   = "\033[44m"
+  ANSI_BACKPURPLE = "\033[45m"
+  ANSI_BACKCYAN   = "\033[46m"
+  ANSI_BACKGRAY   = "\033[47m"
+
+  ANSI_RESET      = "\033[0m"
+  ANSI_BOLD       = "\033[1m"
+  ANSI_UNDERSCORE = "\033[4m"
+  ANSI_BLINK      = "\033[5m"
+  ANSI_REVERSE    = "\033[7m"
+  ANSI_CONCEALED  = "\033[8m"
+
+  XTERM_SET_TITLE   = "\033]2;"
+  XTERM_END         = "\007"
+  ITERM_SET_TAB     = "\033]1;"
+  ITERM_END         = "\007"
+  SCREEN_SET_STATUS = "\033]0;"
+  SCREEN_END        = "\007"
+end
+
+begin # Custom Prompt
+
+  if IRB and IRB.conf[:PROMPT]
+    IRB.conf[:PROMPT][:SD] = {
+      :PROMPT_I => ">> ", # normal prompt
+      :PROMPT_S => "%l> ",  # string continuation
+      :PROMPT_C => " > ",   # code continuation, first line
+      :PROMPT_N => " > ",   # code continuation, remaining lines
+      :RETURN   => "#{ANSI_BOLD}# => %s  #{ANSI_RESET}\n",  # return value
+      :AUTO_INDENT => true
+    }
+    IRB.conf[:PROMPT_MODE] = :SD
+  end
+end
+
+if ENV.include?('RAILS_ENV')
+  script_console_running = IRB.conf[:LOAD_MODULES] && IRB.conf[:LOAD_MODULES].include?('console_with_helpers')
+  require 'logger'
+  Object.const_set(:RAILS_DEFAULT_LOGGER, Logger.new(STDOUT))
+end
+
+
+class Object
+  def pm(*options) # Print methods
+      methods = self.methods
+      methods -= Object.methods unless options.include? :more
+      filter = options.select {|opt| opt.kind_of? Regexp}.first
+      methods = methods.select {|name| name =~ filter} if filter
+
+      data = methods.sort.collect do |name|
+        method = self.method(name)
+        if method.arity == 0
+          args = "()"
+        elsif method.arity > 0
+          n = method.arity
+          args = "(#{(1..n).collect {|i| "arg#{i}"}.join(", ")})"
+        elsif method.arity < 0
+          n = -method.arity
+          args = "(#{(1..n).collect {|i| "arg#{i}"}.join(", ")}, ...)"
+        end
+        klass = $1 if method.inspect =~ /Method: (.*?)#/
+        [name, args, klass]
+      end
+      max_name = data.collect {|item| item[0].size}.max
+      max_args = data.collect {|item| item[1].size}.max
+      data.each do |item| 
+        print " #{ANSI_BOLD}#{item[0].rjust(max_name)}#{ANSI_RESET}"
+        print "#{ANSI_GRAY}#{item[1].ljust(max_args)}#{ANSI_RESET}"
+        print "   #{ANSI_LGRAY}#{item[2]}#{ANSI_RESET}\n"
+      end
+      data.size
+    end
+  end
+
+
+
+
+
+def ri(*names)
+  puts `ri #{names.map {|name| name.to_s}.join(" ")}`
+end
+
+class Object
+  def dclone
+    clone
+  end
+end
+class Array
+  def dclone
+    klone = self.clone
+    klone.clear
+    self.each{|v| klone << v.dclone}
+    klone
+  end
+end
+
+class Object
+  def what?(*args, &block)
+    MethodFinder.new(self, *args, &block)
+  end
+
+  def _clone_
+    self.clone
+  rescue
+    self
+  end
+end
+
+class MethodFinder
+  @@black_list = %w[ what? _clone_ exec exit exit! fork sleep syscall system ]
+
+  def initialize(obj, *args, &block)
+    @obj = obj
+    @args = args
+    @block = block
+  end
+
+  def self.write(*args)
+  end
+
+  # Find all methods on obj which, when called with *args, &block return result
+  def self.find(obj, result, *args, &block)
+    stdout, stderr = $stdout, $stderr
+    $stdout = $stderr = self
+    methods = obj.methods.select do |name|
+      arity = obj.method(name).arity
+      local_args = args.dclone
+      !@@black_list.include?(name)                                       and
+      (arity == args.size) || (arity < 0 && (arity+1).abs <= args.size)  and
+      begin obj._clone_.send(name, *local_args, &block) == result; rescue Object; end
+    end
+    $stdout, $stderr = stdout, stderr
+    methods
+  end
+
+  # As find method but also Pretty-prints the results
+  def self.show(obj, result, *args, &block)
+    args_string = args.empty? ? '' : "(" + args.map {|a| a.inspect}.join(", ") + ")"
+    block_string = block.nil? ? '' : " {...}"
+    find(obj, result, *args, &block).each do |name|
+      puts "#{obj.inspect}.#{name}#{args_string}#{block_string} == #{result.inspect}"
+    end
+  end
+
+  def ==(result)
+    # MethodFinder.find(@obj, result, *@args, &@block)
+    MethodFinder.show(@obj, result, *@args, &@block)
+  end
+
+end
+
+
+
+#  http://gist.github.com/16885
+
+#  $ ./script/console 
+#  Loading development environment (Rails 2.1.0)
+#  >>
+#  >> User.whatis :create!
+#  File: /opt/local/lib/ruby/gems/1.8/gems/activerecord-2.1.0/lib/active_record/validations.rb:876
+#  872:             end  
+#  873:         
+#  874:             # Creates an object just like Base.create but calls save! instead of save  
+#  875:             # so an exception is raised if the record is invalid.  
+#  876: >>>>        def create!(attributes = nil, &block)    <<<<<<<
+#  877:               if attributes.is_a?(Array)  
+#  878:                 attributes.collect { |attr| create!(attr, &block) }  
+#  879:               else  
+#  880:                 object = new(attributes)  
+#  881:                 yield(object) if block_given?  
+#  882:                 object.save!  
+#  883:                 object  
+#  884:               end  
+#  885:             end  
+#  886:         
+#  => #<Method: Class(ActiveRecord::Validations::ClassMethods)#create!>
+#  >> _.tmate
+#  => #<Method: Class(ActiveRecord::Validations::ClassMethods)#create!>
+#  >> 
+#
+#
+#  Examples:
+#  ActionView::Base.new.method(:link_to).whatis
+#  ActionView::Base.new.method(:link_to).tmate       # opens TextMate or E TextEditor 
+#  ActionView::Base.new.whatis :link_to              # instance method of AV::Base
+#  ActionView::Base.whatis :link_sanitizer           # class method of AV::Base
+#  ActionView::Base.whatis :link_to                  # instance method of AV::Base
+#  ActionView::Base.whatis :calendar_date_select     # instance method of AV::Base
+#  whatis ActionView::Base, :link_to                 # instance method of AV::Base
+#  tmate :it                                         # opens source code of methodphitmane
+#  
+#  
+
+module Whatis
+  def self.open_textmate(file, line=1)
+    return unless File.exist?(file)
+    if /mswin32/ =~ RUBY_PLATFORM
+      `start txmt://open?url=file://#{file}^&line=#{line}`
+    else
+      `open 'txmt://open?url=file://#{file}&line=#{line}'`
+    end
+    return
+  end
+  
+  def self.print_file(file, line=1, lines_count = 15)
+    return unless File.exist? file
+    lines = File.read(file).split("\n")
+    start_line = [line - lines_count/3, 0].max
+    selected = (0..lines_count-1).map{|i| 
+      line_no = i+start_line+1
+      title = "#{line_no}: "
+      title << (line_no==line ? '>' : ' ')*(9-title.length)
+      "%s  %s  %s" % [ title, lines[line_no-1].to_s.rstrip ,  ("  <<<<<<<" if line_no==line) ]
+    }
+    puts "File: #{file}:#{line}"
+    puts selected * "\n"
+  end
+  
+  def self.get_method(caller, arg1, arg2)
+    obj, meth = arg2 ? [arg1, arg2] : [caller, arg1]   
+    return meth if meth.is_a? Method
+    if obj.is_a?(Module) && (obj.method(meth) rescue nil).nil? && (get_instance(obj).method(meth) rescue nil)
+      obj = get_instance(obj)
+    end
+    return obj.method(meth)
+  end
+  
+  def self.get_instance(klass)
+    klass = Class.new.send(:include, klass) if !klass.respond_to?(:allocate)
+    return klass.allocate
+  end
+end
+
+class Method
+  SHOW_TRACE = false
+  def trace_func event, file, line, id, binding, classname
+    puts "%8s %s:%-2d %s %8s" % [event, file, line, id, classname] if SHOW_TRACE
+    return unless event == 'call'
+    set_trace_func nil 
+    
+    @file, @line = file, line
+    raise :found
+  end
+  
+  def location
+    if @file.nil?
+      args =[*(1..(arity<-1 ? -arity-1 : arity ))]
+      
+      set_trace_func method(:trace_func).to_proc
+      #begin; call *args; rescue Exception=>e; y e.to_s; y e.backtrace; end
+      call *args rescue nil
+      set_trace_func nil 
+      @file = File.expand_path(@file) if @file && File.exist?(File.expand_path(@file))
+    end
+    return [@file, @line] if File.exist?(@file.to_s)
+  end
+  
+  def whatis;  Whatis.print_file(*location) if location; self end
+  def tmate;  Whatis.open_textmate(*location) if location; self  end
+  
+  alias :tm :tmate
+  alias :wh :whatis
+end
+
+class Object
+  def whatis(arg1, arg2=nil)
+    m = Whatis.get_method(self, arg1, arg2)
+    m.whatis ;  m
+  end
+  
+  def tmate(arg1, arg2=nil)
+    m = Whatis.get_method(self, arg1, arg2)
+    m.tmate ;  m
+  end
+  
+  alias :tm :tmate
+  alias :wh :whatis
+end
