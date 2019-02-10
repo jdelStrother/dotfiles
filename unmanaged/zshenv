@@ -15,8 +15,6 @@ if [[ -z $TMUX ]]; then # tmux's reattach-to-user-namespace command causes this 
   # shit for AWS
   PATH=$HOME/Developer/ec2-api-tools-1.6.7.3/bin:$PATH
   EC2_HOME=$HOME/Developer/ec2-api-tools-1.6.7.3
-  #AWS_ACCESS_KEY=AKIAI67TXILXICUT6LMQ
-  #AWS_SECRET_KEY=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
   JAVA_HOME=/Library/Java/Home
 fi
 
