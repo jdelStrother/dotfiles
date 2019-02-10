@@ -3,6 +3,7 @@
 set nocompatible
 
 " Load Vundle & Plugins ------------------------------------------------------------------------{{{1
+" Run :PluginInstall to install missing plugins
 filetype off " force reloading of filetype
 set rtp+=~/.vim/bundle/vundle/
 call vundle#begin()
