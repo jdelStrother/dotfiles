@@ -8,14 +8,6 @@ if [[ -z $TMUX ]]; then # tmux's reattach-to-user-namespace command causes this 
   typeset -U path
   path=(~/bin /usr/local/bin $path)
   unset manpath
-  export KEYSTORE=/Users/jon/Documents/Certificates/javaKeystore.ImportKey
-
-  export NODE_PATH=/usr/local/lib/node_modules:$NODE_PATH
-
-  # shit for AWS
-  PATH=$HOME/Developer/ec2-api-tools-1.6.7.3/bin:$PATH
-  EC2_HOME=$HOME/Developer/ec2-api-tools-1.6.7.3
-  JAVA_HOME=/Library/Java/Home
 fi
 
 # kill -0 checks to see if the pid exists
@@ -27,10 +19,5 @@ fi
 # fi
 # export GPG_TTY=`tty`
 # export GPG_AGENT_INFO
-
-# Save our path to avoid paths_helper mangling it
-# http://openradar.appspot.com/14630658
-# See zshrc
-# FINALPATH=$PATH
 
 # export AWS_PROFILE=power
