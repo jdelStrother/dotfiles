@@ -58,6 +58,7 @@ This function should only modify configuration layer settings."
           )
      (github :variables magithub-cache t)
      go
+     haml
      helm
      html
      (javascript :variables
