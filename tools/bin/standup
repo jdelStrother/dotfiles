@@ -28,7 +28,7 @@ dirs_with_git_history = {}
   next unless File.exist?("#{dir}/.git")
   work = nil
   Dir.chdir(dir) do
-    work = Open3.capture2("git", "lg", "--author=Jon", "--since={#{previous_day}}", "--all")[0].strip
+    work = Open3.capture2("git", "lg", "--author=Jon", "--since={#{previous_day}}", "--branches", "--remotes")[0].strip
   end
   unless work.empty?
     dirs_with_git_history[dir] = work
