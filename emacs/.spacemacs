@@ -631,6 +631,11 @@ before packages are loaded."
   (add-hook 'js2-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
   (add-hook 'haml-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
 
+  (defun bundle-exec-rubocop ()
+    (setq flycheck-command-wrapper-function (lambda (command) (append '("bundle" "exec") command))))
+  (add-hook 'ruby-mode-hook 'bundle-exec-rubocop)
+  (add-hook 'haml-mode-hook 'bundle-exec-rubocop)
+
   (setq org-agenda-files (list (expand-file-name "~/notes.org") (expand-file-name "~/Dropbox/workflow-notes")))
   (setq org-refile-targets '((org-agenda-files :maxlevel . 1)))
 
