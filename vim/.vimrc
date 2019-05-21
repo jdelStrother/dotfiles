@@ -3,15 +3,19 @@
 set nocompatible
 
 " Load Vundle & Plugins ------------------------------------------------------------------------{{{1
-" Run :PluginInstall to install missing plugins
+" First time: 
+"   $ git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
+"   $ vim +PluginInstall +qall
+"
 filetype off " force reloading of filetype
-set rtp+=~/.vim/bundle/vundle/
+set rtp+=~/.vim/bundle/Vundle.vim
+set shell=/bin/bash
 call vundle#begin()
 
 runtime macros/matchit.vim
 
 " let Vundle manage Vundle
-Bundle 'gmarik/vundle'
+Bundle 'gmarik/Vundle.vim'
 
 " repos on github
 Bundle 'AndrewRadev/linediff.vim'
@@ -499,7 +503,8 @@ endif " has("autocmd")
 " nnoremap <silent> <leader>R :call RunNearestSpec()<CR>
 
 
-let g:rspec_command = "Dispatch bin/rspec {spec}"
+let g:rspec_command = "Dispatch docker-compose -f docker-compose.spring.yml -f docker-compose.yml exec spring rspec {spec}"
+" let g:rspec_command = "!docker-compose -f docker-compose.spring.yml -f docker-compose.yml exec spring rspec {spec}"
 nnoremap <leader>r :call RunCurrentSpecFile()<CR>
 nnoremap <leader>R :call RunNearestSpec()<CR>
 
