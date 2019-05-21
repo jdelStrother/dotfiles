@@ -636,6 +636,11 @@ before packages are loaded."
   (add-hook 'ruby-mode-hook 'bundle-exec-rubocop)
   (add-hook 'haml-mode-hook 'bundle-exec-rubocop)
 
+
+  (defun ruby-simple-function-name ()
+    (car (last (split-string (magit-which-function) "#"))))
+  (add-hook 'ruby-mode-hook (lambda () (setq magit-log-trace-definition-function 'ruby-simple-function-name)))
+
   (setq org-agenda-files (list (expand-file-name "~/notes.org") (expand-file-name "~/Dropbox/workflow-notes")))
   (setq org-refile-targets '((org-agenda-files :maxlevel . 1)))
 
