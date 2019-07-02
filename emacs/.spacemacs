@@ -634,8 +634,8 @@ before packages are loaded."
 
   (defun bundle-exec-rubocop ()
     (setq flycheck-command-wrapper-function (lambda (command) (append '("bundle" "exec") command))))
-  (add-hook 'ruby-mode-hook 'bundle-exec-rubocop)
-  (add-hook 'haml-mode-hook 'bundle-exec-rubocop)
+  (add-hook 'ruby-mode-hook 'bundle-exec-rubocop nil t)
+  (add-hook 'haml-mode-hook 'bundle-exec-rubocop nil t)
 
 
   (defun ruby-simple-function-name ()
