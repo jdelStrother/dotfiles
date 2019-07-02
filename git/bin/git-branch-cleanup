@@ -1,0 +1,7 @@
+#! /bin/bash
+
+git branch --merged | egrep -v "(^\*|master)" | xargs git branch -d
+REMOTE_BRANCHES=$(git branch -r --merged origin/master |  grep origin | egrep -v '>|master|develop|production|staging' | cut -d/ -f2-)
+if [[ -n $REMOTE_BRANCHES ]]; then 
+  git push origin --delete $REMOTE_BRANCHES
+fi
