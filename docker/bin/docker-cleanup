@@ -1,0 +1,45 @@
+#!/bin/bash
+# Exit on error. Append || true if you expect an error.
+set -o errexit
+# Exit on error inside any functions or subshells.
+set -o errtrace
+# Do not allow use of undefined vars. Use ${VAR:-} to use an undefined VAR
+set -o nounset
+# Catch the error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
+set -o pipefail
+# Turn on traces, useful while debugging but commented out by default
+set -o xtrace
+
+start_image=$1
+if [[ -z $start_image ]]; then
+    echo "missing image id to start from"
+    exit 1
+fi
+
+function child_images() {
+    recent_images=$(docker images -a --filter since="$1" --quiet)
+    if [[ -z "$recent_images" ]]; then return; fi
+    # shellcheck disable=SC2086
+    docker inspect --format='{{.Id}} {{.Parent}}' $recent_images | awk '$2 ~ "^sha256:'"$1"'" { split($1,a,":"); print a[2] }' | sort | uniq
+}
+
+function trash_image() {
+    # children=$(child_images "$1")
+    # for child in $children; do
+    #     trash_image "$child"
+    # done
+    docker rmi -f "$1"
+}
+
+for image in $(docker history -q "$start_image"); do
+    echo "Image $image"
+    docker inspect --format='{{.ContainerConfig.Cmd}}' "$image"
+    echo "Looking for null-files..."
+    docker run "$image" bash -c 'find /usr /lib /etc -type f -size +100  \( -exec grep -q -P "[^\0]" {} \; -o -print \)'
+    read -r -n1 -p "Trash image? [y,n]" input
+    echo "input $input"
+    case "$input" in
+        y) trash_image "$image" ;;
+        *) exit 0
+    esac
+done
