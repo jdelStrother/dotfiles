@@ -550,6 +550,8 @@ before packages are loaded."
   ;; (setq-default flycheck-idle-change-delay 2.5)
   (setq-default flycheck-check-syntax-automatically '(mode-enabled save))
   (setq-default flycheck-javascript-flow-args (quote ("--respect-pragma")))
+  ;; `yarn global add eslint_d`
+  (setq flycheck-javascript-eslint-executable "eslint_d")
 
   ;; Don't ask whether to execute code in org files
   (setq org-confirm-babel-evaluate nil)
