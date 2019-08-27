@@ -1,0 +1,1 @@
+defaults read ~/Library/Preferences/com.googlecode.iTerm2 GlobalKeyMap > ~/Dropbox/dotfiles/iterm/GlobalKeyMap

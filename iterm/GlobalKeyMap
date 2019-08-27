@@ -1,0 +1,62 @@
+{
+    "0x68-0x100000" =     {
+        Action = 18;
+        Text = "";
+    };
+    "0x6a-0x100000" =     {
+        Action = 21;
+        Text = "";
+    };
+    "0x6b-0x100000" =     {
+        Action = 20;
+        Text = "";
+    };
+    "0x6c-0x100000" =     {
+        Action = 19;
+        Text = "";
+    };
+    "0x9-0x40000" =     {
+        Action = 32;
+        Text = "";
+    };
+    "0xf702-0x280000" =     {
+        Action = 10;
+        Text = b;
+    };
+    "0xf702-0x320000" =     {
+        Action = 33;
+        Text = "";
+    };
+    "0xf703-0x280000" =     {
+        Action = 10;
+        Text = f;
+    };
+    "0xf703-0x320000" =     {
+        Action = 34;
+        Text = "";
+    };
+    "0xf729-0x100000" =     {
+        Action = 5;
+        Text = "";
+    };
+    "0xf72b-0x100000" =     {
+        Action = 4;
+        Text = "";
+    };
+    "0xf72c-0x100000" =     {
+        Action = 9;
+        Text = "";
+    };
+    "0xf72c-0x20000" =     {
+        Action = 9;
+        Text = "";
+    };
+    "0xf72d-0x100000" =     {
+        Action = 8;
+        Text = "";
+    };
+    "0xf72d-0x20000" =     {
+        Action = 8;
+        Text = "";
+    };
+}
