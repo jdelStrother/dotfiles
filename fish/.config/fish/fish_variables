@@ -2,6 +2,7 @@
 # VERSION: 3.0
 SETUVAR --export BUNDLER_EDITOR:mate
 SETUVAR --export EDITOR:vim
+SETUVAR --export PSSH_OPTIONS:ControlPersist\x3dno
 SETUVAR ZO_CMD:zo
 SETUVAR Z_CMD:z
 SETUVAR Z_DATA:/Users/jon/\x2elocal/share/z/data
