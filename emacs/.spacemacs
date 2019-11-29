@@ -553,6 +553,14 @@ before packages are loaded."
   ;; `yarn global add eslint_d`
   (setq flycheck-javascript-eslint-executable "eslint_d")
 
+  (defun bundle-exec-flycheck ()
+    (make-local-variable 'flycheck-command-wrapper-function)
+    (setq flycheck-command-wrapper-function (lambda (command) (append '("bundle" "exec") command))))
+  (add-hook 'haml-mode-hook 'bundle-exec-flycheck)
+
+  (setq flycheck-ruby-rubocop-executable "rubocop-daemon-wrapper")
+
+
   ;; Don't ask whether to execute code in org files
   (setq org-confirm-babel-evaluate nil)
 
