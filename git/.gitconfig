@@ -12,7 +12,6 @@
 	legacyheaders = false
 	excludesfile = /Users/jon/.gitglobalignore
 	editor = vim
-  pager = diff-highlight | less -r
 [repack]
 	usedeltabaseoffset = true
 [alias]
