@@ -49,9 +49,9 @@ This function should only modify configuration layer settings."
      (auto-completion :variables
                       auto-completion-enable-help-tooltip t)
      ;; better-defaults
+     (lsp :variables lsp-ui-doc-enable nil)
      docker
      emacs-lisp
-     flow-type
      neotree
      (git :variables
           git-use-magit-next t
@@ -65,16 +65,18 @@ This function should only modify configuration layer settings."
                  js2-mode-show-parse-errors nil
                  js2-mode-show-strict-warnings nil
                  node-add-modules-path t
+                 javascript-backend 'lsp
+                 javascript-fmt-tool 'prettier
                  )
      ;; aj-javascript
      ;; markdown
      osx
      ;; (org :variables org-projectile-file (expand-file-name "~/notes.org"))
      react
-     (ruby :variables ruby-test-runner 'rspec ruby-version-manager 'chruby ruby-align-to-stmt-keywords '(def if))
+     (ruby :variables ruby-test-runner 'rspec ruby-version-manager 'chruby ruby-align-to-stmt-keywords '(def if) ruby-backend 'lsp)
      shell
      shell-scripts
-     syntax-checking
+     (syntax-checking :variables syntax-checking-enable-by-default nil)
      terraform
      vinegar
      )
@@ -541,7 +543,14 @@ before packages are loaded."
                           '(javascript-jshint
                             scss
                             scss-lint
-                            )))
+                            ))
+                  )
+    ;; (flycheck-add-next-checker 'javascript-eslint 'javascript-flow-coverage)
+
+    ;; flow-coverage shows up as warnings, which is very noisy.
+    ;; Make the warning markers more subtle, and hide the gutter dot.
+    (set-face-attribute 'flycheck-fringe-warning nil :foreground (face-attribute 'fringe :background ))
+    (set-face-attribute 'flycheck-warning nil :underline (color-lighten-name (face-background 'default) 20))
   )
 
   (add-hook 'js2-mode-hook 'prettier-js-mode)
@@ -658,8 +667,15 @@ before packages are loaded."
   ;; Just autoload TAGS, don't ask
   (setq tags-revert-without-query 1)
 
-  )
 
-(defun dotspacemacs/emacs-custom-settings ()
+
+  ;; I'm not keen on the LSP sideline flashing up constantly while typing.  Disable while in insert mode.
+  (add-hook 'lsp-mode-hook (lambda()
+    (let ((original-lsp-sideline-value nil))
+      (make-local-variable 'original-lsp-sideline-value)
+      (add-hook 'evil-insert-state-entry-hook (lambda () (progn
+        (setq original-lsp-sideline-value lsp-ui-sideline-mode)
+        (lsp-ui-sideline-enable nil))))
+      (add-hook 'evil-insert-state-exit-hook (lambda ()
+        (lsp-ui-sideline-enable original-lsp-sideline-value))))))
 )
-
