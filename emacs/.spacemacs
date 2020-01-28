@@ -33,12 +33,15 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(ansible
+   '(php
+     systemd
+     ansible
      python
      csv
-     sql
      nginx
      markdown
+     sql
+     treemacs
      yaml
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
@@ -49,15 +52,17 @@ This function should only modify configuration layer settings."
      (auto-completion :variables
                       auto-completion-enable-help-tooltip t)
      ;; better-defaults
+     ;; dap
      (lsp :variables lsp-ui-doc-enable nil)
      docker
      emacs-lisp
-     neotree
+     ;; heotree
      (git :variables
           git-use-magit-next t
           )
      (github :variables magithub-cache t)
-     go
+     (go :variables go-format-before-save t)
+     gtags
      haml
      helm
      html
@@ -71,13 +76,18 @@ This function should only modify configuration layer settings."
      ;; aj-javascript
      ;; markdown
      osx
-     ;; (org :variables org-projectile-file (expand-file-name "~/notes.org"))
+     (org :variables
+          org-projectile-file (expand-file-name "~/notes.org")
+          org-enable-org-journal-support t)
+     prettier
      react
      (ruby :variables ruby-test-runner 'rspec ruby-version-manager 'chruby ruby-align-to-stmt-keywords '(def if) ruby-backend 'lsp)
      shell
      shell-scripts
      (syntax-checking :variables syntax-checking-enable-by-default nil)
+     templates
      terraform
+     typescript
      vinegar
      )
 
@@ -88,12 +98,12 @@ This function should only modify configuration layer settings."
    ;; To use a local version of a package, use the `:location' property:
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '(haml-mode scss-mode rvm groovy-mode prettier-js)
+   dotspacemacs-additional-packages '(scss-mode rvm groovy-mode base16-theme gif-screencast gcmh)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
    ;; Remove jinja2 because its syntax highlighting is very geared towards html, not unix config files
-   dotspacemacs-excluded-packages '(smartparens evil-unimpaired company-tern tern rainbow-delimiters jinja2)
+   dotspacemacs-excluded-packages '(smartparens evil-unimpaired company-tern tern rainbow-delimiters jinja2 magit-gitflow)
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
    ;; `used-only' installs only explicitly used packages and deletes any unused
@@ -119,8 +129,8 @@ It should only modify the values of Spacemacs settings."
 
    ;; File path pointing to emacs 27.1 executable compiled with support
    ;; for the portable dumper (this is currently the branch pdumper).
-   ;; (default "emacs")
-   dotspacemacs-emacs-pdumper-executable-file "/usr/local/Cellar/emacs-plus/HEAD-faaaece/bin/emacs"
+   ;; (default "emacs-27.0.50")
+   dotspacemacs-emacs-pdumper-executable-file "/Applications/Emacs.app/Contents/MacOS/Emacs"
 
    ;; Name of the Spacemacs dump file. This is the file will be created by the
    ;; portable dumper in the cache directory under dumps sub-directory.
@@ -209,15 +219,15 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(monokai
+   dotspacemacs-themes '(monokai base16-default-dark
                          spacemacs-light)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
-   ;; `all-the-icons', `custom', `vim-powerline' and `vanilla'. The first three
-   ;; are spaceline themes. `vanilla' is default Emacs mode-line. `custom' is a
-   ;; user defined themes, refer to the DOCUMENTATION.org for more info on how
-   ;; to create your own spaceline theme. Value can be a symbol or list with\
-   ;; additional properties.
+   ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
+   ;; first three are spaceline themes. `doom' is the doom-emacs mode-line.
+   ;; `vanilla' is default Emacs mode-line. `custom' is a user defined themes,
+   ;; refer to the DOCUMENTATION.org for more info on how to create your own
+   ;; spaceline theme. Value can be a symbol or list with additional properties.
    ;; (default '(spacemacs :separator wave :separator-scale 1.5))
    dotspacemacs-mode-line-theme '(spacemacs :separator wave :separator-scale 1.5)
 
@@ -261,7 +271,7 @@ It should only modify the values of Spacemacs settings."
    ;; and TAB or `C-m' and `RET'.
    ;; In the terminal, these pairs are generally indistinguishable, so this only
    ;; works in the GUI. (default nil)
-   dotspacemacs-distinguish-gui-tab nil
+   dotspacemacs-distinguish-gui-tab t
 
    ;; Name of the default layout (default "Default")
    dotspacemacs-default-layout-name "Default"
@@ -463,6 +473,7 @@ This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
+
   ;; https://github.com/syl20bnr/spacemacs/issues/3920
   (setq exec-path-from-shell-arguments '("-l"))
 
@@ -474,8 +485,18 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
   (setq node-add-modules-path t)
   (setq-default git-magit-status-fullscreen t)
+  ;; We don't need VC if we have magit
+  (setq vc-handled-backends nil)
 
-  (setq custom-file "~/.emacs.d/custom.el")
+  (setq lsp-eslint-server-command
+        '("node"
+          "/Users/jon/.vscode/extensions/dbaeumer.vscode-eslint-2.0.11/server/out/eslintServer.js"
+          "--stdio"))
+
+  (require 'gnutls)
+  (add-to-list 'gnutls-trustfiles "/usr/local/etc/openssl/cert.pem")
+
+  (setq custom-file (concat user-emacs-directory "custom.el"))
   (load custom-file)
   )
 (defun dotspacemacs/user-load ()
@@ -483,9 +504,11 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 This function is called only while dumping Spacemacs configuration. You can
 `require' or `load' the libraries of your choice that will be included in the
 dump."
-  (require 'ruby-mode)
-  (require 'helm)
-  (require 'magit)
+  (with-temp-buffer
+    (helm-mode))
+  (with-temp-buffer
+    (require 'magit)
+    (magit-mode))
   )
 
 (defun dotspacemacs/user-config ()
@@ -494,6 +517,11 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
+
+  ;; Try the garbage collection hack http://akrl.sdf.org/#org2a987f7
+  (require 'gcmh)
+  (gcmh-mode 1)
+
   ; Treat _ as part of a word
   (modify-syntax-entry ?_ "w")
   ; Make :s/foo/bar global by default
@@ -516,6 +544,9 @@ before packages are loaded."
   (setq js2-basic-offset 2)
   (setq js2-indent-switch-body 1)
 
+  ;; don't use GUI popup alerts
+  (setq use-dialog-box nil)
+
   ;; stop asking about following symlinks when editing home-dir-dotfiles
   (setq vc-follow-symlinks nil)
 
@@ -523,7 +554,7 @@ before packages are loaded."
   ;;(require 'sgml-mode)
 
   ;; fix copy-paste? https://github.com/syl20bnr/spacemacs/issues/2032
-  (fset 'evil-visual-update-x-selection 'ignore)
+  ;; (fset 'evil-visual-update-x-selection 'ignore)
 
   (defun my-web-mode-hook ()
     "Hooks for Web mode."
@@ -535,6 +566,8 @@ before packages are loaded."
   (add-hook 'web-mode-hook 'my-web-mode-hook)
 
   (add-to-list 'auto-mode-alist '("\\.es6" . js2-mode))
+
+  ;; (setq dap-chrome-debug-program `("node" ,(expand-file-name "~/.extensions/chrome/out/src/chromeDebug.js")))
 
   (with-eval-after-load 'flycheck
     ;; disable jshint since we prefer eslint checking
@@ -587,6 +620,7 @@ before packages are loaded."
 
   (advice-add 'github-browse-file--relative-url :around #'github-browse-file--relative-url--with-hacks)
 
+  ;; C-x C-l to expand a matching line
   (defun my-expand-lines ()
     (interactive)
     (let ((hippie-expand-try-functions-list
@@ -607,14 +641,52 @@ before packages are loaded."
       ad-do-it))
   (ad-activate 'rspec-compile)
 
-  (eval-after-load 'rspec-mode
-    ;; I got frustrated trying to find a combination that uses spring in docker,
-    ;; while also avoiding 'risky' emacs variables prompt every time.
-    '(defun rspec-compile-command (target &optional opts)
-       "Composes RSpec command line for the compile function"
-       (format "docker exec web_web_1 bin/rspec %s"
-               (mapconcat 'identity `(,(rspec-runner-options opts)
-                                      ,(rspec-runner-target target)) " "))))
+  (defun compilation-exit-autoclose (STATUS code msg)
+    "Close the compilation window if there was no error at all."
+    ;; If M-x compile exists with a 0
+    (when (and (eq STATUS 'exit) (zerop code))
+      ;; then bury the *compilation* buffer, so that C-x b doesn't go there
+      (bury-buffer)
+      ;; and delete the *compilation* window
+      (delete-window (get-buffer-window (get-buffer "*compilation*"))))
+    ;; Always return the anticipated result of compilation-exit-message-function
+    (cons msg code))
+  (setq compilation-exit-message-function 'compilation-exit-autoclose)
+
+
+  ;; (eval-after-load 'rspec-mode
+  ;;   ;; I got frustrated trying to find a combination that uses spring in docker,
+  ;;   ;; while also avoiding 'risky' emacs variables prompt every time.
+  ;;   '(defun rspec-compile-command (target &optional opts)
+  ;;      "Composes RSpec command line for the compile function"
+  ;;      (format "docker exec web_web_1 bin/rspec %s"
+  ;;              (mapconcat 'identity `(,(rspec-runner-options opts)
+  ;;                                     ,(rspec-runner-target target)) " "))))
+
+  ;; (with-eval-after-load 'rspec-mode
+  ;;   ;; (require 'dap-ruby)
+  ;;   (defun jds-rspec--populate-start-file-args (conf)
+  ;;     "Populate CONF with the required arguments."
+  ;;     (progn
+  ;;       (-> conf
+  ;;           (dap--put-if-absent :dap-server-path dap-ruby-debug-program)
+  ;;           (dap--put-if-absent :cwd (rspec-project-root))
+  ;;           (dap--put-if-absent :args (list (buffer-file-name)))
+  ;;           (dap--put-if-absent :type "Rspec")
+  ;;           (dap--put-if-absent :name "Rspec Debug"))
+  ;;       (message "%s" conf)
+  ;;       conf))
+  ;;   (message "Registering templates!")
+  ;;   (dap-register-debug-provider "Ruby" 'jds-rspec--populate-start-file-args)
+  ;;   (dap-register-debug-template "Rspec Run Configuration!"
+  ;;                               (list :type "Ruby"
+  ;;                                     :cwd "/Users/jon/Developer/web"
+  ;;                                     :request "launch"
+  ;;                                     :program "bin/rspec"
+  ;;                                     :environment-variables '(("DISABLE_SPRING" . "1"))
+  ;;                                     :name "Ruby::Rspec"))
+  ;;   )
+  ;; (add-hook 'ruby-mode-hook (lambda () (spacemacs/dap-bind-keys-for-mode 'ruby-mode)))
 
   (evil-set-register ?i
         (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([99 119 105 109 112 111 114 116 escape 47 61 return 99 102 40 105 109 backspace backspace 102 114 111 109 32 escape 36 120 106 94] 0 "%d")) arg)))
@@ -647,15 +719,9 @@ before packages are loaded."
   (setq helm-recentf-fuzzy-match t)
 
   ;; Include underscore as part of word
-  (add-hook 'ruby-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
-  (add-hook 'js2-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
-  (add-hook 'haml-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
-
-  (defun bundle-exec-rubocop ()
-    (setq flycheck-command-wrapper-function (lambda (command) (append '("bundle" "exec") command))))
-  (add-hook 'ruby-mode-hook 'bundle-exec-rubocop nil t)
-  (add-hook 'haml-mode-hook 'bundle-exec-rubocop nil t)
-
+  (add-hook 'ruby-mode-hook (lambda () (modify-syntax-entry ?_ "w")))
+  (add-hook 'js2-mode-hook (lambda () (modify-syntax-entry ?_ "w")))
+  (add-hook 'haml-mode-hook (lambda () (modify-syntax-entry ?_ "w")))
 
   (defun ruby-simple-function-name ()
     (car (last (split-string (magit-which-function) "#"))))
@@ -665,9 +731,28 @@ before packages are loaded."
   (setq org-refile-targets '((org-agenda-files :maxlevel . 1)))
 
   ;; Just autoload TAGS, don't ask
-  (setq tags-revert-without-query 1)
+  ;; (setq tags-revert-without-query 1)
+
+  ;; (tramp-set-completion-function "ssh"
+  ;;                                '((tramp-parse-sconfig "/etc/ssh_config")
+  ;;                                  (tramp-parse-sconfig "~/.ssh/config")))
 
 
+  (with-eval-after-load 'gif-screencast
+    ;; I can't persuade cropping to work in GUI emacs - just use in iTerm2
+    (let* ((app-name (if (eq window-system 'ns) "Emacs" "iTerm2"))
+           (id (shell-command-to-string (format "osascript -e 'tell app \"%s\" to id of window 1'" app-name))))
+      (setq gif-screencast-args (list "-x" "-o" "-w" (format "-l%s" (substring id 0 -1))))
+    )
+    (setq gif-screencast-optimize-args '("--batch" "--optimize=3" "--colors=256"))
+    (define-key gif-screencast-mode-map (kbd "<f8>") 'gif-screencast-toggle-pause)
+    (define-key gif-screencast-mode-map (kbd "<f9>") 'gif-screencast-stop))
+
+
+  ;; Allegedly you can just set magit-wip-mode in Custom, but I can't get that working.  Manually require it.
+  ;; Update: I don't like it, it makes saves too slow
+  ;; (require 'magit-wip)
+  ;; (magit-wip-mode t)
 
   ;; I'm not keen on the LSP sideline flashing up constantly while typing.  Disable while in insert mode.
   (add-hook 'lsp-mode-hook (lambda()

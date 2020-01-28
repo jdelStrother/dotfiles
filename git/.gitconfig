@@ -29,7 +29,7 @@
   fetchall = "!git -c 'gc.auto=0' fetch origin & git -c 'gc.auto=0' fetch github; wait"
   pushall = "!f() { git push origin $@ & git push github $@; wait; }; f"
 	ff = pull --ff-only -v
-	secretsdiff = "!f() { set -ex; export XDG_CONFIG_HOME=/tmp/rails-secrets-diff; mkdir -p $XDG_CONFIG_HOME/git; echo 'secrets.yml.enc diff=rails-secrets-enc' > $XDG_CONFIG_HOME/git/attributes; git diff; }; f"
+	secretsdiff = "!f() { set -ex; export XDG_CONFIG_HOME=/tmp/rails-secrets-diff; mkdir -p $XDG_CONFIG_HOME/git; echo 'secrets.yml.enc diff=rails-secrets-enc' > $XDG_CONFIG_HOME/git/attributes; git diff $@; }; f"
 [merge]
 	tool = OpenDiff
 	keepBackup = false
@@ -87,8 +87,11 @@
 	binary = false
 [diff "sass"]
 	xfuncname = ^ *([^: ].*)$
+[diff "javascript"]
+  xfuncname = "^ *(([A-z]+\\(.*\\) \\{)|function ([A-z0-9]+))$"
 [diff "rails-secrets-enc"]
-  textconv = bin/rails runner \"puts Rails::Secrets.decrypt(IO.binread(ARGV[0]))\" --
+  textconv = bin/rails encrypted:show
+  cachetextconv = false
 
 [imap]
 	folder = [Google Mail]/Drafts
@@ -106,8 +109,6 @@
 	cmd = /bin/sh -c 'open http://git-scm.com/docs/$(basename $1 .html)' --
 [help]
 	browser = gitscm
-[init]
-	templatedir = ~/.git_template
 [credential]
 	helper = osxkeychain
 [difftool]
@@ -122,16 +123,16 @@
   user = jdelStrother
 [include]
   path = ~/.gitconfig-private
-# [transfer] 
-#   fsckobjects = true 
-# [fetch] 
-#   fsckobjects = true 
-# [receive] 
-#   fsckObjects = true 
-# [commit]
-#   gpgsign = true
+[transfer] 
+  fsckobjects = true 
+[fetch] 
+  fsckobjects = true 
+[receive] 
+  fsckObjects = true 
+[fetch "fsck"]
+  zeroPaddedFilemode = ignore
 [commit]
-	gpgsign = false
+	gpgsign = true
 [filter "lfs"]
 	clean = git-lfs clean %f
 	smudge = git-lfs smudge %f
