@@ -7,4 +7,4 @@ else
   args="$@"
 fi
 
-stow -t ~ -v --ignore .DS_Store $args
+stow -t ~ -v --ignore='(.elc|.DS_Store)' $args
