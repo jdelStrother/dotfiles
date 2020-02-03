@@ -66,6 +66,29 @@
   ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled
   (setq lsp-auto-guess-root nil))
 
+(after! haml-mode
+  (after! flycheck
+    (flycheck-define-checker haml-lint
+        "A haml syntax checker using the haml-lint tool."
+        :command ("bundle"
+                  "exec"
+                  "haml-lint"
+                  source-inplace)
+        :working-directory flycheck-ruby--find-project-root
+        :error-patterns
+        ((info line-start (file-name) ":" line " [C] " (message) line-end)
+        (warning line-start (file-name) ":" line " [W] " (message) line-end)
+        (error line-start (file-name) ":" line " [" (or "E" "F") "] " (message) line-end))
+        :modes (haml-mode))
+      (add-to-list 'flycheck-checkers 'haml-lint)
+      (flycheck-add-next-checker 'haml '(warning . haml-lint))
+
+      (add-to-list 'compilation-error-regexp-alist-alist
+                   '(haml-lint
+                     "^\\([^:]+\\):\\([0-9]+\\) \\[\\(W\\|E\\)\\] "
+                     1 2))
+      (add-to-list 'compilation-error-regexp-alist 'haml-lint)))
+
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
