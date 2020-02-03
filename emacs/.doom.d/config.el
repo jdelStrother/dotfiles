@@ -51,7 +51,7 @@
    :font :inherit :fontset :vector :extend])
 
 ;; Not keen on ruby's auto-formatter, lets just rely on prettier.js for now
-(setq +format-on-save-enabled-modes '(js2-mode))
+(setq +format-on-save-enabled-modes '(js2-mode rjsx-mode))
 
 (after! lsp
   ;; I'm not keen on the LSP sideline flashing up constantly while typing.  Disable while in insert mode.
@@ -65,6 +65,13 @@
         (lsp-ui-sideline-enable original-lsp-sideline-value))))))
   ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled
   (setq lsp-auto-guess-root nil))
+
+;; auto-activate sh-mode for .fish files
+(add-to-list 'auto-mode-alist '("\\.fish" . sh-mode))
+
+;; don't steal focus when running rspec-compile
+(after! enh-ruby-mode
+  (set-popup-rule! "\*rspec-compilation\*" :select #'ignore))
 
 (after! haml-mode
   (after! flycheck
