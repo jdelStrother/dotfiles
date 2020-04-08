@@ -30,10 +30,24 @@
 
 ;; If you want to change the style of line numbers, change this to `relative' or
 ;; `nil' to disable it:
-(setq display-line-numbers-type t)
+;; line-number-mode is really slow, especially in the GUI 😢
+(setq display-line-numbers-type nil)
+
+;; Make window dividers more obvious
+(setq window-divider-default-bottom-width 3)
+
+;; use sh for spawning random subprocesses, but fish if you want a proper shell
+(setq shell-file-name "/bin/sh")
+(let ((fishpath (executable-find "fish")))
+  (if fishpath
+    (setq explicit-shell-file-name fishpath)))
+;; set EDITOR to use the current emacs instance in a shell
+(add-hook 'shell-mode-hook  'with-editor-export-editor)
+
 
 ;; Disable the weird GUI toolbar I never use
 (tool-bar-mode -1)
+
 
 ;; Default window size on startup
 (add-to-list 'default-frame-alist '(width . 160))
@@ -41,6 +55,26 @@
 
 ;; Hit '-' to jump to the containing directory
 (define-key evil-normal-state-map (kbd "-") 'dired-jump)
+
+;; Company completion popups are slow.  Hit C-SPC if you want one
+(setq company-idle-delay nil)
+
+(after! magit
+  ;; Stop magit complaining about too-long summary lines
+  (setq git-commit-style-convention-checks
+        (remove 'overlong-summary-line git-commit-style-convention-checks)))
+
+(setq projectile-project-search-path '("~/Developer/" "~/Developer/vendor/"))
+
+;; Enter multiedit, then in visual mode hit return to remove all other matches.
+;; This is the recommended multiedit keybinding, but doom-emacs doesn't bind it by default.
+(after! evil-multiedit
+  (define-key evil-motion-state-map (kbd "RET") 'evil-multiedit-toggle-or-restrict-region))
+
+;; swiper sets a very low max-columns, resulting in "Omitted long line" when searching.
+;; https://github.com/abo-abo/swiper/issues/2482
+(setq counsel-rg-base-command
+  "rg --max-columns 500 --with-filename --no-heading --line-number --color never %s")
 
 ;; Avoid an error in Emacs 27.  Hopefully fixed in more recent builds?
 ;; https://github.com/seagle0128/doom-modeline/issues/232#issuecomment-544144235
@@ -68,6 +102,7 @@
 
 ;; auto-activate sh-mode for .fish files
 (add-to-list 'auto-mode-alist '("\\.fish" . sh-mode))
+(add-to-list 'auto-mode-alist '("\\.nix" . nix-mode))
 
 ;; don't steal focus when running rspec-compile
 (after! enh-ruby-mode
@@ -111,3 +146,8 @@
 ;;
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
+;; I keep getting a flycheck error on trying to create pull requests
+(setq flycheck-global-modes '(not forge-post-mode))
+
+;; Don't try to execute 'cvs' when visiting a directory that contains a csv directory
+(setq vc-handled-backends '(Git))
