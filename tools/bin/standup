@@ -4,11 +4,15 @@ require "date"
 require "pathname"
 
 today = Date.today
-previous_day = if today.cwday == 1
-                 today - (ARGV[0] || 3).to_i
-               else
-                 today - (ARGV[0] || 1).to_i
-               end
+days_ago =
+  if ARGV[0]
+    ARGV[0].to_i
+  elsif today.cwday == 1 # Today is Monday, go back to Friday
+    3
+  else
+    1
+  end
+previous_day = (today - days_ago)
 puts "Since #{previous_day}"
 
 # Common directories always get checked even if they're not in the recent history, just in case we edited them via emacs or something
@@ -28,7 +32,7 @@ dirs_with_git_history = {}
   next unless File.exist?("#{dir}/.git")
   work = nil
   Dir.chdir(dir) do
-    work = Open3.capture2("git", "lg", "--author=Jon", "--since={#{previous_day}}", "--branches", "--remotes")[0].strip
+    work = Open3.capture2("git", "lg", "--author=Jon", "--since={#{previous_day.strftime("%Y%m%dT00:00:00")}}", "--branches", "--remotes")[0].strip
   end
   unless work.empty?
     dirs_with_git_history[dir] = work
