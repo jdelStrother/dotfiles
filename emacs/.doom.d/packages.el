@@ -55,3 +55,24 @@
 (package! feature-mode)
 
 (package! groovy-mode)
+
+(package! yaml-mode)
+
+(package! explain-pause-mode
+  :recipe (:host github :repo "lastquestion/explain-pause-mode"))
+
+;; (package! magit
+;;   :recipe
+;;   (:host github
+;;    :branch "reset-keep"
+;;    :repo "jdelStrother/magit"
+;;    :files ("*.el" "lisp/*.el")))
+
+;; (package! magit :recipe (:local-repo "path/to/local/magit" :no-byte-compile t))
+
+;; (package! eglot
+;;   :recipe
+;;   (:host github
+;;    :branch "patch-1"
+;;    :repo "jdelStrother/eglot"
+;;    :files ("*.el")))

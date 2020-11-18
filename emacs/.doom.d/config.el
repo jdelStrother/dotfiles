@@ -73,8 +73,13 @@
 
 ;; swiper sets a very low max-columns, resulting in "Omitted long line" when searching.
 ;; https://github.com/abo-abo/swiper/issues/2482
+;; Also, rg excludes hidden files by default, which means that searching for stuff in webpack/.storybook/* fails.
+;; https://github.com/BurntSushi/ripgrep/issues/623#issuecomment-659909044
 (setq counsel-rg-base-command
-  "rg --max-columns 500 --with-filename --no-heading --line-number --color never %s")
+  "rg --max-columns 500 --with-filename --no-heading --line-number --color never --hidden --glob !.git %s")
+
+;; don't enable smartparens by default - when it doesn't work, it's really frustrating
+(remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
 ;; Avoid an error in Emacs 27.  Hopefully fixed in more recent builds?
 ;; https://github.com/seagle0128/doom-modeline/issues/232#issuecomment-544144235
@@ -85,7 +90,7 @@
    :font :inherit :fontset :vector :extend])
 
 ;; Not keen on ruby's auto-formatter, lets just rely on prettier.js for now
-(setq +format-on-save-enabled-modes '(js2-mode rjsx-mode))
+(setq +format-on-save-enabled-modes '(js2-mode rjsx-mode typescript-mode)) ;; css-mode scss-mode))
 
 (after! lsp
   ;; I'm not keen on the LSP sideline flashing up constantly while typing.  Disable while in insert mode.
@@ -151,3 +156,6 @@
 
 ;; Don't try to execute 'cvs' when visiting a directory that contains a csv directory
 (setq vc-handled-backends '(Git))
+
+(load-file (expand-file-name "mine/cfn-mode.el" (file-name-directory load-file-name)))
+(load-file (expand-file-name "mine/hlds-mode.el" (file-name-directory load-file-name)))
