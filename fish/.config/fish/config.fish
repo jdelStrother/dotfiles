@@ -19,3 +19,6 @@ function __direnv_export_eval --on-event fish_prompt;
 	"/usr/local/bin/direnv" export fish | source;
 end
 
+# not sure of the best way to get this to autoload, so source it manually
+source (dirname (status --current-filename))/completions/git-lg.fish
+
