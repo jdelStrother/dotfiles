@@ -11,10 +11,8 @@ function scmpuff_status
     end
 
     set -l files (string split \t $cmd_output[1])
-    if test (count $files) -gt 0
-        for e in (seq (count $files))
-            set -gx "$scmpuff_env_char""$e" "$files[$e]"
-        end
+    for e in (seq (count $files))
+        set -gx "$scmpuff_env_char""$e" "$files[$e]"
     end
 
     for line in $cmd_output[2..-1]
