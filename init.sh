@@ -1,18 +1,11 @@
 #!/bin/bash
 defaults write ~/Library/Preferences/com.googlecode.iterm2 GlobalKeyMap "$(cat iTerm/GlobalKeyMap)"
 
-mkdir -p ~/emacs
-if [[ ! -d ~/emacs/spacemacs ]]; then
-  git clone -b develop https://github.com/syl20bnr/spacemacs ~/emacs/spacemacs
+if [[ ! -d ~/.emacs.d ]]; then
+  git clone -b develop --depth 1 https://github.com/hlissner/doom-emacs ~/.emacs.d
+  echo 'After running `./stow.sh emacs`, you should run `~/.emacs.d/bin/doom install`'
 fi
-if [[ ! -d ~/emacs/chemacs ]]; then
-  git clone https://github.com/plexus/chemacs.git ~/emacs/chemacs
-  ~/emacs/chemacs/install.sh
-fi
-if [[ ! -d ~/emacs/doom-emacs ]]; then
-  git clone -b develop https://github.com/hlissner/doom-emacs ~/emacs/doom-emacs
-  echo 'After running `./stow.sh emacs`, you should run `~/emacs/doom-emacs/bin/doom install`'
-fi
+
 
 # Emacs.app is installed with something along the lines of:
 # git clone https://git.savannah.gnu.org/git/emacs.git
