@@ -103,7 +103,10 @@
       (add-hook 'evil-insert-state-exit-hook (lambda ()
         (lsp-ui-sideline-enable original-lsp-sideline-value))))))
   ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled
-  (setq lsp-auto-guess-root nil))
+  (setq lsp-auto-guess-root nil)
+
+  ;; We use prettier to format typescript, so don't want the typescript LSP interfering
+  (setq-hook! 'typescript-mode-hook +format-with-lsp nil))
 
 ;; auto-activate sh-mode for .fish files
 (add-to-list 'auto-mode-alist '("\\.fish" . sh-mode))
