@@ -66,7 +66,15 @@
 (after! magit
   ;; Stop magit complaining about too-long summary lines
   (setq git-commit-style-convention-checks
-        (remove 'overlong-summary-line git-commit-style-convention-checks)))
+        (remove 'overlong-summary-line git-commit-style-convention-checks))
+  ;; Show timestamps rather than relative dates
+  (setq magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18))
+  ;; Try to speed up status buffer refreshes
+  (remove-hook 'magit-status-headers-hook 'magit-insert-tags-header)
+  ;; Allegedly helps to hard-code the path rather than force magit to look it up on each execution
+  (setq magit-git-executable (executable-find "git"))
+  (setq magit-git-executable "git")
+  )
 
 (setq projectile-project-search-path '("~/Developer/" "~/Developer/vendor/"))
 
