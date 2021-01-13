@@ -110,6 +110,25 @@
 (setq-hook! 'js2-mode-hook +format-with-lsp nil)
 
 (after! lsp-mode
+  ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled.
+  ;; Use lsp-workspace-folders-add instead.
+  (setq lsp-auto-guess-root nil)
+  (setq lsp-eslint-server-command
+        (list "node"
+              ;; versions > 2.1.8 have issues: https://github.com/emacs-lsp/lsp-mode/issues/1932
+              ;; (expand-file-name (car (last (file-expand-wildcards "~/.vscode/extensions/dbaeumer.vscode-eslint-*/server/out/eslintServer.js"))))
+              (expand-file-name (car (last (file-expand-wildcards "~/.vscode/extensions/dbaeumer.vscode-eslint-2.1.8/server/out/eslintServer.js"))))
+              "--stdio"))
+
+  (add-function :around (symbol-function 'lsp-file-watch-ignored-directories)
+      (lambda (orig)
+        (let ((root (lsp--workspace-root (cl-first (lsp-workspaces)))))
+          (cond
+           ((string-prefix-p "/Users/jon/Developer/web" root)
+            (append '("/tmp$" "/vendor$" "/webpack$" "/files$" "app/assets/javascripts/packages" "") (funcall orig)))
+           (t
+            (funcall orig))))))
+
   ;; I'm not keen on the LSP sideline flashing up constantly while typing.  Disable while in insert mode.
   (add-hook 'lsp-mode-hook (lambda()
     (let ((original-lsp-sideline-value nil))
@@ -119,8 +138,6 @@
         (lsp-ui-sideline-enable nil))))
       (add-hook 'evil-insert-state-exit-hook (lambda ()
         (lsp-ui-sideline-enable original-lsp-sideline-value))))))
-  ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled
-  (setq lsp-auto-guess-root nil)
 
   )
 
