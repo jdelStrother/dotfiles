@@ -40,9 +40,13 @@
 (setq shell-file-name "/bin/sh")
 (let ((fishpath (executable-find "fish")))
   (if fishpath
-    (setq explicit-shell-file-name fishpath)))
+    (progn
+      (setq explicit-shell-file-name fishpath)
+      (setq vterm-shell fishpath)
+  )))
 ;; set EDITOR to use the current emacs instance in a shell
 (add-hook 'shell-mode-hook  'with-editor-export-editor)
+(add-hook 'vterm-mode-hook  'with-editor-export-editor)
 
 
 ;; Disable the weird GUI toolbar I never use
