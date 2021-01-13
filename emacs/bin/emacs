@@ -1,2 +1,2 @@
 #!/bin/sh
-/Applications/Emacs.app/Contents/MacOS/Emacs -nw $*
+/Users/jon/.nix-profile/Applications/Emacs.app/Contents/MacOS/Emacs -nw $*
