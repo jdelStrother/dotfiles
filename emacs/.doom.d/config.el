@@ -27,6 +27,23 @@
 
 ;; If you intend to use org, it is recommended you change this!
 (setq org-directory "~/org/")
+(setq org-roam-directory "~/org/roam")
+;; Better insert behaviour with evil
+;; https://github.com/syl20bnr/spacemacs/issues/14137
+(defadvice org-roam-insert (around append-if-in-evil-normal-mode activate compile)
+  "If in evil normal mode and cursor is on a whitespace character, then go into
+append mode first before inserting the link. This is to put the link after the
+space rather than before."
+  (let ((is-in-evil-normal-mode (and (bound-and-true-p evil-mode)
+                                     (not (bound-and-true-p evil-insert-state-minor-mode))
+                                     (looking-at "[[:blank:]]"))))
+    (if (not is-in-evil-normal-mode)
+        ad-do-it
+      (evil-append 0)
+      ad-do-it
+      (evil-normal-state))))
+
+(map! :leader :desc "capture today" "n r C" #'org-roam-dailies-capture-today)
 
 ;; If you want to change the style of line numbers, change this to `relative' or
 ;; `nil' to disable it:
