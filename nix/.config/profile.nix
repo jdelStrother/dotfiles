@@ -22,7 +22,7 @@ in {
     nixfmt
     nodejs-14_x
     parallel
-    ruby_2_7
+    # ruby_2_7
     ripgrep
     # common dependencies for gem installs (nokogiri)
     # You'll need `gem install nokogiri -- --use-system-libraries` and/or `bundle config build.nokogiri --use-system-libraries`
@@ -30,6 +30,9 @@ in {
     go;
 
   awscli2 = nix-vendor.awscli2;
+  ruby_3_0 = nix-vendor.ruby_3_0.override {
+    docSupport = false;
+  };
 
   pngpaste = stdenv.mkDerivation rec {
     src = pkgs.fetchFromGitHub {
