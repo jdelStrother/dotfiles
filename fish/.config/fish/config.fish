@@ -14,6 +14,9 @@ if which direnv > /dev/null
   end
 end
 
-# not sure of the best way to get this to autoload, so source it manually
-source (dirname (status --current-filename))/completions/git-lg.fish
+set dir (dirname (status --current-filename))
 
+# not sure of the best way to get this to autoload, so source it manually
+source $dir/completions/git-lg.fish
+
+source $dir/iterm2_shell_integration.(basename $SHELL)
