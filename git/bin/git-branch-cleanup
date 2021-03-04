@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BRANCHES=$(git branch --merged | egrep -v "(^\*|master)")
+BRANCHES=$(git branch --merged | egrep -v "(^(\*|\+)|master)")
 if [[ -n $BRANCHES ]]; then
   git branch -d $BRANCHES
 fi
