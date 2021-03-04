@@ -17,6 +17,7 @@ in {
     direnv
     # emacsMacport
     fish
+    fzf
     gist
     git
     gnupg
@@ -24,11 +25,15 @@ in {
     nodejs-14_x
     parallel
     # ruby_2_7
+    pssh
     ripgrep
     # common dependencies for gem installs (nokogiri)
     # You'll need `gem install nokogiri -- --use-system-libraries` and/or `bundle config build.nokogiri --use-system-libraries`
     zlib libiconv libxml2
-    go;
+    rdbtools
+    go
+    shellcheck
+    yarn;
 
   ruby_3_0 = nix-vendor.ruby_3_0.override {
     docSupport = false;
