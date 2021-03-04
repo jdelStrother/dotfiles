@@ -13,14 +13,17 @@ let nix-vendor = import(/Users/jon/Developer/vendor/nixpkgs) {
 in {
   inherit awslogs
     coreutils
-    emacsMacport
+    direnv
+    # emacsMacport
     fish
     gist
     git
+    gnupg
     nixfmt
     nodejs-14_x
     parallel
     ruby_2_7
+    ripgrep
     # common dependencies for gem installs (nokogiri)
     # You'll need `gem install nokogiri -- --use-system-libraries` and/or `bundle config build.nokogiri --use-system-libraries`
     zlib libiconv libxml2
@@ -42,4 +45,14 @@ in {
       cp pngpaste $out/bin/
     '';
   };
+
+  # for emacs/roam/forge/vterm
+  # (Pretty sure you should be able to use emacsWithPackages for this, but couldn't make it work)
+  inherit sqlite cmake libtool;
+  gccemacs = (import (pkgs.fetchFromGitHub {
+    owner = "twlz0ne";
+    repo = "nix-gccemacs-darwin";
+    rev = "e5019ce975516cbef2202e7316356f1342c22806";
+    sha256 = "0ak19pfwj604p2gzz5zbfi2v2fqymkaxg396xch74qjixgb83qf1";
+  })).emacsGccDarwin;
 }
