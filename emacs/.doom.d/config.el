@@ -1,7 +1,7 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
 ;; Place your private configuration here! Remember, you do not need to run 'doom
-;; refresh' after modifying this file!
+;; sync' after modifying this file!
 
 
 ;; These are used for a number of things, particularly for GPG configuration,
@@ -25,9 +25,12 @@
 ;; `load-theme' function. These are the defaults.
 (setq doom-theme 'doom-one)
 
-;; If you intend to use org, it is recommended you change this!
 (setq org-directory "~/org/")
 (setq org-roam-directory "~/org/roam")
+(setq org-agenda-files '("~/org/" "~/org/roam" "~/org/roam/daily"))
+;; auto-save after toggling todo state
+(add-hook 'org-trigger-hook 'save-buffer)
+
 ;; Better insert behaviour with evil
 ;; https://github.com/syl20bnr/spacemacs/issues/14137
 (defadvice org-roam-insert (around append-if-in-evil-normal-mode activate compile)
@@ -45,9 +48,9 @@ space rather than before."
 
 (map! :leader :desc "capture today" "n r C" #'org-roam-dailies-capture-today)
 
-;; If you want to change the style of line numbers, change this to `relative' or
-;; `nil' to disable it:
-;; line-number-mode is really slow, especially in the GUI 😢
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+;; Hit `SPC u SPC t l` to toggle relative line numbers on
 (setq display-line-numbers-type nil)
 
 ;; Make window dividers more obvious
@@ -212,3 +215,107 @@ space rather than before."
 
 (load-file (expand-file-name "mine/cfn-mode.el" (file-name-directory load-file-name)))
 (load-file (expand-file-name "mine/hlds-mode.el" (file-name-directory load-file-name)))
+
+;; (explain-pause-mode t)
+
+;; (use-package eglot
+;;   :config
+;;   (setq eglot-connect-timeout 60) ;; solargraph is slow to start
+;;   (map-put eglot-server-programs '(js-mode js2-mode rjsx-mode) '("flow" "lsp" "--from" "emacs" "--autostop"))
+;;   )
+
+(after! project
+  (defvar project-root-markers '("package.json")
+    "Files or directories that indicate the root of a project.")
+  (defun jds/project-find-root (path)
+    "Tail-recursive search in PATH for root markers."
+    (let* ((this-dir (file-name-as-directory (file-truename path)))
+           (parent-dir (expand-file-name (concat this-dir "../")))
+           (system-root-dir (expand-file-name "/")))
+      (cond
+       ((jds/project-root-p this-dir) (cons 'transient this-dir))
+       ((equal system-root-dir this-dir) nil)
+       (t (jds/project-find-root parent-dir)))))
+  (defun jds/project-root-p (path)
+    "Check if current PATH has any of project root markers."
+    (let ((results (mapcar (lambda (marker)
+                             (file-exists-p (concat path marker)))
+                           project-root-markers)))
+      (eval `(or ,@ results))))
+  (add-to-list 'project-find-functions #'jds/project-find-root))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages '(flycheck-pos-tip pos-tip)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+
+;; (defun doom-thing-at-point-or-region (&optional thing prompt)
+;;   "Grab the current selection, THING at point, or xref identifier at point.
+
+;; Returns THING if it is a string. Otherwise, if nothing is found at point and
+;; PROMPT is non-nil, prompt for a string (if PROMPT is a string it'll be used as
+;; the prompting string). Returns nil if all else fails.
+
+;; NOTE: Don't use THING for grabbing symbol-at-point. The xref fallback is smarter
+;; in some cases."
+;;   (declare (side-effect-free t))
+;;   (cond ((stringp thing)
+;;          thing)
+;;         ((doom-region-active-p)
+;;          (buffer-substring-no-properties
+;;           (doom-region-beginning)
+;;           (doom-region-end)))
+;;         (thing
+;;          (thing-at-point thing t))
+;;         ((require 'xref nil t)
+;;          ;; A little smarter than using `symbol-at-point', though in most cases,
+;;          ;; xref ends up using `symbol-at-point' anyway.
+;;          ;; "Most cases" doesn't cover 'eglot so we manually exclude it.
+;;          ;; See discussion in https://github.com/joaotavora/eglot/issues/503
+;;          (xref-backend-identifier-at-point (xref-find-backend)))
+;;         (prompt
+;;          (read-string (if (stringp prompt) prompt "")))))
+
+;; (defun +jdelStrother/search-project-for-symbol-at-point (&optional symbol arg)
+;;   "Search current project for symbol at point.
+;; If prefix ARG is set, prompt for a known project to search from."
+;;   (interactive
+;; ;; Only change
+;;    (list (rxt-quote-pcre (or (doom-thing-at-point-or-region 'symbol) ""))
+;;          current-prefix-arg))
+;;   (let* ((projectile-project-root nil)
+;;          (default-directory
+;;            (if arg
+;;                (if-let (projects (projectile-relevant-known-projects))
+;;                    (completing-read "Search project: " projects nil t)
+;;                  (user-error "There are no known projects"))
+;;              default-directory)))
+;;     (cond ((featurep! :completion ivy)
+;;            (+ivy/project-search nil symbol))
+;;           ((featurep! :completion helm)
+;;            (+helm/project-search nil symbol))
+;;           ((rgrep (regexp-quote symbol))))))
+
+;; (map! :leader
+;; :desc "Search for symbol in project" "*" #'+jdelStrother/search-project-for-symbol-at-point)
+
+;; (use-package! dash)
+
+
+(defun doom/ediff-init-and-example ()
+  "ediff the current `init.el' with the example in doom-emacs-dir"
+  (interactive)
+  (ediff-files (concat doom-private-dir "init.el")
+               (concat doom-emacs-dir "init.example.el")))
+
+(define-key! help-map
+  "di"   #'doom/ediff-init-and-example
+  )
