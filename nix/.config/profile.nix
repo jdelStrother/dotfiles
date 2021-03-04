@@ -12,6 +12,7 @@ let nix-vendor = import(/Users/jon/Developer/vendor/nixpkgs) {
 };
 in {
   inherit awslogs
+    awscli2
     coreutils
     direnv
     # emacsMacport
@@ -29,7 +30,6 @@ in {
     zlib libiconv libxml2
     go;
 
-  awscli2 = nix-vendor.awscli2;
   ruby_3_0 = nix-vendor.ruby_3_0.override {
     docSupport = false;
   };
