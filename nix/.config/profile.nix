@@ -10,12 +10,21 @@ with import <nixpkgs> { };
 let nix-vendor = import(/Users/jon/Developer/vendor/nixpkgs) {
   config.allowUnfree = true;
 };
+gccemacs = (import (pkgs.fetchFromGitHub {
+  owner = "twlz0ne";
+  repo = "nix-gccemacs-darwin";
+  rev = "e5019ce975516cbef2202e7316356f1342c22806";
+  sha256 = "0ak19pfwj604p2gzz5zbfi2v2fqymkaxg396xch74qjixgb83qf1";
+})).emacsGccDarwin;
+emacsPackages = emacsPackagesNgGen gccemacs;
+emacsWithPackages = emacsPackages.emacsWithPackages;
 in {
+  emacs = emacsWithPackages (epkgs: [ epkgs.magit epkgs.vterm ]);
+
   inherit awslogs
     awscli2
     coreutils
     direnv
-    # emacsMacport
     fish
     fzf
     gist
@@ -54,13 +63,4 @@ in {
     '';
   };
 
-  # for emacs/roam/forge/vterm
-  # (Pretty sure you should be able to use emacsWithPackages for this, but couldn't make it work)
-  inherit sqlite cmake libtool;
-  gccemacs = (import (pkgs.fetchFromGitHub {
-    owner = "twlz0ne";
-    repo = "nix-gccemacs-darwin";
-    rev = "e5019ce975516cbef2202e7316356f1342c22806";
-    sha256 = "0ak19pfwj604p2gzz5zbfi2v2fqymkaxg396xch74qjixgb83qf1";
-  })).emacsGccDarwin;
 }
