@@ -30,10 +30,11 @@ in {
     gist
     git
     gnupg
+    jq
     nixfmt
     nodejs-14_x
     parallel
-    # ruby_2_7
+    ruby_2_7
     pssh
     ripgrep
     # common dependencies for gem installs (nokogiri)
@@ -42,12 +43,10 @@ in {
     rdbtools
     go
     shellcheck
+    tmux
     yarn;
 
-  ruby_3_0 = nix-vendor.ruby_3_0.override {
-    docSupport = false;
-  };
-
+  # for pasting images into org mode
   pngpaste = stdenv.mkDerivation rec {
     src = pkgs.fetchFromGitHub {
       owner = "jcsalterego";
@@ -63,4 +62,27 @@ in {
     '';
   };
 
+  # Use 'trash' rather than slow Applescript to delete files in Emacs
+  trash = stdenv.mkDerivation rec {
+    src = pkgs.fetchFromGitHub {
+      owner = "ali-rantakari";
+      repo = "trash";
+      rev = "d33f12fb91d2ccb553098e0f0aea57a2add77e09";
+      sha256 = "1d3rc03vgz32faj7qi18iiggxvxlqrj9lsk5jkpa9r1mcs5d89my";
+    };
+    name = "trash";
+    buildInputs = [
+      pkgs.darwin.apple_sdk.frameworks.Cocoa
+      pkgs.darwin.apple_sdk.frameworks.ScriptingBridge
+      pkgs.perl
+    ];
+    patchPhase = "substituteInPlace Makefile --replace '-arch i386' ''";
+    buildPhase = "make && make docs";
+    installPhase = ''
+      mkdir -p $out/bin
+      mkdir -p $out/share/man/man1
+      cp trash    $out/bin
+      cp trash.1 $out/share/man/man1
+    '';
+  };
 }
