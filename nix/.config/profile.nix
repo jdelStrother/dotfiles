@@ -29,9 +29,11 @@ in {
     fzf
     gist
     gnupg
+    graphviz # dot for emacs/roam
     jq
     nixfmt
     nodejs-14_x
+    oathToolkit
     parallel
     ruby_2_7
     pssh
