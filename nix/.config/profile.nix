@@ -28,7 +28,6 @@ in {
     fish
     fzf
     gist
-    git
     gnupg
     jq
     nixfmt
@@ -45,6 +44,15 @@ in {
     shellcheck
     tmux
     yarn;
+
+  git = git.overrideAttrs (_: rec {
+    installCheckTarget = ""; # skip tests
+    version = "2.30.2";
+    src = fetchurl {
+      url = "https://www.kernel.org/pub/software/scm/git/git-${version}.tar.xz";
+      sha256 = "sha256-QffZDHH5R2zTh2c/yxDOCcy+1nMyQ2pMxY168yw1X6o=";
+    };
+  });
 
   # for pasting images into org mode
   pngpaste = stdenv.mkDerivation rec {
