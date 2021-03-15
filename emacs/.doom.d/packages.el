@@ -58,6 +58,8 @@
 
 (package! yaml-mode)
 
+(package! lsp-treemacs)
+
 (package! explain-pause-mode
   :recipe (:host github :repo "lastquestion/explain-pause-mode"))
 
