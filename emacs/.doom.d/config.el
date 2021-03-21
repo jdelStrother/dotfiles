@@ -97,7 +97,7 @@ space rather than before."
   )
 
 (setq projectile-project-search-path '("~/Developer/" "~/Developer/vendor/"))
-
+(setq projectile-rails-expand-snippet-with-magic-comment t)
 ;; Enter multiedit, then in visual mode hit return to remove all other matches.
 ;; This is the recommended multiedit keybinding, but doom-emacs doesn't bind it by default.
 (after! evil-multiedit
@@ -112,14 +112,6 @@ space rather than before."
 
 ;; don't enable smartparens by default - when it doesn't work, it's really frustrating
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
-
-;; Avoid an error in Emacs 27.  Hopefully fixed in more recent builds?
-;; https://github.com/seagle0128/doom-modeline/issues/232#issuecomment-544144235
-(setq internal-lisp-face-attributes
-  [nil
-   :family :foundry :swidth :height :weight :slant :underline :inverse
-   :foreground :background :stipple :overline :strike :box
-   :font :inherit :fontset :vector :extend])
 
 ;; Not keen on ruby's auto-formatter, lets just rely on prettier.js for now
 (setq +format-on-save-enabled-modes '(js2-mode rjsx-mode typescript-mode typescript-tsx-mode)) ;; css-mode scss-mode))
@@ -148,6 +140,24 @@ space rather than before."
             (append '("/tmp$" "/vendor$" "/webpack$" "/files$" "app/assets/javascripts/packages" "") (funcall orig)))
            (t
             (funcall orig))))))
+
+  ;; steep tries to activate if 'bundle' is present in the path
+  (setq lsp-disabled-clients '(steep-ls))
+
+  (setq lsp-file-watch-ignored-directories
+    (append lsp-file-watch-ignored-directories '(
+      "[/\\\\]\\.direnv\\'"
+      ;; Bunch of audioboom-specific things because lsp doesn't work great with dir-locals (https://www.reddit.com/r/emacs/comments/jeenx4/til_how_to_load_file_or_dirlocals_before_a_minor/)
+      "[/\\\\]\\.sass-cache\\'"
+      "[/\\\\]\\.services\\'"
+      "[/\\\\]app/assets/javascripts/packages\\'"
+      "[/\\\\]coverage\\'"
+      "[/\\\\]db/sphinx\\'"
+      "[/\\\\]files\\'"
+      "[/\\\\]tmp\\'"
+      "[/\\\\]vendor\\'"
+      "[/\\\\]webpack\\'"
+    )))
 
   ;; I'm not keen on the LSP sideline flashing up constantly while typing.  Disable while in insert mode.
   (add-hook 'lsp-mode-hook (lambda()
