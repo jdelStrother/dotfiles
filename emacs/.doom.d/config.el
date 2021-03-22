@@ -176,7 +176,7 @@ space rather than before."
 (add-to-list 'auto-mode-alist '("\\.nix" . nix-mode))
 
 ;; don't steal focus when running rspec-compile
-(after! enh-ruby-mode
+(after! rspec-mode
   (set-popup-rule! "\*rspec-compilation\*" :select #'ignore))
 
 (after! haml-mode
