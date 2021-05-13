@@ -71,16 +71,14 @@ space rather than before."
 (add-hook 'vterm-mode-hook  'with-editor-export-editor)
 
 
-;; Disable the weird GUI toolbar I never use
-(tool-bar-mode -1)
-
-
 ;; Default window size on startup
 (add-to-list 'default-frame-alist '(width . 160))
 (add-to-list 'default-frame-alist '(height . 50))
 
 ;; Hit '-' to jump to the containing directory
 (define-key evil-normal-state-map (kbd "-") 'dired-jump)
+
+(setq-default tab-width 2)
 
 ;; Company completion popups are slow.  Hit C-SPC if you want one
 (setq company-idle-delay nil)
@@ -127,13 +125,6 @@ space rather than before."
   ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled.
   ;; Use lsp-workspace-folders-add instead.
   (setq lsp-auto-guess-root nil)
-  (setq lsp-eslint-server-command
-        (list "node"
-              ;; versions > 2.1.8 have issues: https://github.com/emacs-lsp/lsp-mode/issues/1932
-              ;; (expand-file-name (car (last (file-expand-wildcards "~/.vscode/extensions/dbaeumer.vscode-eslint-*/server/out/eslintServer.js"))))
-              (expand-file-name (car (last (file-expand-wildcards "~/.vscode/extensions/dbaeumer.vscode-eslint-2.1.8/server/out/eslintServer.js"))))
-              "--stdio"))
-
   (add-function :around (symbol-function 'lsp-file-watch-ignored-directories)
       (lambda (orig)
         (let ((root (lsp--workspace-root (cl-first (lsp-workspaces)))))
@@ -161,16 +152,14 @@ space rather than before."
       "[/\\\\]webpack\\'"
     )))
 
-  ;; I'm not keen on the LSP sideline flashing up constantly while typing.  Disable while in insert mode.
+  ;; I'm not keen on the LSP sideline flashing up constantly while typing. Disable while in insert mode.
   (add-hook 'lsp-mode-hook (lambda()
-    (let ((original-lsp-sideline-value nil))
-      (make-local-variable 'original-lsp-sideline-value)
-      (add-hook 'evil-insert-state-entry-hook (lambda () (progn
-        (setq original-lsp-sideline-value lsp-ui-sideline-mode)
-        (lsp-ui-sideline-enable nil))))
-      (add-hook 'evil-insert-state-exit-hook (lambda ()
-        (lsp-ui-sideline-enable original-lsp-sideline-value))))))
-
+    (setq-local original-lsp-sideline-value nil)
+    (add-hook 'evil-insert-state-entry-hook (lambda () (progn
+      (setq-local original-lsp-sideline-value lsp-ui-sideline-mode)
+      (lsp-ui-sideline-enable nil))))
+    (add-hook 'evil-insert-state-exit-hook (lambda ()
+      (lsp-ui-sideline-enable original-lsp-sideline-value)))))
   )
 
 ;; auto-activate sh-mode for .fish files
