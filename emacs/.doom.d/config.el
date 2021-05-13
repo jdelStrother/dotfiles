@@ -25,9 +25,11 @@
 ;; `load-theme' function. These are the defaults.
 (setq doom-theme 'doom-one)
 
-(setq org-directory "~/org/")
-(setq org-roam-directory "~/org/roam")
-(setq org-agenda-files '("~/org/" "~/org/roam" "~/org/roam/daily"))
+(setq org-directory "~/Documents/org/")
+(setq org-roam-directory "~/Documents/org/roam")
+(setq org-agenda-files '("~/Documents/org/" "~/Documents/org/roam" "~/Documents/org/roam/daily" "~/Library/Mobile Documents/iCloud~com~agiletortoise~Drafts5/Documents/org"))
+;; hide todos that are deferred to future dates
+(setq org-agenda-todo-ignore-scheduled 'future)
 ;; auto-save after toggling todo state
 (add-hook 'org-trigger-hook 'save-buffer)
 
