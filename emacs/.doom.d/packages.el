@@ -53,12 +53,13 @@
 
 ;; for cucumber
 (package! feature-mode)
-
 (package! groovy-mode)
-
-(package! yaml-mode)
-
 (package! lsp-treemacs)
+(package! nginx-mode)
+;; Doom's format-all mode seems kind of a mess, and I can't get it to obey .prettierignore
+;; Let's just use the prettier package for formatting.
+(package! prettier)
+(package! yaml-mode)
 
 (package! explain-pause-mode
   :recipe (:host github :repo "lastquestion/explain-pause-mode"))

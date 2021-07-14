@@ -320,3 +320,10 @@ space rather than before."
 (define-key! help-map
   "di"   #'doom/ediff-init-and-example
   )
+
+(use-package prettier
+  :hook ((typescript-mode . prettier-mode)
+         (js-mode . prettier-mode)
+         (json-mode . prettier-mode)
+         (web-mode . prettier-mode)
+         (yaml-mode . prettier-mode)))
