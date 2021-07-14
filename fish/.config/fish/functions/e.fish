@@ -1,3 +1,3 @@
 function e
-  emacsclient -nw $argv
+  TERM=xterm-24bit emacsclient -nw $argv
 end
