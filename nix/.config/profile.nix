@@ -5,35 +5,54 @@
 # Update user packages with:
 # nix-env -irf ~/.config/profile.nix
 #
-with import <nixpkgs> { };
-# https://nixos.wiki/wiki/User:Raboof#using_a_fork_of_a_packaged_project
-let nix-vendor = import(/Users/jon/Developer/vendor/nixpkgs) {
+let pkgs = import(<nixpkgs>) {
   config.allowUnfree = true;
+  localSystem = "aarch64-darwin";
+  overlays = [
+    (self: super: { nix-direnv = super.nix-direnv.override { enableFlakes = true; }; } )
+  ];
 };
+pkgs_intel = import(<nixpkgs>) {
+  config.allowUnfree = true;
+  localSystem = "x86_64-darwin";
+};
+
 gccemacs = (import (pkgs.fetchFromGitHub {
   owner = "twlz0ne";
   repo = "nix-gccemacs-darwin";
-  rev = "e5019ce975516cbef2202e7316356f1342c22806";
-  sha256 = "0ak19pfwj604p2gzz5zbfi2v2fqymkaxg396xch74qjixgb83qf1";
+  rev = "088f97e2939f33d6983fb90649a9c51d572736ec";
+  sha256 = "0mdbgl82r0dpgsz71i2npfy6kyd16637sk7glagwwdz7l0zxxmwn";
 })).emacsGccDarwin;
-emacsPackages = emacsPackagesNgGen gccemacs;
+emacsPackages = pkgs.emacsPackagesNgGen gccemacs;
+# emacsPackages = pkgs_next.emacsPackagesNgGen pkgs_next.emacsMacport;
+
 emacsWithPackages = emacsPackages.emacsWithPackages;
 in {
-  emacs = emacsWithPackages (epkgs: [ epkgs.magit epkgs.vterm ]);
+  # I'm using https://emacsformacosx.com nightlies instead nowadays
+  # emacs = emacsWithPackages (epkgs: [ epkgs.magit epkgs.vterm ]);
 
-  inherit awslogs
+  inherit (pkgs_intel)
+    niv
+    nixfmt
+    shellcheck
+    cmake
+    oathToolkit;
+  inherit (pkgs)
     awscli2
+    nixUnstable
+    awslogs
+    clang
     coreutils
     direnv
+    nix-direnv
+    git
     fish
     fzf
     gist
     gnupg
     graphviz # dot for emacs/roam
     jq
-    nixfmt
-    nodejs-14_x
-    oathToolkit
+    nodejs-16_x
     parallel
     ruby_2_7
     pssh
@@ -43,21 +62,11 @@ in {
     zlib libiconv libxml2
     rdbtools
     go
-    shellcheck
     tmux
     yarn;
 
-  git = git.overrideAttrs (_: rec {
-    installCheckTarget = ""; # skip tests
-    version = "2.30.2";
-    src = fetchurl {
-      url = "https://www.kernel.org/pub/software/scm/git/git-${version}.tar.xz";
-      sha256 = "sha256-QffZDHH5R2zTh2c/yxDOCcy+1nMyQ2pMxY168yw1X6o=";
-    };
-  });
-
   # for pasting images into org mode
-  pngpaste = stdenv.mkDerivation rec {
+  pngpaste = pkgs.stdenv.mkDerivation rec {
     src = pkgs.fetchFromGitHub {
       owner = "jcsalterego";
       repo="pngpaste";
@@ -73,8 +82,8 @@ in {
   };
 
   # Use 'trash' rather than slow Applescript to delete files in Emacs
-  trash = stdenv.mkDerivation rec {
-    src = pkgs.fetchFromGitHub {
+  trash = pkgs_intel.stdenv.mkDerivation rec {
+    src = pkgs_intel.fetchFromGitHub {
       owner = "ali-rantakari";
       repo = "trash";
       rev = "d33f12fb91d2ccb553098e0f0aea57a2add77e09";
@@ -82,11 +91,12 @@ in {
     };
     name = "trash";
     buildInputs = [
-      pkgs.darwin.apple_sdk.frameworks.Cocoa
-      pkgs.darwin.apple_sdk.frameworks.ScriptingBridge
-      pkgs.perl
+      pkgs_intel.darwin.apple_sdk.frameworks.Cocoa
+      pkgs_intel.darwin.apple_sdk.frameworks.ScriptingBridge
+      pkgs_intel.perl
     ];
     patchPhase = "substituteInPlace Makefile --replace '-arch i386' ''";
+    # patchPhase = "substituteInPlace Makefile --replace '-arch i386' '-arch arm64'";
     buildPhase = "make && make docs";
     installPhase = ''
       mkdir -p $out/bin
