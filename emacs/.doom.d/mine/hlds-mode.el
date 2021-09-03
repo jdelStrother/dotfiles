@@ -38,9 +38,7 @@
 
 (define-minor-mode hlds-mode
   "Highlight double-spaces that should separate sentences."
-  nil
-  " ds"
-  nil
+  :lighter " ds"
   (if hlds-mode
     (if font-lock-mode
       (progn

@@ -27,11 +27,30 @@
 
 (setq org-directory "~/Documents/org/")
 (setq org-roam-directory "~/Documents/org/roam")
-(setq org-agenda-files '("~/Documents/org/" "~/Documents/org/roam" "~/Documents/org/roam/daily" "~/Library/Mobile Documents/iCloud~com~agiletortoise~Drafts5/Documents/org"))
+(setq org-agenda-files '("~/Documents/org/" "~/Documents/org/roam" "~/Documents/org/roam/daily" "~/Library/Mobile Documents/iCloud~com~agiletortoise~Drafts5/Documents/org" "~/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/inbox.org"))
 ;; hide todos that are deferred to future dates
 (setq org-agenda-todo-ignore-scheduled 'future)
 ;; auto-save after toggling todo state
 (add-hook 'org-trigger-hook 'save-buffer)
+(after! org
+  (org-link-set-parameters "message" :follow
+   (lambda (id)
+    (shell-command
+     (concat "open message:" id)))))
+
+;; Doom's default capture templates, but excluding the project-specific ones I never use,
+;; and with a timestamp on todos
+(setq org-capture-templates
+ '(("t" "Todo" entry
+    (file+headline +org-capture-todo-file "Inbox")
+    "* [ ] %?\n%i\n%a\n:PROPERTIES:\n:CREATED: %u\n:END:" :prepend t)
+   ("n" "Notes" entry
+    (file+headline +org-capture-notes-file "Inbox")
+    "* %u %?\n%i\n%a" :prepend t)
+   ("j" "Journal" entry
+    (file+olp+datetree +org-capture-journal-file)
+    "* %U %?\n%i\n%a" :prepend t)))
+
 
 ;; Better insert behaviour with evil
 ;; https://github.com/syl20bnr/spacemacs/issues/14137
@@ -214,8 +233,11 @@ space rather than before."
 ;; Don't try to execute 'cvs' when visiting a directory that contains a csv directory
 (setq vc-handled-backends '(Git))
 
-(load-file (expand-file-name "mine/cfn-mode.el" (file-name-directory load-file-name)))
-(load-file (expand-file-name "mine/hlds-mode.el" (file-name-directory load-file-name)))
+;; load-file-name is used when we're loaded normally, buffer-file-name for if we eval this buffer
+(let ((dir (file-name-directory (or load-file-name (buffer-file-name)))))
+  (load-file (expand-file-name "mine/cfn-mode.el" dir))
+  (load-file (expand-file-name "mine/hlds-mode.el" dir))
+  (load-file (expand-file-name "mine/frame-recenter.el" dir)))
 
 ;; (explain-pause-mode t)
 
@@ -321,9 +343,14 @@ space rather than before."
   "di"   #'doom/ediff-init-and-example
   )
 
+(defun maybe-use-prettier ()
+  "Enable prettier-js-mode if an rc file is located."
+  (if (locate-dominating-file default-directory ".prettierrc")
+      (prettier-mode +1)))
+
 (use-package prettier
-  :hook ((typescript-mode . prettier-mode)
-         (js-mode . prettier-mode)
-         (json-mode . prettier-mode)
-         (web-mode . prettier-mode)
-         (yaml-mode . prettier-mode)))
+  :hook ((typescript-mode . maybe-use-prettier)
+         (js-mode . maybe-use-prettier)
+         (json-mode . maybe-use-prettier)
+         (web-mode . maybe-use-prettier)
+         (yaml-mode . maybe-use-prettier)))
