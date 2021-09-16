@@ -19,7 +19,7 @@ puts "Since #{previous_day}"
 COMMON_DIRECTORIES = %w[/Users/jon/Developer/web /Users/jon/Developer/terraform /Users/jon/Developer/imgn /Users/jon/Developer/jenkins-docker /Users/jon/Developer/ansible]
 dirs=[]
 File.foreach(File.expand_path("~/.local/share/z/data")) do |line|
-  name, score, time = line.split("|")
+  name, _score, time = line.split("|")
   time = Time.at(time.to_i)
   if time > previous_day.to_time
     dirs << name
@@ -27,14 +27,41 @@ File.foreach(File.expand_path("~/.local/share/z/data")) do |line|
 end
 dirs = dirs.sort.uniq
 
+
+def git_history_ignoring_rebases(previous_day, dir)
+  Dir.chdir(dir) do
+    # I do a lot of rebasing which probably isn't interesting to report for standup.
+    # This alters the commit-date, so `git log --since={yesterday}` doesn't work.
+    # Rebasing keeps the original author-date, though. Take a first pass to find commits where the author-date is
+    # after yesterday's date, and then print out those commits with `git log --no-walk`
+    datetime = previous_day.strftime("%Y-%m-%dT00:00:00")
+    commits = Open3.capture2("git", "log", "--all", "--pretty=%aI %H", "--since={#{datetime}}")[0]
+    recent_commits = commits.each_line.filter_map do |l|
+      author_date, commit = l.chomp.split(" ")
+      commit if author_date >= datetime
+    end
+    return if recent_commits.empty?
+
+    Open3.capture2(
+      "git", "log", "--author=Jon", "--no-walk", "--color", "--date=relative",
+      "--pretty=format:%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%aN, %cd)%Creset",
+      *recent_commits
+    )[0].strip
+  end
+end
+
+def git_history(previous_day, dir)
+  Dir.chdir(dir) do
+    datetime = previous_day.strftime("%Y-%m-%dT00:00:00")
+    return Open3.capture2("git", "lg", "--author=Jon", "--since={#{datetime}}", "--branches", "--remotes")[0].strip
+  end
+end
+
 dirs_with_git_history = {}
 (COMMON_DIRECTORIES + dirs).uniq.each do |dir|
   next unless File.exist?("#{dir}/.git")
-  work = nil
-  Dir.chdir(dir) do
-    work = Open3.capture2("git", "lg", "--author=Jon", "--since={#{previous_day.strftime("%Y%m%dT00:00:00")}}", "--branches", "--remotes")[0].strip
-  end
-  unless work.empty?
+  work = git_history_ignoring_rebases(previous_day, dir)
+  if work && !work.empty?
     dirs_with_git_history[dir] = work
   end
 end
