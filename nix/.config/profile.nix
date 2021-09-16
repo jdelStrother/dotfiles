@@ -7,7 +7,8 @@
 #
 let pkgs = import(<nixpkgs>) {
   config.allowUnfree = true;
-  localSystem = "aarch64-darwin";
+  # Build for M1 if that's what we're on
+  localSystem = builtins.currentSystem;
   overlays = [
     (self: super: { nix-direnv = super.nix-direnv.override { enableFlakes = true; }; } )
   ];
