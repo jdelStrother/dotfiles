@@ -122,13 +122,6 @@ space rather than before."
 (after! evil-multiedit
   (define-key evil-motion-state-map (kbd "RET") 'evil-multiedit-toggle-or-restrict-region))
 
-;; swiper sets a very low max-columns, resulting in "Omitted long line" when searching.
-;; https://github.com/abo-abo/swiper/issues/2482
-;; Also, rg excludes hidden files by default, which means that searching for stuff in webpack/.storybook/* fails.
-;; https://github.com/BurntSushi/ripgrep/issues/623#issuecomment-659909044
-(setq counsel-rg-base-command
-  "rg --max-columns 500 --with-filename --no-heading --line-number --color never --hidden --glob !.git %s")
-
 ;; don't enable smartparens by default - when it doesn't work, it's really frustrating
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
