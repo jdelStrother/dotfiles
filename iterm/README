@@ -1,1 +1,3 @@
-defaults read ~/Library/Preferences/com.googlecode.iTerm2 GlobalKeyMap > ~/Dropbox/dotfiles/iterm/GlobalKeyMap
+defaults read ~/Library/Preferences/com.googlecode.iTerm2 GlobalKeyMap > ~/dotfiles/iterm/GlobalKeyMap
+
+see https://gist.github.com/algal/9fc1d9a1b3f35f84e94937eef90887c7 for 24 bit color

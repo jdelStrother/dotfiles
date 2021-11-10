@@ -1,4 +1,4 @@
-set PATH ~/bin ~/go/bin $PATH
+set PATH ~/bin ~/go/bin ~/.npm/bin $PATH
 
 if status --is-login && which scmpuff > /dev/null
   scmpuff init -s --shell=fish | source

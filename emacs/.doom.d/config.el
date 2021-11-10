@@ -9,6 +9,9 @@
 (setq user-full-name "Jonathan del Strother"
       user-mail-address "jdelStrother@gmail.com")
 
+;; automatically revert buffers if they change on disk
+(global-auto-revert-mode t)
+
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
 ;;

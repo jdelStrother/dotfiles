@@ -118,6 +118,11 @@
 [diff "request"]
 	textconv = less
   binary = false
+[color "diff-highlight"]
+  oldNormal = red bold
+  oldHighlight = red bold 52
+  newNormal = green bold
+  newHighlight = green bold 22
 
 [github]
   user = jdelStrother
@@ -132,11 +137,12 @@
 [fetch "fsck"]
   zeroPaddedFilemode = ignore
 [commit]
-	gpgsign = true
+  gpgsign = true
 [filter "lfs"]
-	clean = git-lfs clean %f
-	smudge = git-lfs smudge %f
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
 	required = true
+	process = git-lfs filter-process
 [magit]
 	hideCampaign = true
 [magithub]
@@ -145,3 +151,10 @@
 	includeStatusHeader = false
 	includePullRequestsSection = false
 	includeIssuesSection = false
+[pull]
+	ff = only
+[maintenance]
+	repo = /Users/jon/Developer/vendor/nixpkgs
+	repo = /Users/jon/Developer/web
+[init]
+	defaultBranch = main

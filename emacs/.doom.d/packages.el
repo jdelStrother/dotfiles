@@ -64,9 +64,6 @@
 (package! explain-pause-mode
   :recipe (:host github :repo "lastquestion/explain-pause-mode"))
 
-(package! projectile-rails
-  :recipe (:host github :repo "jdelStrother/projectile-rails" :branch "insert-nil"))
-
 ;; (package! magit
 ;;   :recipe
 ;;   (:host github

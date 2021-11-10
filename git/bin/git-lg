@@ -6,15 +6,15 @@ args=$@
 if [[ "$args" == *"--all"* ]]
 then
   # don't show notes with the --all flag
-  #if git rev-parse --verify -q refs/notes/commits > /dev/null
-  #then
-    #args="$args ^refs/notes/commits "
-  #fi
+  if git rev-parse --verify -q refs/notes/commits > /dev/null
+  then
+    args="$args ^refs/notes/commits "
+  fi
   # Exclude pullreq refs - its often a branch that's been squashed in, so no longer useful,
   # and if it's a PR that's not yet merged, it'll have a branch name pointing to it, so will show up that way.
-  args="--exclude=refs/wip/* --exclude=refs/pullreqs/* $args"
+  args="--exclude=refs/prefetch/* --exclude=refs/wip/* --exclude=refs/pullreqs/* $args"
 fi
 
 # git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s <<<NOTE>>> %Cgreen(%aN, %cr)%Creset' --abbrev-commit --date=relative $args | git-logger-notes.rb | LESS=FRSX less
 # we're not using git-notes at the moment, don't waste time on it
-git log --graph --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%aN, %cd)%Creset' --date=relative --abbrev-commit $args | LESS=FRSX less
+git log --graph --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%aN, %cd)%Creset' --date=relative --abbrev-commit --decorate=short $args | LESS=FRSX less

@@ -1,6 +1,6 @@
 # This file contains fish universal variable definitions.
 # VERSION: 3.0
-SETUVAR --export BUNDLER_EDITOR:mate
+SETUVAR --export BUNDLER_EDITOR:code
 SETUVAR --export EDITOR:vim
 SETUVAR --export PSSH_OPTIONS:ControlPersist\x3dno
 SETUVAR ZO_CMD:zo

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# stuff with a '+' prefix is a worktree, '*' is checked out
 BRANCHES=$(git branch --merged | egrep -v "(^(\*|\+)|master)")
 if [[ -n $BRANCHES ]]; then
   git branch -d $BRANCHES
