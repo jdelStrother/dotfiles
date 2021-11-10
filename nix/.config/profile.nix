@@ -33,11 +33,7 @@ in {
   # emacs = emacsWithPackages (epkgs: [ epkgs.magit epkgs.vterm ]);
 
   inherit (pkgs_intel)
-    niv
-    nixfmt
-    shellcheck
-    cmake
-    oathToolkit;
+    niv;
   inherit (pkgs)
     awscli2
     nixUnstable
@@ -64,7 +60,10 @@ in {
     rdbtools
     go
     tmux
-    yarn;
+    oathToolkit
+    shellcheck
+    nixfmt
+    cmake;
 
   # for pasting images into org mode
   pngpaste = pkgs.stdenv.mkDerivation rec {
@@ -83,8 +82,8 @@ in {
   };
 
   # Use 'trash' rather than slow Applescript to delete files in Emacs
-  trash = pkgs_intel.stdenv.mkDerivation rec {
-    src = pkgs_intel.fetchFromGitHub {
+  trash = pkgs.stdenv.mkDerivation rec {
+    src = pkgs.fetchFromGitHub {
       owner = "ali-rantakari";
       repo = "trash";
       rev = "d33f12fb91d2ccb553098e0f0aea57a2add77e09";
@@ -92,12 +91,16 @@ in {
     };
     name = "trash";
     buildInputs = [
-      pkgs_intel.darwin.apple_sdk.frameworks.Cocoa
-      pkgs_intel.darwin.apple_sdk.frameworks.ScriptingBridge
-      pkgs_intel.perl
+      pkgs.darwin.apple_sdk.frameworks.Cocoa
+      pkgs.darwin.apple_sdk.frameworks.ScriptingBridge
+      pkgs.perl
     ];
-    patchPhase = "substituteInPlace Makefile --replace '-arch i386' ''";
-    # patchPhase = "substituteInPlace Makefile --replace '-arch i386' '-arch arm64'";
+
+    patchPhase = if builtins.currentSystem == "aarch64-darwin" then
+      "substituteInPlace Makefile --replace '-arch i386 -arch x86_64' '-arch arm64'"
+    else
+      "substituteInPlace Makefile --replace '-arch i386' ''";
+
     buildPhase = "make && make docs";
     installPhase = ''
       mkdir -p $out/bin
