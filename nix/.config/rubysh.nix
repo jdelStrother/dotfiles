@@ -1,9 +1,15 @@
-{ pkgs ? import <nixpkgs> { localSystem = "x86_64-darwin"; } }:
+{ pkgs ? import <nixpkgs> {
+    # localSystem = "x86_64-darwin";
+    localSystem = builtins.currentSystem;
+  },
+  ruby_version ? "ruby_2_7"
+ }:
 
 with pkgs;
 let
-  ruby = ruby_2_7;
+  ruby = builtins.getAttr ruby_version pkgs;
   gems = ruby.gems;
+  gemHome = "$HOME/.gem/ruby/${ruby.version.libDir}-${stdenv.system}";
 
 in mkShell {
   buildInputs = [
@@ -16,11 +22,13 @@ in mkShell {
     gems.mysql2
     gems.pg
     gems.sassc
-    gems.sqlite3
   ];
 
   shellHook = ''
-    export GEM_HOME="$HOME/.gem/ruby/${ruby.version.libDir}-${stdenv.system}";
-    export GEM_PATH="$HOME/.gem/ruby/${ruby.version.libDir}-${stdenv.system}";
+    export GEM_HOME="${gemHome}";
+    export GEM_PATH="${gemHome}";
+    export PATH="${gemHome}/bin:$PATH";
+    bundle config set build.nokogiri ${builtins.concatStringsSep " " ruby.gems.nokogiri.buildFlags}
+    bundle config set build.sqlite3 ${builtins.concatStringsSep " " ruby.gems.sqlite3.buildFlags} --with-cflags=-fdeclspec
   '';
 }
