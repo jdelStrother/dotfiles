@@ -347,3 +347,22 @@ space rather than before."
          (json-mode . maybe-use-prettier)
          (web-mode . maybe-use-prettier)
          (yaml-mode . maybe-use-prettier)))
+
+
+;; Fix stylelint v14:
+(flycheck-define-checker general-stylelint
+  "A checker for CSS and related languages using Stylelint"
+  :command ("stylelint"
+            (eval flycheck-stylelint-args)
+            (option-flag "--quiet" flycheck-stylelint-quiet)
+            (config-file "--config" flycheck-general-stylelintrc))
+  :standard-input t
+  :error-parser flycheck-parse-stylelint
+  :predicate flycheck-buffer-nonempty-p
+  :modes (scss-mode))
+(flycheck-def-config-file-var flycheck-general-stylelintrc
+    (general-stylelint) nil)
+(add-to-list 'flycheck-checkers 'general-stylelint)
+(add-hook 'scss-mode-hook
+          (lambda ()
+            (flycheck-disable-checker 'scss-stylelint)))
