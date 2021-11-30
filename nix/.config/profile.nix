@@ -46,6 +46,7 @@ in {
     fish
     fzf
     gist
+    gnugrep #macos grep is weird
     gnupg
     graphviz # dot for emacs/roam
     jq
