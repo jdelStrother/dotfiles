@@ -30,3 +30,5 @@ source $dir/iterm2_shell_integration.(basename $SHELL)
 
 # I use 24 bit color in iterm, but that's not going to work on most ssh hosts...
 alias ssh="TERM=xterm-256color command ssh"
+
+set -g theme_display_aws_vault_profile yes

@@ -38,6 +38,7 @@ in {
     awscli2
     nixUnstable
     awslogs
+    aws-vault
     clang
     coreutils
     direnv
@@ -48,6 +49,7 @@ in {
     gist
     gnugrep #macos grep is weird
     gnupg
+    gnused # macos sed is weird
     graphviz # dot for emacs/roam
     jq
     nodejs-16_x
