@@ -136,6 +136,8 @@ space rather than before."
 (setq-hook! 'typescript-tsx-mode-hook +format-with-lsp nil)
 (setq-hook! 'js2-mode-hook +format-with-lsp nil)
 
+(add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
+
 (after! lsp-mode
   ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled.
   ;; Use lsp-workspace-folders-add instead.
