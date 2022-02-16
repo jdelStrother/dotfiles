@@ -358,7 +358,8 @@ space rather than before."
   :command ("stylelint"
             (eval flycheck-stylelint-args)
             (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-general-stylelintrc))
+            (config-file "--config" flycheck-general-stylelintrc)
+            "--stdin-filename" (eval (or (buffer-file-name) "style.scss")))
   :standard-input t
   :error-parser flycheck-parse-stylelint
   :predicate flycheck-buffer-nonempty-p
