@@ -25,6 +25,22 @@ emacsPackages = pkgs.emacsPackagesNgGen gccemacs;
 # emacsPackages = pkgs_next.emacsPackagesNgGen pkgs_next.emacsMacport;
 
 emacsWithPackages = emacsPackages.emacsWithPackages;
+
+
+scmpuff = pkgs.buildGoModule rec {
+  pname = "scmpuff";
+  version = "0.44pre";
+  vendorSha256 = "sha256-rT0+ifCB5P/Qv9ZMIoahJ0IA6hwk2zONYQUvQB/UPSY=";
+  src = pkgs.fetchFromGitHub {
+    owner = "mroth";
+    repo = "scmpuff";
+    rev = "8a7a6514486e64c4a94473da91f783b57e6d775d";
+    hash="sha256-+L0W+M8sZdUSCWj9Ftft1gkRRfWMHdxon2xNnotx8Xs";
+  };
+  checkPhase = "";
+};
+
+
 in {
   # I'm using https://emacsformacosx.com nightlies instead nowadays
   # emacs = emacsWithPackages (epkgs: [ epkgs.magit epkgs.vterm ]);
@@ -64,6 +80,7 @@ in {
     nixfmt
     cmake;
 
+  inherit scmpuff;
 
   # for pasting images into org mode
   pngpaste = pkgs.stdenv.mkDerivation rec {
