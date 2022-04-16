@@ -9,24 +9,11 @@ let pkgs = import(<nixpkgs>) {
   config.allowUnfree = true;
   # Build for M1 if that's what we're on
   localSystem = builtins.currentSystem;
-  overlays = [
-    (self: super: { nix-direnv = super.nix-direnv.override { enableFlakes = true; }; } )
-  ];
 };
 pkgs_intel = import(<nixpkgs>) {
   config.allowUnfree = true;
   localSystem = "x86_64-darwin";
 };
-# got impatient waiting for nix-direnv 2 to reach nixpkgs-unstable
-nix-direnv = (
-  let src = pkgs.fetchFromGitHub {
-    owner  = "nix-community";
-    repo   = "nix-direnv";
-    rev    = "c44fd24a25e5d83e36fc6f2f9aa55f403705d20e";
-    sha256 = "1npscypic84ygv6bam3z91i1z3xxggr3lab7224gcqmlfr7srgyq";
-  };
-  in import "${src}/default.nix" {}
-);
 
 gccemacs = (import (pkgs.fetchFromGitHub {
   owner = "twlz0ne";
@@ -42,8 +29,6 @@ in {
   # I'm using https://emacsformacosx.com nightlies instead nowadays
   # emacs = emacsWithPackages (epkgs: [ epkgs.magit epkgs.vterm ]);
 
-  inherit (pkgs_intel)
-    niv;
   inherit (pkgs)
     awscli2
     nixUnstable
@@ -52,7 +37,7 @@ in {
     clang
     coreutils
     direnv
-    # nix-direnv
+    nix-direnv
     git
     fish
     fzf
@@ -62,9 +47,10 @@ in {
     gnused # macos sed is weird
     graphviz # dot for emacs/roam
     jq
+    niv
     nodejs-16_x
     parallel
-    ruby_2_7
+    ruby_3_0
     pssh
     ripgrep
     # common dependencies for gem installs (nokogiri)
@@ -78,7 +64,6 @@ in {
     nixfmt
     cmake;
 
-  inherit nix-direnv;
 
   # for pasting images into org mode
   pngpaste = pkgs.stdenv.mkDerivation rec {
