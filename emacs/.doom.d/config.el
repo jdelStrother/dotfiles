@@ -179,8 +179,6 @@ space rather than before."
       (lsp-ui-sideline-enable original-lsp-sideline-value)))))
   )
 
-;; auto-activate sh-mode for .fish files
-(add-to-list 'auto-mode-alist '("\\.fish" . sh-mode))
 (add-to-list 'auto-mode-alist '("\\.nix" . nix-mode))
 
 ;; don't steal focus when running rspec-compile
