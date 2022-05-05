@@ -129,7 +129,8 @@ space rather than before."
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
 ;; Not keen on ruby's auto-formatter, lets just rely on prettier.js for now
-(setq +format-on-save-enabled-modes '(js2-mode rjsx-mode typescript-mode typescript-tsx-mode)) ;; css-mode scss-mode))
+;; (And nowadays I just use the prettier package rather than format-all, so remove this entire thing:
+;; (setq +format-on-save-enabled-modes '(js2-mode rjsx-mode typescript-mode typescript-tsx-mode)) ;; css-mode scss-mode))
 
 ;; We use prettier to format typescript, so don't want the typescript LSP interfering
 (setq-hook! 'typescript-mode-hook +format-with-lsp nil)
@@ -347,7 +348,10 @@ space rather than before."
 (use-package prettier
   :hook ((typescript-mode . maybe-use-prettier)
          (js-mode . maybe-use-prettier)
+         (css-mode . maybe-use-prettier)
+         (scss-mode . maybe-use-prettier)
          (json-mode . maybe-use-prettier)
+         ;; (ruby-mode . maybe-use-prettier)
          (web-mode . maybe-use-prettier)
          (yaml-mode . maybe-use-prettier)))
 
