@@ -140,35 +140,25 @@ space rather than before."
 (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
 
 (after! lsp-mode
-  ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled.
-  ;; Use lsp-workspace-folders-add instead.
-  (setq lsp-auto-guess-root nil)
-  (add-function :around (symbol-function 'lsp-file-watch-ignored-directories)
-      (lambda (orig)
-        (let ((root (lsp--workspace-root (cl-first (lsp-workspaces)))))
-          (cond
-           ((string-prefix-p "/Users/jon/Developer/web" root)
-            (append '("/tmp$" "/vendor$" "/webpack$" "/files$" "app/assets/javascripts/packages" "") (funcall orig)))
-           (t
-            (funcall orig))))))
+  ;; Ignore anything in .gitignore
+  (defun ++git-ignore-p (path)
+    (let* (; trailing / breaks git check-ignore if path is a symlink:
+         (path (directory-file-name path))
+         (default-directory (file-name-directory path))
+         (relpath (file-name-nondirectory path))
+         (cmd (format "git check-ignore '%s'" relpath))
+         (status (call-process-shell-command cmd)))
+    (eq status 0)))
+  (defun ++lsp--path-is-watchable-directory-a
+      (fn path dir ignored-directories)
+    (and (not (++git-ignore-p (f-join dir path)))
+         (funcall fn path dir ignored-directories)))
+  (advice-add 'lsp--path-is-watchable-directory
+              :around #'++lsp--path-is-watchable-directory-a)
 
-  ;; steep tries to activate if 'bundle' is present in the path
-  (setq lsp-disabled-clients '(steep-ls))
 
-  (setq lsp-file-watch-ignored-directories
-    (append lsp-file-watch-ignored-directories '(
-      "[/\\\\]\\.direnv\\'"
-      ;; Bunch of audioboom-specific things because lsp doesn't work great with dir-locals (https://www.reddit.com/r/emacs/comments/jeenx4/til_how_to_load_file_or_dirlocals_before_a_minor/)
-      "[/\\\\]\\.sass-cache\\'"
-      "[/\\\\]\\.services\\'"
-      "[/\\\\]app/assets/javascripts/packages\\'"
-      "[/\\\\]coverage\\'"
-      "[/\\\\]db/sphinx\\'"
-      "[/\\\\]files\\'"
-      "[/\\\\]tmp\\'"
-      "[/\\\\]vendor\\'"
-      "[/\\\\]webpack\\'"
-    )))
+  ;; steep & typeprof try to activate if 'bundle' is present in the path
+  (setq lsp-disabled-clients '(steep-ls typeprof-ls))
 
   ;; I'm not keen on the LSP sideline flashing up constantly while typing. Disable while in insert mode.
   (add-hook 'lsp-mode-hook (lambda()
