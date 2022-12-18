@@ -39,7 +39,7 @@
 #     set -g theme_display_hostname ssh
 #     set -g theme_display_sudo_user yes
 #     set -g theme_display_vi no
-#     set -g theme_display_nvm yes
+#     set -g theme_display_node yes
 #     set -g theme_avoid_ambiguous_glyphs yes
 #     set -g theme_powerline_fonts no
 #     set -g theme_nerd_fonts yes
@@ -399,7 +399,7 @@ function __bobthefish_finish_segments -S -d 'Close open prompt segments'
 
         if set -q theme_newline_prompt
             echo -ens "$theme_newline_prompt"
-        else if [ "$theme_powerline_fonts" = "no" -a "$theme_nerd_fonts" != "yes" ]
+        else if [ "$theme_powerline_fonts" = 'no' -a "$theme_nerd_fonts" != 'yes' ]
             echo -ns '> '
         else
             echo -ns "$right_arrow_glyph "
@@ -641,12 +641,12 @@ function __bobthefish_prompt_k8s_context -S -d 'Show current Kubernetes context'
     and [ -z $namespace -o "$namespace" = 'default' ]
     and return
 
-    set -l segment $k8s_glyph " " $context
+    set -l segment $k8s_glyph ' ' $context
     [ -n "$namespace" ]
-    and set segment $segment ":" $namespace
+    and set segment $segment ':' $namespace
 
     __bobthefish_start_segment $color_k8s
-    echo -ns $segment " "
+    echo -ns $segment ' '
 end
 
 
@@ -669,17 +669,17 @@ function __bobthefish_prompt_aws_vault_profile -S -d 'Show AWS Vault profile'
 
     set -l diff_time $diff_mins"m"
     [ $diff_mins -le 0 ]
-    and set -l diff_time "0m"
+    and set -l diff_time '0m'
     [ $diff_mins -ge 60 ]
     and set -l diff_time (math "floor($diff_mins / 60)")"h"(math "$diff_mins % 60")"m"
 
-    set -l segment $profile " (" $diff_time ")"
+    set -l segment $profile ' (' $diff_time ')'
     set -l status_color $color_aws_vault
     [ $diff_mins -le 0 ]
     and set -l status_color $color_aws_vault_expired
 
     __bobthefish_start_segment $status_color
-    echo -ns $segment " "
+    echo -ns $segment ' '
 end
 
 
@@ -690,7 +690,7 @@ end
 # Polyfill for fish < 2.5.0
 if not type -q prompt_hostname
     if not set -q __bobthefish_prompt_hostname
-        set -g __bobthefish_prompt_hostname (hostname | string replace -r '\..*' '')
+        set -g __bobthefish_prompt_hostname (uname -n | string replace -r '\..*' '')
     end
 
     function prompt_hostname
@@ -830,10 +830,10 @@ function __bobthefish_prompt_rubies -S -d 'Display current Ruby information'
         set -l asdf_current_ruby (asdf current ruby 2>/dev/null)
         or return
 
-        echo "$asdf_current_ruby" | read -l asdf_ruby_version asdf_provenance
+        echo "$asdf_current_ruby" | read -l _asdf_plugin asdf_ruby_version asdf_provenance
 
         # If asdf changes their ruby version provenance format, update this to match
-        [ (string trim -- "$asdf_provenance") = "(set by $HOME/.tool-versions)" ]
+        [ (string trim -- "$asdf_provenance") = "$HOME/.tool-versions" ]
         and return
 
         set ruby_version $asdf_ruby_version
@@ -891,20 +891,70 @@ function __bobthefish_prompt_desk -S -d 'Display current desk environment'
     and return
 
     __bobthefish_start_segment $color_desk
-    echo -ns $desk_glyph ' ' (basename  -a -s ".fish" "$DESK_ENV") ' '
+    echo -ns $desk_glyph ' ' (basename -a -s '.fish' "$DESK_ENV") ' '
     set_color normal
 end
 
-function __bobthefish_prompt_nvm -S -d 'Display current node version through NVM'
-    [ "$theme_display_nvm" = 'yes' -a -n "$NVM_DIR" ]
+function __bobthefish_prompt_find_file_up -S -d 'Find file(s), going up the parent directories'
+    set -l dir "$argv[1]"
+    set -l files $argv[2..-1]
+
+    if test -z "$dir"
+        or test -z "$files"
+        return 1
+    end
+
+    while [ "$dir" ]
+        for f in $files
+            if [ -e "$dir/$f" ]
+                return
+            end
+        end
+
+        [ "$dir" = '/' ]
+        and return 1
+
+        set dir (__bobthefish_dirname "$dir")
+    end
+    return 1
+end
+
+function __bobthefish_prompt_node -S -d 'Display current node version'
+    set -l should_show
+
+    if [ "$theme_display_node" = 'always' -o "$theme_display_nvm" = 'yes' ]
+        set should_show 1
+    else if [ "$theme_display_node" = 'yes' ]
+        __bobthefish_prompt_find_file_up "$PWD" package.json .nvmrc .node-version
+        and set should_show 1
+    end
+
+    [ -z "$should_show" ]
+    and return
+
+    set -l node_manager
+    set -l node_manager_dir
+
+    if type -q nvm
+      set node_manager 'nvm'
+      set node_manager_dir $NVM_DIR
+    else if type -fq fnm
+      set node_manager 'fnm'
+      set node_manager_dir $FNM_DIR
+    end
+
+    [ -n "$node_manager_dir" ]
     or return
 
-    set -l node_version (nvm current 2> /dev/null)
+    set -l node_version ("$node_manager" current 2> /dev/null)
 
     [ -z $node_version -o "$node_version" = 'none' -o "$node_version" = 'system' ]
     and return
 
-    __bobthefish_start_segment $color_nvm
+    [ -n "$color_nvm" ]
+    and set -x color_node $color_nvm
+
+    __bobthefish_start_segment $color_node
     echo -ns $node_glyph $node_version ' '
     set_color normal
 end
@@ -928,7 +978,7 @@ function __bobthefish_prompt_hg -S -a hg_root_dir -a real_pwd -d 'Display the ac
 
     set -l flags "$dirty"
     [ "$flags" ]
-    and set flags ""
+    and set flags ''
 
     set -l flag_colors $color_repo
     if [ "$dirty" ]
@@ -1090,8 +1140,8 @@ function fish_prompt -d 'bobthefish, a fish theme optimized for awesome'
     set -l last_status $status
 
     # Use a simple prompt on dumb terminals.
-    if [ "$TERM" = "dumb" ]
-        echo "> "
+    if [ "$TERM" = 'dumb' ]
+        echo '> '
         return
     end
 
@@ -1124,7 +1174,7 @@ function fish_prompt -d 'bobthefish, a fish theme optimized for awesome'
     __bobthefish_prompt_rubies
     __bobthefish_prompt_virtualfish
     __bobthefish_prompt_virtualgo
-    __bobthefish_prompt_nvm
+    __bobthefish_prompt_node
 
     set -l real_pwd (__bobthefish_pwd)
 
