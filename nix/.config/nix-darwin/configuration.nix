@@ -64,9 +64,9 @@
       pkgs.shellcheck
       pkgs.nixfmt
       pkgs.cmake
-      (pkgs.callPackage ./macos-trash {})
-      (pkgs.callPackage ./pngpaste {})
-      (pkgs.callPackage ./scmpuff {})
+      (pkgs.callPackage ./pkgs/macos-trash {})
+      (pkgs.callPackage ./pkgs/pngpaste {})
+      (pkgs.callPackage ./pkgs/scmpuff {})
     ];
     programs.direnv.enable = true;
     programs.direnv.nix-direnv.enable = true;
