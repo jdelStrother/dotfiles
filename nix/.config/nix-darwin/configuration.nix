@@ -32,6 +32,7 @@
   home-manager.useUserPackages = true;
 
   home-manager.users.jon = { pkgs, ... }: {
+    imports = [./home-manager-apps.nix];
     home.stateVersion = "22.11";
     home.packages = [
       pkgs.awscli2
