@@ -1,2 +1,2 @@
-vim/.vim/bundle
-emacs/**/*.elc
+stow/vim/.vim/bundle
+stow/emacs/**/*.elc
