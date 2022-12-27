@@ -1,6 +1,6 @@
-# darwin-rebuild switch --flake (realpath ~/.config/nix-darwin)
+# darwin-rebuild switch --flake ~/dotfiles
 
-{ pkgs, ... }:
+{ pkgs, config, lib, ... }:
 {
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
@@ -14,13 +14,17 @@
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
   nix.package = pkgs.nix;
+  # add the current version of pkgs to the search path,
+  # so that they consistently refer to the same thing (eg for `home-manager switch`)
+  nix.nixPath = [ ("nixpkgs=" + toString pkgs.path) ];
 
   programs.zsh.enable = true;
   programs.fish.enable = true;
 
-  # Sadly setting the shell doesn't work unless you're creating a new user.
-  # Use `chsh -s /run/current-system/sw/bin/fish` instead
   users.users.jon = {
+    home = "/Users/jon";
+    # Sadly setting the shell doesn't work unless you're creating a new user.
+    # Use `chsh -s /run/current-system/sw/bin/fish` instead
     shell = pkgs.fish;
   };
 

@@ -1,22 +1,29 @@
 { pkgs, ... }:
 
+# `home-manager -f ~/dotfiles/home.nix switch`
 {
   imports = [./home-manager-apps.nix];
+
+  home.username = "jon";
+  home.homeDirectory = "/Users/jon";
   home.stateVersion = "22.11";
+
   home.packages = [
     pkgs.ruby_3_1
     pkgs.nodejs-16_x
     pkgs.php # for Alfred devdocs workflow
 
-    pkgs.awscli2
     pkgs.nixUnstable
+    pkgs.home-manager
+
+    pkgs.awscli2
     # pkgs.awslogs
     pkgs.aws-vault
     pkgs.clang
     pkgs.coreutils
     pkgs.fzf
     pkgs.gist
-    pkgs.gnugrep #macos grep is weird
+    pkgs.gnugrep # macos grep is weird
     pkgs.gnused # macos sed is weird
     pkgs.graphviz # dot for emacs/roam
 
@@ -34,7 +41,7 @@
     pkgs.rdbtools
     pkgs.go
     pkgs.tmux
-    pkgs.oathToolkit
+    # pkgs.oathToolkit
     pkgs.shellcheck
     pkgs.nixfmt
     pkgs.cmake
