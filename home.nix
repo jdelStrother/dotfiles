@@ -1,6 +1,5 @@
 { pkgs, ... }:
 
-# `home-manager -f ~/dotfiles/home.nix switch`
 {
   imports = [ ./home-manager-apps.nix ];
 
@@ -8,7 +7,10 @@
   home.homeDirectory = "/Users/jon";
   home.stateVersion = "22.11";
 
-  home.sessionVariables = { EDITOR = "emacs"; };
+  home.sessionVariables = {
+    EDITOR = "emacs";
+    BUNDLER_EDITOR = "code";
+  };
 
   home.packages = [
     pkgs.ruby_3_1
@@ -61,6 +63,23 @@
   ];
   programs.direnv.enable = true;
   programs.direnv.nix-direnv.enable = true;
+
+  programs.git = {
+    enable = true;
+    userName = "Jonathan del Strother";
+    userEmail = "me@delstrother.com";
+    signing = {
+      key = "0F567E1A2C4EBD80";
+      signByDefault = true;
+    };
+    aliases = { amend = "commit --amend -C HEAD"; };
+    extraConfig = {
+      core.editor = "vim";
+      github.user = "jdelStrother";
+      init.defaultBranch = "main";
+      pull.ff = "only";
+    };
+  };
 
   programs.fish.enable = true;
   programs.fish.plugins = [
@@ -158,12 +177,12 @@
           set hosts staging1-1 staging1-2
         else if test "$argv[1]" = "--dj"
           set argv $argv[2..-1]
-          set hosts s2 staging1-3
+          set hosts staging1-3
         else if string match -- '--*' "$argv[1]"
           echo "unrecognized host option" 1>&2
           return 1
         else
-          set hosts s1 s2 staging1-1 staging1-2 staging1-3
+          set hosts staging1-1 staging1-2 staging1-3
         end
       else
         if test "$argv[1]" = "--web"
@@ -240,20 +259,22 @@
     '';
   };
 
-  xdg.configFile."fish/completions/aws.fish".text = ''
-    complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)';
-  '';
-  xdg.configFile."fish/completions/git-lg.fish".text = ''
-    complete --no-files -c git -a '(__fish_git_branches)' -n '__fish_git_using_command lg'
-  '';
-  xdg.configFile."fish/completions/rake.fish".text = ''
-    function __get_rake_completions -d "Get rake completions"
-      set tool rake
-      if test -f bin/rake
-        set tool bin/rake
+  home.file = {
+    ".config/fish/completions/aws.fish".text = ''
+      complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)';
+    '';
+    ".config/fish/completions/git-lg.fish".text = ''
+      complete --no-files -c git -a '(__fish_git_branches)' -n '__fish_git_using_command lg'
+    '';
+    ".config/fish/completions/rake.fish".text = ''
+      function __get_rake_completions -d "Get rake completions"
+        set tool rake
+        if test -f bin/rake
+          set tool bin/rake
+        end
+        $tool -T 2>&1 | sed -e "s/^rake \([a-z:_0-9!\-]*\).*#\(.*\)/\1	\2/"
       end
-      $tool -T 2>&1 | sed -e "s/^rake \([a-z:_0-9!\-]*\).*#\(.*\)/\1	\2/"
-    end
-    complete -c rake --no-files -a "(__get_rake_completions)"
-  '';
+      complete -c rake --no-files -a "(__get_rake_completions)"
+    '';
+  };
 }

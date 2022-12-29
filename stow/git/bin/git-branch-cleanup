@@ -1,5 +1,7 @@
 #!/bin/bash
 
+git fetch --prune
+
 # stuff with a '+' prefix is a worktree, '*' is checked out
 BRANCHES=$(git branch --merged | egrep -v "(^(\*|\+)|master)")
 if [[ -n $BRANCHES ]]; then
