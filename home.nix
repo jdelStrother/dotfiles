@@ -30,6 +30,7 @@
     pkgs.gnugrep # macos grep is weird
     pkgs.gnused # macos sed is weird
     pkgs.graphviz # dot for emacs/roam
+    pkgs.zstd # doom-emacs uses zstd for some optimizations
 
     pkgs.gnupg
     pkgs.pinentry
@@ -59,8 +60,9 @@
     (pkgs.callPackage ./pkgs/pngpaste { })
     (pkgs.callPackage ./pkgs/scmpuff { })
 
-    pkgs.emacs
+    ((pkgs.emacsPackagesFor pkgs.emacs).emacsWithPackages (epkgs: [ epkgs.vterm ]))
   ];
+
   programs.direnv.enable = true;
   programs.direnv.nix-direnv.enable = true;
 
