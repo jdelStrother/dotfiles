@@ -60,7 +60,7 @@
     (pkgs.callPackage ./pkgs/pngpaste { })
     (pkgs.callPackage ./pkgs/scmpuff { })
 
-    ((pkgs.emacsPackagesFor pkgs.emacs).emacsWithPackages (epkgs: [ epkgs.vterm ]))
+    ((pkgs.emacsPackagesFor pkgs.emacsGit).emacsWithPackages (epkgs: [ epkgs.vterm ]))
   ];
 
   programs.direnv.enable = true;

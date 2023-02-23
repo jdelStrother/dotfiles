@@ -17,6 +17,19 @@
   # add the current version of pkgs to the search path,
   # so that they consistently refer to the same thing (eg for `home-manager switch`)
   nix.nixPath = [ ("nixpkgs=" + toString pkgs.path) ];
+  nix.settings = {
+    substituters = [
+      "https://nix-community.cachix.org"
+    ];
+    trusted-public-keys = [
+      "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
+    trusted-substituters = [
+      "https://cachix.org/api/v1/cache/emacs"
+      "https://cachix.org/api/v1/cache/nix-community"
+    ];
+  };
 
   programs.zsh.enable = true;
   programs.fish.enable = true;
