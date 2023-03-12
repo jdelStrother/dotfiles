@@ -1,6 +1,34 @@
 { pkgs, ... }:
 
-{
+# edit a dir/file in emacs, geared towards browsing third-party code
+# so opens in a temp workspace and sets up projectile to isolate just that directory.
+# (As opposed to opening node_modules/bootstrap and finding that, eg, `SPC SPC` tries to browse
+# the top-level project folder.
+let emacsLauncher = pkgs.writeShellScriptBin "edit" ''
+if [ -d "$1" ]; then
+  dir=$(realpath "$1")/
+  target="$dir"
+else
+  dir=$(dirname "$1")
+  target="$1"
+fi
+emacsclient --alternate-editor="" --no-wait --create-frame --quiet --eval "
+(progn
+  (select-frame-set-input-focus (selected-frame))
+  (modify-frame-parameters
+    (selected-frame)
+    '((user-position . t) (top . 0.5) (left . 0.5)))
+
+  (dir-locals-set-class-variables 'vendor-directory
+   '((nil . ((projectile-project-root . \"$dir\")))))
+  (dir-locals-set-directory-class \"$dir\" 'vendor-directory)
+  (add-to-list 'safe-local-variable-values '(projectile-project-root . \"$dir\"))
+
+  (find-file \"$target\")
+  (setq projectile-project-root \"$dir\"))
+)"
+'';
+in {
   imports = [ ./home-manager-apps.nix ];
 
   home.username = "jon";
@@ -9,10 +37,11 @@
 
   home.sessionVariables = {
     EDITOR = "emacs";
-    BUNDLER_EDITOR = "code";
+    BUNDLER_EDITOR = "${emacsLauncher}/bin/edit";
   };
 
   home.packages = [
+    emacsLauncher
     pkgs.ruby_3_1
     pkgs.nodejs-16_x
     pkgs.php # for Alfred devdocs workflow
