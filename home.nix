@@ -12,12 +12,14 @@ else
   dir=$(dirname "$1")
   target="$1"
 fi
-emacsclient --alternate-editor="" --no-wait --create-frame --quiet --eval "
-(progn
-  (select-frame-set-input-focus (selected-frame))
+emacsclient --alternate-editor="" --no-wait --quiet --eval "
+;; using make-frame rather than 'emacsclient --create-frame' because the latter is a bit weird on macOS,
+;; creating a second dock icon with the generic file icon rather than an emacs icon, and doesn't allow cmd-~ to switch windows
+(let ((frame (make-frame '((display . \":0\")))))
   (modify-frame-parameters
-    (selected-frame)
+    frame
     '((user-position . t) (top . 0.5) (left . 0.5)))
+  (select-frame-set-input-focus frame)
 
   (dir-locals-set-class-variables 'vendor-directory
    '((nil . ((projectile-project-root . \"$dir\")))))
@@ -25,7 +27,6 @@ emacsclient --alternate-editor="" --no-wait --create-frame --quiet --eval "
   (add-to-list 'safe-local-variable-values '(projectile-project-root . \"$dir\"))
 
   (find-file \"$target\")
-  (setq projectile-project-root \"$dir\"))
 )"
 '';
 in {
@@ -36,7 +37,7 @@ in {
   home.stateVersion = "22.11";
 
   home.sessionVariables = {
-    EDITOR = "emacs";
+    EDITOR = "emacsclient --tty --alternate-editor=''";
     BUNDLER_EDITOR = "${emacsLauncher}/bin/edit";
   };
 
