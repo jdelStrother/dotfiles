@@ -289,6 +289,11 @@ in {
       env NODE_ENV=production node_modules/.bin/webpack --bail --config webpack.production.config.js  --profile --json > "/tmp/$argv[1]"
       and webpack-bundle-analyzer "/tmp/$argv[1]" ~/Developer/web/app/assets/javascripts/packages
     '';
+
+    # eg `gemgrep 'google*' | xargs bundle update`
+    gemgrep = ''
+      ruby -rbundler -e "puts Bundler::LockfileParser.new(Bundler.read_file('Gemfile.lock')).specs.map(&:name).select{File.fnmatch(ARGV[0], _1)}" "$argv[1]"
+    '';
   };
 
   home.file = {
