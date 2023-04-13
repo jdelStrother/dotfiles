@@ -1,34 +1,13 @@
 { pkgs, ... }:
 
+let emacs = ((pkgs.emacsPackagesFor pkgs.emacs).emacsWithPackages (epkgs: [ epkgs.vterm ]));
 # edit a dir/file in emacs, geared towards browsing third-party code
 # so opens in a temp workspace and sets up projectile to isolate just that directory.
 # (As opposed to opening node_modules/bootstrap and finding that, eg, `SPC SPC` tries to browse
 # the top-level project folder.
-let emacsLauncher = pkgs.writeShellScriptBin "edit" ''
-if [ -d "$1" ]; then
-  dir=$(realpath "$1")/
-  target="$dir"
-else
-  dir=$(dirname "$1")
-  target="$1"
-fi
-emacsclient --alternate-editor="" --no-wait --quiet --eval "
-;; using make-frame rather than 'emacsclient --create-frame' because the latter is a bit weird on macOS,
-;; creating a second dock icon with the generic file icon rather than an emacs icon, and doesn't allow cmd-~ to switch windows
-(let ((frame (make-frame '((display . \":0\")))))
-  (modify-frame-parameters
-    frame
-    '((user-position . t) (top . 0.5) (left . 0.5)))
-  (select-frame-set-input-focus frame)
+emacsLauncher = pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
+git-recent = pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
 
-  (dir-locals-set-class-variables 'vendor-directory
-   '((nil . ((projectile-project-root . \"$dir\")))))
-  (dir-locals-set-directory-class \"$dir\" 'vendor-directory)
-  (add-to-list 'safe-local-variable-values '(projectile-project-root . \"$dir\"))
-
-  (find-file \"$target\")
-)"
-'';
 in {
   imports = [ ./home-manager-apps.nix ];
 
@@ -43,6 +22,7 @@ in {
 
   home.packages = [
     emacsLauncher
+    git-recent
     pkgs.ruby_3_1
     pkgs.nodejs-16_x
     pkgs.php # for Alfred devdocs workflow
@@ -90,7 +70,7 @@ in {
     (pkgs.callPackage ./pkgs/pngpaste { })
     (pkgs.callPackage ./pkgs/scmpuff { })
 
-    ((pkgs.emacsPackagesFor pkgs.emacsGit).emacsWithPackages (epkgs: [ epkgs.vterm ]))
+    emacs
   ];
 
   programs.direnv.enable = true;

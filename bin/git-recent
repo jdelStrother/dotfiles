@@ -1,8 +1,25 @@
 #!/usr/bin/env ruby
-#
+
 # this is a slightly smarter version of the git alias
 # "!git for-each-ref --count=10 --sort=-committerdate --format='ref=%(refname);sub=%(subject)' --shell refs/heads | while read -r entry; do eval \"$entry\"; printf \"%-30s %s\n\" \"${ref/refs\\/heads\\/}\" \"$sub\"; done"
 # which groups by sha1
+
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: git recent [options]"
+  opts.on("-n", "--count [NUMBER]", "Display up to X branches") do |v|
+    options[:count] = v
+  end
+  opts.on("-h", "--help", "Prints this help") do
+    puts opts
+    exit
+  end
+end.parse!(ARGV)
+
+count = options[:count] || 10
+pattern = ARGV.last || 'refs/heads'
 
 class Head
   attr_accessor :sha, :ref, :subject
@@ -13,8 +30,12 @@ class Head
   end
 end
 
-pattern = ARGV[0] || 'refs/heads'
-recent = `git for-each-ref --count=10 --sort=-committerdate --format='sha=%(objectname:short);ref=%(refname);sub=%(subject)' --python #{pattern}`
+def color(string)
+  return string unless STDOUT.tty?
+  "\e[34m#{string}\e[0m"
+end
+
+recent = `git for-each-ref --count=#{count} --sort=-committerdate --format='sha=%(objectname:short);ref=%(refname);sub=%(subject)' --python #{pattern}`
 heads = recent.split("\n").map do |r|
   eval("#{r}; Head.new(sha,ref,sub)")
 end
@@ -25,6 +46,5 @@ end
 
 max_ref_length = deduped_heads.map{|h| h.ref.length}.max
 deduped_heads.each do |head|
-  puts "#{head.ref}#{' '*(max_ref_length-head.ref.length)}  #{head.subject}"
+  puts "#{color(head.ref)}#{' '*(max_ref_length-head.ref.length)}  #{head.subject}"
 end
-
