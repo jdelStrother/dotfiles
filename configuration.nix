@@ -18,6 +18,7 @@
   # so that they consistently refer to the same thing (eg for `home-manager switch`)
   nix.nixPath = [ ("nixpkgs=" + toString pkgs.path) ];
   nix.settings = {
+    sandbox = true;
     substituters = [
       "https://nix-community.cachix.org"
     ];
@@ -29,7 +30,10 @@
       "https://cachix.org/api/v1/cache/emacs"
       "https://cachix.org/api/v1/cache/nix-community"
     ];
+    # silence "ignoring untrusted substituter 'https://devenv.cachix.org'"
+    trusted-users = ["root" "jon"];
   };
+  nixpkgs.config.allowUnfree = true;
 
   programs.zsh.enable = true;
   programs.fish.enable = true;
