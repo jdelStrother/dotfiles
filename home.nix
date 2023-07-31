@@ -1,16 +1,10 @@
 { pkgs, ... }:
 
-# borrow a emacs 29 patch to fix json-null-parsing with lsp
-# There's also pkgs.emacsUnstable or pkgs.emacsGit, but both are crashy for me.
-let emacs = pkgs.emacs.overrideAttrs (old: {
-      patches = (old.patches or []) ++ [
-        (pkgs.fetchpatch {
-          url = "https://github.com/emacs-mirror/emacs/commit/8b52d9f5f177ce76b9ebecadd70c6dbbf07a20c6.patch";
-          hash = "sha256-/W9yateE9UZ9a8CUjavQw0X7TgxigYzBuOvtAXdEsSA=";
-        })
-      ];
-    });
-  emacsWithPackages = ((pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [ epkgs.vterm ]));
+let emacs = pkgs.emacs-unstable;
+  emacsWithPackages = ((pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
+      epkgs.vterm
+      epkgs.treesit-grammars.with-all-grammars
+    ]));
 # edit a dir/file in emacs, geared towards browsing third-party code
 # so opens in a temp workspace and sets up projectile to isolate just that directory.
 # (As opposed to opening node_modules/bootstrap and finding that, eg, `SPC SPC` tries to browse
@@ -34,10 +28,10 @@ in {
     emacsLauncher
     git-recent
     pkgs.ruby_3_1
-    pkgs.nodejs-16_x
+    pkgs.nodejs
     pkgs.php # for Alfred devdocs workflow
 
-    pkgs.nixUnstable
+    pkgs.nix
     pkgs.home-manager
 
     pkgs.awscli2
