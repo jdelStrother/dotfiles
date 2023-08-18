@@ -62,6 +62,7 @@
 ;; Let's just use the prettier package for formatting.
 (package! prettier)
 (package! yaml-mode)
+(package! simpleclip)
 
 (package! explain-pause-mode
   :recipe (:host github :repo "lastquestion/explain-pause-mode"))
