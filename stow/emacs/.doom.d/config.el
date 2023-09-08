@@ -12,30 +12,52 @@
 ;; automatically revert buffers if they change on disk
 (global-auto-revert-mode t)
 
-;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
-;; are the three important ones:
+;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
-;; + `doom-font'
-;; + `doom-variable-pitch-font'
-;; + `doom-big-font' -- used for `doom-big-font-mode'
+;; - `doom-font' -- the primary font to use
+;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
+;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;; - `doom-unicode-font' -- for unicode glyphs
+;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
 ;;
-;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
-;; font string. You generally only need these two:
+;; See 'C-h v doom-font' for documentation and more examples of what they
+;; accept. For example:
+;;
 (setq doom-font (font-spec :family "monospace" :size 14))
+;; decrease the size of emojis. Otherwise they add a lot of extra line-height
+(if IS-MAC
+  (setq doom-unicode-font (font-spec :family "Apple Color Emoji" :size 12)))
+;;
+;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
+;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
+;; refresh your font settings. If Emacs still can't find your font, it likely
+;; wasn't installed correctly. Font issues are rarely Doom issues!
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
-;; `load-theme' function. These are the defaults.
+;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-one)
 
+;; I needed this for an MS Sculpt keyboard's M-x to work
+(setq ns-right-option-modifier 'left)
+
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+;; Hit `SPC t l` to toggle relative line numbers on
+(setq display-line-numbers-type nil)
+
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Documents/org/")
 (setq org-roam-directory "~/Documents/org/roam")
 (setq org-agenda-files '("~/Documents/org/" "~/Documents/org/roam" "~/Documents/org/roam/daily" "~/Library/Mobile Documents/iCloud~com~agiletortoise~Drafts5/Documents/org" "~/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/inbox.org"))
 ;; hide todos that are deferred to future dates
 (setq org-agenda-todo-ignore-scheduled 'future)
-;; auto-save after toggling todo state
-(add-hook 'org-trigger-hook 'save-buffer)
+(setq org-log-done 'time)
 (after! org
+  ;; auto-save after toggling todo state
+  (add-hook 'org-trigger-hook 'save-buffer)
   (org-link-set-parameters "message" :follow
    (lambda (id)
     (shell-command
@@ -96,14 +118,19 @@ space rather than before."
 ;; Default window size on startup
 (add-to-list 'default-frame-alist '(width . 160))
 (add-to-list 'default-frame-alist '(height . 50))
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
 
 ;; Hit '-' to jump to the containing directory
 (define-key evil-normal-state-map (kbd "-") 'dired-jump)
 
 (setq-default tab-width 2)
+(setq-default scroll-margin 5)
+(pixel-scroll-precision-mode)
 
 ;; Company completion popups are slow.  Hit C-SPC if you want one
-(setq company-idle-delay nil)
+;;
+(when (modulep! :completion company)
+  (setq company-idle-delay nil))
 
 (after! magit
   ;; Stop magit complaining about too-long summary lines
@@ -115,7 +142,6 @@ space rather than before."
   (remove-hook 'magit-status-headers-hook 'magit-insert-tags-header)
   ;; Allegedly helps to hard-code the path rather than force magit to look it up on each execution
   (setq magit-git-executable (executable-find "git"))
-  (setq magit-git-executable "git")
   )
 
 (setq projectile-project-search-path '("~/Developer/" "~/Developer/vendor/"))

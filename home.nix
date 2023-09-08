@@ -11,6 +11,7 @@ let emacs = pkgs.emacs-unstable;
 # the top-level project folder.
 emacsLauncher = pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
 git-recent = pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
+ruby = pkgs.ruby_3_1;
 
 in {
   imports = [ ./home-manager-apps.nix ];
@@ -22,12 +23,15 @@ in {
   home.sessionVariables = {
     EDITOR = "emacsclient --tty --alternate-editor=''";
     BUNDLER_EDITOR = "${emacsLauncher}/bin/edit";
+
+    GEM_HOME = "$HOME/.gem/ruby/${builtins.baseNameOf ruby}";
+    GEM_PATH = "$HOME/.gem/ruby/${builtins.baseNameOf ruby}";
   };
 
   home.packages = [
     emacsLauncher
     git-recent
-    pkgs.ruby_3_1
+    ruby
     pkgs.nodejs
     pkgs.php # for Alfred devdocs workflow
 
