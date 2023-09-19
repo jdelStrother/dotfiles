@@ -27,8 +27,8 @@
 (setq doom-font (font-spec :family "monospace" :size 14))
 ;; decrease the size of emojis. Otherwise they add a lot of extra line-height
 (if IS-MAC
-  (setq doom-unicode-font (font-spec :family "Apple Color Emoji" :size 12)))
-;;
+    (setq doom-unicode-font (font-spec :family "Apple Color Emoji" :size 12)))
+
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
 ;; refresh your font settings. If Emacs still can't find your font, it likely
@@ -59,22 +59,22 @@
   ;; auto-save after toggling todo state
   (add-hook 'org-trigger-hook 'save-buffer)
   (org-link-set-parameters "message" :follow
-   (lambda (id)
-    (shell-command
-     (concat "open message:" id)))))
+                           (lambda (id)
+                             (shell-command
+                              (concat "open message:" id)))))
 
 ;; Doom's default capture templates, but excluding the project-specific ones I never use,
 ;; and with a timestamp on todos
 (setq org-capture-templates
- '(("t" "Todo" entry
-    (file+headline +org-capture-todo-file "Inbox")
-    "* [ ] %?\n%i\n%a\n:PROPERTIES:\n:CREATED: %u\n:END:" :prepend t)
-   ("n" "Notes" entry
-    (file+headline +org-capture-notes-file "Inbox")
-    "* %u %?\n%i\n%a" :prepend t)
-   ("j" "Journal" entry
-    (file+olp+datetree +org-capture-journal-file)
-    "* %U %?\n%i\n%a" :prepend t)))
+      '(("t" "Todo" entry
+         (file+headline +org-capture-todo-file "Inbox")
+         "* [ ] %?\n%i\n%a\n:PROPERTIES:\n:CREATED: %u\n:END:" :prepend t)
+        ("n" "Notes" entry
+         (file+headline +org-capture-notes-file "Inbox")
+         "* %u %?\n%i\n%a" :prepend t)
+        ("j" "Journal" entry
+         (file+olp+datetree +org-capture-journal-file)
+         "* %U %?\n%i\n%a" :prepend t)))
 
 
 ;; Better insert behaviour with evil
@@ -106,10 +106,10 @@ space rather than before."
 (setq shell-file-name "/bin/sh")
 (let ((fishpath (executable-find "fish")))
   (if fishpath
-    (progn
-      (setq explicit-shell-file-name fishpath)
-      (setq vterm-shell fishpath)
-  )))
+      (progn
+        (setq explicit-shell-file-name fishpath)
+        (setq vterm-shell fishpath)
+        )))
 ;; set EDITOR to use the current emacs instance in a shell
 (add-hook 'shell-mode-hook  'with-editor-export-editor)
 (add-hook 'vterm-mode-hook  'with-editor-export-editor)
@@ -170,41 +170,50 @@ space rather than before."
   ;; Use lsp-workspace-folders-add instead.
   (setq lsp-auto-guess-root nil)
   (add-function :around (symbol-function 'lsp-file-watch-ignored-directories)
-      (lambda (orig)
-        (let ((root (lsp--workspace-root (cl-first (lsp-workspaces)))))
-          (cond
-           ((string-prefix-p "/Users/jon/Developer/web" root)
-            (append '("/tmp$" "/vendor$" "/webpack$" "/files$" "app/assets/javascripts/packages" "") (funcall orig)))
-           (t
-            (funcall orig))))))
+                (lambda (orig)
+                  (let ((root (lsp--workspace-root (cl-first (lsp-workspaces)))))
+                    (cond
+                     ((string-prefix-p "/Users/jon/Developer/web" root)
+                      (append '("/tmp$" "/vendor$" "/webpack$" "/files$" "app/assets/javascripts/packages" "") (funcall orig)))
+                     (t
+                      (funcall orig))))))
 
   ;; steep tries to activate if 'bundle' is present in the path
   (setq lsp-disabled-clients '(steep-ls))
 
   (setq lsp-file-watch-ignored-directories
-    (append lsp-file-watch-ignored-directories '(
-      "[/\\\\]\\.direnv\\'"
-      ;; Bunch of audioboom-specific things because lsp doesn't work great with dir-locals (https://www.reddit.com/r/emacs/comments/jeenx4/til_how_to_load_file_or_dirlocals_before_a_minor/)
-      "[/\\\\]\\.sass-cache\\'"
-      "[/\\\\]\\.services\\'"
-      "[/\\\\]app/assets/javascripts/packages\\'"
-      "[/\\\\]coverage\\'"
-      "[/\\\\]db/sphinx\\'"
-      "[/\\\\]files\\'"
-      "[/\\\\]tmp\\'"
-      "[/\\\\]vendor\\'"
-      "[/\\\\]webpack\\'"
-    )))
+        (append lsp-file-watch-ignored-directories
+                '(
+                  "[/\\\\]\\.direnv\\'"
+                  ;; Bunch of audioboom-specific things because lsp doesn't work great with dir-locals (https://www.reddit.com/r/emacs/comments/jeenx4/til_how_to_load_file_or_dirlocals_before_a_minor/)
+                  "[/\\\\]\\.sass-cache\\'"
+                  "[/\\\\]\\.services\\'"
+                  "[/\\\\]app/assets/javascripts/packages\\'"
+                  "[/\\\\]coverage\\'"
+                  "[/\\\\]db/sphinx\\'"
+                  "[/\\\\]files\\'"
+                  "[/\\\\]tmp\\'"
+                  "[/\\\\]vendor\\'"
+                  "[/\\\\]webpack\\'"
+                  )))
 
   ;; I'm not keen on the LSP sideline flashing up constantly while typing. Disable while in insert mode.
-  (add-hook 'lsp-mode-hook (lambda()
-    (setq-local original-lsp-sideline-value nil)
-    (add-hook 'evil-insert-state-entry-hook (lambda () (progn
-      (setq-local original-lsp-sideline-value lsp-ui-sideline-mode)
-      (lsp-ui-sideline-enable nil))))
-    (add-hook 'evil-insert-state-exit-hook (lambda ()
-      (lsp-ui-sideline-enable original-lsp-sideline-value)))))
+  (add-hook 'lsp-mode-hook
+            (lambda()
+              (setq-local original-lsp-sideline-value nil)
+              (add-hook 'evil-insert-state-entry-hook
+                        (lambda ()
+                          "Save the original sideline value and then disable it"
+                          (setq-local original-lsp-sideline-value lsp-ui-sideline-mode)
+                          (lsp-ui-sideline-enable nil))
+                        nil t)
+              (add-hook 'evil-insert-state-exit-hook
+                        (lambda ()
+                          "Restore the original sideline value"
+                          (lsp-ui-sideline-enable original-lsp-sideline-value))
+                        nil t)))
   )
+
 
 (add-to-list 'auto-mode-alist '("\\.nix" . nix-mode))
 
@@ -215,25 +224,25 @@ space rather than before."
 (after! haml-mode
   (after! flycheck
     (flycheck-define-checker haml-lint
-        "A haml syntax checker using the haml-lint tool."
-        :command ("bundle"
-                  "exec"
-                  "haml-lint"
-                  source-inplace)
-        :working-directory flycheck-ruby--find-project-root
-        :error-patterns
-        ((info line-start (file-name) ":" line " [C] " (message) line-end)
-        (warning line-start (file-name) ":" line " [W] " (message) line-end)
-        (error line-start (file-name) ":" line " [" (or "E" "F") "] " (message) line-end))
-        :modes (haml-mode))
-      (add-to-list 'flycheck-checkers 'haml-lint)
-      (flycheck-add-next-checker 'haml '(warning . haml-lint))
+      "A haml syntax checker using the haml-lint tool."
+      :command ("bundle"
+                "exec"
+                "haml-lint"
+                source-inplace)
+      :working-directory flycheck-ruby--find-project-root
+      :error-patterns
+      ((info line-start (file-name) ":" line " [C] " (message) line-end)
+       (warning line-start (file-name) ":" line " [W] " (message) line-end)
+       (error line-start (file-name) ":" line " [" (or "E" "F") "] " (message) line-end))
+      :modes (haml-mode))
+    (add-to-list 'flycheck-checkers 'haml-lint)
+    (flycheck-add-next-checker 'haml '(warning . haml-lint))
 
-      (add-to-list 'compilation-error-regexp-alist-alist
-                   '(haml-lint
-                     "^\\([^:]+\\):\\([0-9]+\\) \\[\\(W\\|E\\)\\] "
-                     1 2))
-      (add-to-list 'compilation-error-regexp-alist 'haml-lint)))
+    (add-to-list 'compilation-error-regexp-alist-alist
+                 '(haml-lint
+                   "^\\([^:]+\\):\\([0-9]+\\) \\[\\(W\\|E\\)\\] "
+                   1 2))
+    (add-to-list 'compilation-error-regexp-alist 'haml-lint)))
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
@@ -415,9 +424,9 @@ space rather than before."
   (interactive "<R><x><y>")
   (evil-yank beg end type register yank-handler)
   (if (not register)
-    (simpleclip-set-contents (evil-get-register ?0))
+      (simpleclip-set-contents (evil-get-register ?0))
+    )
   )
-)
 (evil-define-operator jds-evil-yank-line-to-system (beg end type register)
   "Save whole lines into the kill-ring."
   :motion evil-line-or-visual-line
@@ -425,9 +434,9 @@ space rather than before."
   (interactive "<R><x>")
   (evil-yank-line beg end type register)
   (if (not register)
-    (simpleclip-set-contents (evil-get-register ?0))
+      (simpleclip-set-contents (evil-get-register ?0))
+    )
   )
-)
 (define-key evil-normal-state-map "y" 'jds-evil-yank-to-system)
 (define-key evil-normal-state-map "Y" 'jds-evil-yank-line-to-system)
 (define-key evil-motion-state-map "y" 'jds-evil-yank-to-system)
