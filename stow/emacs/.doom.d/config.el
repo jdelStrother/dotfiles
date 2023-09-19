@@ -154,14 +154,37 @@ space rather than before."
 ;; don't enable smartparens by default - when it doesn't work, it's really frustrating
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
-;; Not keen on ruby's auto-formatter, lets just rely on prettier.js for now
-;; (And nowadays I just use the prettier package rather than format-all, so remove this entire thing:
-;; (setq +format-on-save-enabled-modes '(js2-mode rjsx-mode typescript-mode typescript-tsx-mode)) ;; css-mode scss-mode))
 
-;; We use prettier to format typescript, so don't want the typescript LSP interfering
-(setq-hook! 'typescript-mode-hook +format-with-lsp nil)
-(setq-hook! 'typescript-tsx-mode-hook +format-with-lsp nil)
-(setq-hook! 'js2-mode-hook +format-with-lsp nil)
+
+;; Apheleia can format with rubocop rather than prettier,
+;; but it's quite slow due to launching a new rubocop process each time.
+;; Disable it and rely on solargraph formatting with LSP.
+;; (This seems like an oversight in doom's (:editor format +onsave) behaviour,
+;; maybe it'll be fixed soon)
+(setq-hook! 'ruby-mode-hook
+  apheleia-inhibit t
+  +format-with nil)
+(add-hook 'ruby-mode-hook
+          (lambda()
+            (add-hook 'before-save-hook #'+format/buffer nil t)))
+
+
+;;;; But if we do want to use Apheleia's rubocop formatter, here's how:
+;; (setq-hook! 'ruby-mode-hook
+;;   +format-with 'rubocop
+;;   +format-with-lsp nil
+;; )
+;; (setq-hook! 'ruby-ts-mode-hook
+;;   +format-with 'rubocop
+;;   +format-with-lsp nil
+;;   )
+;;;; And make it use bundle-exec:
+;; (after! apheleia
+;;   (let ((rubocop-formatter (cdr (assq 'rubocop apheleia-formatters))))
+;;     (setf (alist-get 'rubocop apheleia-formatters) (nconc '("bundle" "exec") rubocop-formatter))))
+
+
+
 
 (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
 
@@ -179,7 +202,9 @@ space rather than before."
                       (funcall orig))))))
 
   ;; steep tries to activate if 'bundle' is present in the path
-  (setq lsp-disabled-clients '(steep-ls))
+  (setq lsp-disabled-clients '(steep-ls typeprof-ls))
+
+  (setq lsp-warn-no-matched-clients nil)
 
   (setq lsp-file-watch-ignored-directories
         (append lsp-file-watch-ignored-directories
@@ -375,21 +400,22 @@ space rather than before."
   "di"   #'doom/ediff-init-and-example
   )
 
-(defun maybe-use-prettier ()
-  "Enable prettier-js-mode if an rc file is located."
-  (if (locate-dominating-file default-directory ".prettierrc")
-      (prettier-mode +1)))
+;; (defun maybe-use-prettier ()
+;;   "Enable prettier-js-mode if an rc file is located."
+;;   (if (locate-dominating-file default-directory ".prettierrc")
+;;       (prettier-mode +1)))
 
-(use-package prettier
-  :hook ((typescript-mode . maybe-use-prettier)
-         (js-mode . maybe-use-prettier)
-         (css-mode . maybe-use-prettier)
-         (scss-mode . maybe-use-prettier)
-         (json-mode . maybe-use-prettier)
-         ;; (ruby-mode . maybe-use-prettier)
-         (web-mode . maybe-use-prettier)
-         (yaml-mode . maybe-use-prettier)))
-
+;; (use-package prettier
+;;   :hook ((typescript-mode . maybe-use-prettier)
+;;          (typescript-ts-mode . maybe-use-prettier)
+;;          (tsx-ts-mode . maybe-use-prettier)
+;;          (js-mode . maybe-use-prettier)
+;;          (css-mode . maybe-use-prettier)
+;;          (scss-mode . maybe-use-prettier)
+;;          (json-mode . maybe-use-prettier)
+;;          ;; (ruby-mode . maybe-use-prettier)
+;;          (web-mode . maybe-use-prettier)
+;;          (yaml-mode . maybe-use-prettier)))
 
 ;; Fix stylelint v14:
 (flycheck-define-checker general-stylelint

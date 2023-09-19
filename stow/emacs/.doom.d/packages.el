@@ -48,16 +48,12 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
 
-;; for cucumber
-(package! feature-mode)
+
+(package! feature-mode) ;; for cucumber
 (package! groovy-mode)
-(package! lsp-treemacs)
 (package! nginx-mode)
 (package! foreman-mode)
 (package! fish-mode)
-;; Doom's format-all mode seems kind of a mess, and I can't get it to obey .prettierignore
-;; Let's just use the prettier package for formatting.
-(package! prettier)
 (package! yaml-mode)
 (package! simpleclip)
 
