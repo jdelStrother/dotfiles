@@ -99,6 +99,11 @@ in {
       github.user = "jdelStrother";
       init.defaultBranch = "main";
       pull.ff = "only";
+      # I keep getting http-408 errors on pushing to Github. Supposedly this fixes it.
+      http.postBuffer = 524288000;
+
+      core.untrackedCache = true;
+      core.fsmonitor = true;
     };
   };
 
