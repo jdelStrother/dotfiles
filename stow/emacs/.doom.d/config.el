@@ -76,6 +76,8 @@
          (file+olp+datetree +org-capture-journal-file)
          "* %U %?\n%i\n%a" :prepend t)))
 
+;; I never touch Emac's gross menubar mess
+(menu-bar-mode -1)
 
 ;; Better insert behaviour with evil
 ;; https://github.com/syl20bnr/spacemacs/issues/14137
@@ -93,11 +95,6 @@ space rather than before."
       (evil-normal-state))))
 
 (map! :leader :desc "capture today" "n r C" #'org-roam-dailies-capture-today)
-
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
-;; Hit `SPC u SPC t l` to toggle relative line numbers on
-(setq display-line-numbers-type nil)
 
 ;; Make window dividers more obvious
 (setq window-divider-default-bottom-width 3)
