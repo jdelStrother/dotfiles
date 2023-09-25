@@ -1,17 +1,18 @@
 { pkgs, ... }:
 
-let emacs = pkgs.emacs-unstable;
-  emacsWithPackages = ((pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
-      epkgs.vterm
-      epkgs.treesit-grammars.with-all-grammars
-    ]));
-# edit a dir/file in emacs, geared towards browsing third-party code
-# so opens in a temp workspace and sets up projectile to isolate just that directory.
-# (As opposed to opening node_modules/bootstrap and finding that, eg, `SPC SPC` tries to browse
-# the top-level project folder.
-emacsLauncher = pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
-git-recent = pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
-ruby = pkgs.ruby_3_1;
+let
+  emacs = pkgs.emacs-unstable;
+  emacsWithPackages = ((pkgs.emacsPackagesFor emacs).emacsWithPackages
+    (epkgs: [ epkgs.vterm epkgs.treesit-grammars.with-all-grammars ]));
+  # edit a dir/file in emacs, geared towards browsing third-party code
+  # so opens in a temp workspace and sets up projectile to isolate just that directory.
+  # (As opposed to opening node_modules/bootstrap and finding that, eg, `SPC SPC` tries to browse
+  # the top-level project folder.
+  emacsLauncher =
+    pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
+  git-recent =
+    pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
+  ruby = pkgs.ruby_3_1;
 
 in {
   imports = [ ./home-manager-apps.nix ];
@@ -205,6 +206,9 @@ in {
           set hosts staging1-1 staging1-2 staging1-3
         end
       else
+        if test "$argv[1]" = "production"
+          set --erase argv[1]
+        end
         if test "$argv[1]" = "--web"
           set argv $argv[2..-1]
           set hosts app1-1 app1-2 app1-3 app1-4 app1-5 dj1-1 dj1-2
