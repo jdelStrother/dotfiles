@@ -436,6 +436,9 @@ space rather than before."
           (lambda ()
             (flycheck-disable-checker 'scss-stylelint)))
 
+;; Avoid leaving a million dired buffers when navigating directories
+(setq dired-kill-when-opening-new-dired-buffer t)
+
 
 ;; By default emacs makes a mess of my systemwide clipboard history,
 ;; with every deletion and `xp` getting exported into it.
