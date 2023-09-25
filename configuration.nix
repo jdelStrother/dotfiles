@@ -49,6 +49,15 @@
   # $ darwin-rebuild changelog
   system.stateVersion = 4;
 
+  system.defaults = {
+    CustomUserPreferences = {
+      # suppress crash popups, put them in Notification Center instead
+      "com.apple.CrashReporter" = {
+        "UseUNC"= 1;
+      };
+    };
+  };
+
   homebrew = {
     enable = true;
     brews = [
