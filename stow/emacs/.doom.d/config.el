@@ -442,6 +442,7 @@ space rather than before."
 ;; with every deletion and `xp` getting exported into it.
 ;; Instead I use simpleclip so that the killring doesn't alter clipboard history by default,
 ;; and then remap `y` & `Y` so that those 'intentional' copy operations _are_ exported to the system clipboard.
+;; We can't just advise evil-yank because it's used all over the place for 'unintentional' copy operations.
 (simpleclip-mode 1)
 
 (evil-define-operator jds-evil-yank-to-system (beg end type register yank-handler)
@@ -469,6 +470,9 @@ space rather than before."
 (define-key evil-motion-state-map "y" 'jds-evil-yank-to-system)
 (define-key evil-motion-state-map "Y" 'jds-evil-yank-line-to-system)
 
-(defun jds-copy-to-system-clipboard ()
+(defun jds-copy-to-system-clipboard (&rest _args)
   (simpleclip-set-contents (car kill-ring)))
 (advice-add 'browse-at-remote-kill :after 'jds-copy-to-system-clipboard)
+(advice-add 'evil-collection-magit-yank-whole-line :after 'jds-copy-to-system-clipboard)
+(advice-add 'magit-copy-buffer-revision :after 'jds-copy-to-system-clipboard)
+
