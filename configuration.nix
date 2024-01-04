@@ -1,15 +1,10 @@
 # darwin-rebuild switch --flake ~/dotfiles
 
-{ pkgs, config, lib, ... }:
-{
+{ pkgs, config, lib, ... }: {
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
-  environment.systemPackages = [
-    pkgs.vim
-    pkgs.git
-    pkgs.fish
-  ];
-  environment.shells = [pkgs.fish];
+  environment.systemPackages = [ pkgs.vim pkgs.git pkgs.fish ];
+  environment.shells = [ pkgs.fish ];
 
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
@@ -31,7 +26,7 @@
       "https://cachix.org/api/v1/cache/nix-community"
     ];
     # silence "ignoring untrusted substituter 'https://devenv.cachix.org'"
-    trusted-users = ["root" "jon"];
+    trusted-users = [ "root" "jon" ];
   };
   nixpkgs.config.allowUnfree = true;
 
@@ -52,17 +47,13 @@
   system.defaults = {
     CustomUserPreferences = {
       # suppress crash popups, put them in Notification Center instead
-      "com.apple.CrashReporter" = {
-        "UseUNC"= 1;
-      };
+      "com.apple.CrashReporter" = { "UseUNC" = 1; };
     };
   };
 
   homebrew = {
     enable = true;
-    brews = [
-      "pinentry-mac"
-    ];
+    brews = [ "pinentry-mac" ];
     # Keep things deterministic.
     onActivation.autoUpdate = false;
     # Properly uninstall all things not managed by Nix homebrew.
@@ -72,5 +63,5 @@
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
 
-  home-manager.users.jon = import ./home.nix ;
+  home-manager.users.jon = import ./home.nix;
 }
