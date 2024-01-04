@@ -61,20 +61,20 @@
   (org-link-set-parameters "message" :follow
                            (lambda (id)
                              (shell-command
-                              (concat "open message:" id)))))
+                              (concat "open message:" id))))
 
-;; Doom's default capture templates, but excluding the project-specific ones I never use,
-;; and with a timestamp on todos
-(setq org-capture-templates
-      '(("t" "Todo" entry
-         (file+headline +org-capture-todo-file "Inbox")
-         "* [ ] %?\n%i\n%a\n:PROPERTIES:\n:CREATED: %u\n:END:" :prepend t)
-        ("n" "Notes" entry
-         (file+headline +org-capture-notes-file "Inbox")
-         "* %u %?\n%i\n%a" :prepend t)
-        ("j" "Journal" entry
-         (file+olp+datetree +org-capture-journal-file)
-         "* %U %?\n%i\n%a" :prepend t)))
+  ;; Doom's default capture templates, but excluding the project-specific ones I never use,
+  ;; and with a timestamp on todos
+  (setq org-capture-templates
+        '(("t" "Todo" entry
+           (file+headline +org-capture-todo-file "Inbox")
+           "* [ ] %?\n%i\n%a\n%u\n" :prepend t)
+          ("n" "Notes" entry
+           (file+headline +org-capture-notes-file "Inbox")
+           "* %u %?\n%i\n%a" :prepend t)
+          ("j" "Journal" entry
+           (file+olp+datetree +org-capture-journal-file)
+           "* %U %?\n%i\n%a" :prepend t))))
 
 ;; I never touch Emac's gross menubar mess
 (menu-bar-mode -1)
