@@ -21,13 +21,16 @@ in {
   home.homeDirectory = "/Users/jon";
   home.stateVersion = "22.11";
 
-  home.sessionVariables = {
-    EDITOR = "emacsclient --tty --alternate-editor=''";
-    BUNDLER_EDITOR = "${emacsLauncher}/bin/edit";
+  home.sessionVariables =
+    let gemHome = "$HOME/.gem/ruby/${builtins.baseNameOf ruby}";
+    in {
+      EDITOR = "emacsclient --tty --alternate-editor=''";
+      BUNDLER_EDITOR = "${emacsLauncher}/bin/edit";
 
-    GEM_HOME = "$HOME/.gem/ruby/${builtins.baseNameOf ruby}";
-    GEM_PATH = "$HOME/.gem/ruby/${builtins.baseNameOf ruby}";
-  };
+      GEM_HOME = gemHome;
+      GEM_PATH = gemHome;
+      PATH = "${gemHome}/bin:$PATH";
+    };
 
   home.packages = [
     emacsLauncher
