@@ -153,34 +153,48 @@ space rather than before."
 
 
 
-;; Apheleia can format with rubocop rather than prettier,
+;; Apheleia can format ruby code with rubocop/prettier
 ;; but it's quite slow due to launching a new rubocop process each time.
-;; Disable it and rely on solargraph formatting with LSP.
-;; (This seems like an oversight in doom's (:editor format +onsave) behaviour,
-;; maybe it'll be fixed soon)
-(setq-hook! 'ruby-mode-hook
+;; Disable it and rely on solargraph formatting with LSP, on projects where lsp is enabled.
+;; (This seems like an oversight in doom's (:editor format +onsave) behaviour, maybe it'll be fixed sometime?)
+(defun use-lsp-instead-of-apheleia()
+  (message "maybe use lsp")
+  (when (derived-mode-p 'ruby-mode)
+    (message "ruby mode, use lsp!")
+    (setq-local apheleia-inhibit t)
+    (setq-local +format-with nil)
+    (apheleia-mode -1)
+    (message "hook <= %s" before-save-hook)
+    (add-hook 'before-save-hook #'+format/buffer nil t)
+    (message "hook => %s" before-save-hook)
+    ))
+
+(after! lsp-mode
+  (add-hook 'lsp-after-open-hook #'use-lsp-instead-of-apheleia))
+
+;; Or, if we _are_ using rubocop in apheleia, use bundle-exec and replace the deprecated --auto-correct flag
+(after! apheleia
+  (add-to-list 'apheleia-formatters
+               '(rubocop . ("bundle" "exec" "rubocop" "--stdin" filepath "--autocorrect"
+                            "--stderr" "--format" "quiet" "--fail-level" "fatal"))))
+
+;; disabling apheleia in web-mode, because it then tries to format all .html.erb files with npx-prettier.
+;; I'd tried to define a new erb derived mode below, but no luck with it yet
+(setq-hook! 'web-mode-hook
   apheleia-inhibit t
   +format-with nil)
-(add-hook 'ruby-mode-hook
-          (lambda()
-            (add-hook 'before-save-hook #'+format/buffer nil t)))
 
+(after! web-mode
+  ;; add a derived erb-mode so that flycheck/apheleia can distinguish it from all the other web-mode files
+  (define-derived-mode erb-mode web-mode "Web[erb]")
+  (add-to-list 'auto-mode-alist '("\\.erb\\'" . erb-mode)))
 
-;;;; But if we do want to use Apheleia's rubocop formatter, here's how:
-;; (setq-hook! 'ruby-mode-hook
-;;   +format-with 'rubocop
-;;   +format-with-lsp nil
-;; )
-;; (setq-hook! 'ruby-ts-mode-hook
-;;   +format-with 'rubocop
-;;   +format-with-lsp nil
-;;   )
-;;;; And make it use bundle-exec:
 ;; (after! apheleia
-;;   (let ((rubocop-formatter (cdr (assq 'rubocop apheleia-formatters))))
-;;     (setf (alist-get 'rubocop apheleia-formatters) (nconc '("bundle" "exec") rubocop-formatter))))
-
-
+;;   (push '(erblint . ("bundle" "exec" "erblint" "--autocorrect" inplace ))
+;;         apheleia-formatters)
+;;   (setf (alist-get 'erb-mode apheleia-mode-alist)
+;;         '(erblint))
+;;   )
 
 
 (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
