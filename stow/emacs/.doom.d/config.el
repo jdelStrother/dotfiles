@@ -230,6 +230,19 @@ space rather than before."
                   "[/\\\\]webpack\\'"
                   )))
 
+  (lsp-defun my/filter-typescript ((params &as &PublishDiagnosticsParams :diagnostics)
+                                   _workspace)
+    (lsp:set-publish-diagnostics-params-diagnostics
+     params
+     (or (seq-filter (-lambda ((&Diagnostic :source? :code?))
+                       ;; Silence "This may be converted to an async function" from typescript
+                       (not (and (eq 80006 code?) (string= "typescript" source?))))
+                     diagnostics)
+         []))
+    params)
+
+  (setq lsp-diagnostic-filter 'my/filter-typescript )
+
   ;; I'm not keen on the LSP sideline flashing up constantly while typing. Disable while in insert mode.
   (add-hook 'lsp-mode-hook
             (lambda()
