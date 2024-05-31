@@ -469,6 +469,19 @@ space rather than before."
 ;; We can't just advise evil-yank because it's used all over the place for 'unintentional' copy operations.
 (simpleclip-mode 1)
 
+(defun jds-disable-simpleclip-around (orig-fun &rest args)
+  "Temporarily disable `simpleclip-mode` around the execution of ORIG-FUN."
+  (let ((was-enabled (bound-and-true-p simpleclip-mode)))
+    ;; Disable simpleclip-mode if it is enabled
+    (when was-enabled (simpleclip-mode -1))
+    ;; Call the original function
+    (unwind-protect (apply orig-fun args)
+      ;; Re-enable simpleclip-mode if it was previously enabled
+      (when was-enabled (simpleclip-mode 1)))))
+
+(advice-add 'emacs-everywhere-initialise :around #'jds-disable-simpleclip-around)
+(advice-add 'emacs-everywhere-finish :around #'jds-disable-simpleclip-around)
+(setq emacs-everywhere-clipboard-sleep-delay 0.2)
 (evil-define-operator jds-evil-yank-to-system (beg end type register yank-handler)
   "Save the characters in motion into the kill-ring."
   :move-point nil
