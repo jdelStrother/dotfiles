@@ -55,7 +55,6 @@
 (package! foreman-mode)
 (package! fish-mode)
 (package! yaml-mode)
-(package! simpleclip)
 
 (package! explain-pause-mode
   :recipe (:host github :repo "lastquestion/explain-pause-mode"))
