@@ -47,3 +47,13 @@ E.g. for commands that copy particularly useful text."
 (define-key evil-normal-state-map "Y" 'jds-evil-yank-line-to-system)
 (define-key evil-motion-state-map "y" 'jds-evil-yank-to-system)
 (define-key evil-motion-state-map "Y" 'jds-evil-yank-line-to-system)
+
+;; Assume that any paste operations should be reading from the system clipboard.
+;; (Possible we should just rewrite cmd-v rather than all yank operations?)
+;; (NB: evil-yank = copy, emacs-yank = paste)
+(defun jds-paste ()
+  "paste from the system clipboard"
+  (let ((select-enable-clipboard t))
+    (yank)))
+(let ((map (make-sparse-keymap)))
+  (define-key map [remap yank] 'jds-paste))
