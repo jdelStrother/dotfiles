@@ -1,11 +1,11 @@
 {
   description = "M1 Nix";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-23.05-darwin";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-23.11-darwin";
 
     emacs-overlay.url = "github:nix-community/emacs-overlay";
 
-    home-manager.url = "github:nix-community/home-manager/release-23.05";
+    home-manager.url = "github:nix-community/home-manager/release-23.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     darwin.url = "github:lnl7/nix-darwin/master";
@@ -18,9 +18,7 @@
       modules = [
         ./configuration.nix
         home-manager.darwinModules.home-manager
-        {
-          nixpkgs.overlays = [emacs-overlay.overlay];
-        }
+        { nixpkgs.overlays = [ emacs-overlay.overlay ]; }
       ];
     };
   };
