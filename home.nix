@@ -108,7 +108,6 @@ in {
       http.postBuffer = 524288000;
 
       core.untrackedCache = true;
-      core.fsmonitor = true;
     };
   };
 
