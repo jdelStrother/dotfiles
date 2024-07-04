@@ -16,10 +16,13 @@
     sandbox = true;
     substituters = [
       "https://nix-community.cachix.org"
+
+      "https://devenv.cachix.org"
     ];
     trusted-public-keys = [
       "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
     ];
     trusted-substituters = [
       "https://cachix.org/api/v1/cache/emacs"
@@ -50,10 +53,12 @@
       "com.apple.CrashReporter" = { "UseUNC" = 1; };
     };
   };
+  security.pam.enableSudoTouchIdAuth = true;
 
   homebrew = {
     enable = true;
-    brews = [ "pinentry-mac" ];
+    # Not actually using any homebrew packages right now
+    brews = [ ];
     # Keep things deterministic.
     onActivation.autoUpdate = false;
     # Properly uninstall all things not managed by Nix homebrew.

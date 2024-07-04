@@ -53,9 +53,10 @@ in {
     pkgs.gnused # macos sed is weird
     pkgs.graphviz # dot for emacs/roam
     pkgs.zstd # doom-emacs uses zstd for some optimizations
+    pkgs.codespell # for flymake-codespell
 
     pkgs.gnupg
-    pkgs.pinentry
+    pkgs.pinentry_mac
 
     pkgs.jq
     pkgs.niv
@@ -73,8 +74,9 @@ in {
     pkgs.tmux
     # pkgs.oathToolkit
     pkgs.shellcheck
-    pkgs.nixfmt
+    pkgs.nixfmt-classic
     pkgs.cmake
+    pkgs._1password
 
     pkgs.nodePackages.typescript-language-server # for emacs lsp
 
@@ -240,7 +242,7 @@ in {
       # get the OTP URL from 1password, paste the secret code (after secret=...) into here:
       # security add-generic-password -a jdelStrother -s "AWS OTP" -w
       set otpcode (security find-generic-password -a jdelStrother -s 'AWS OTP' -w); or return $status
-      oathtool --totp --base32 {$otpcode}
+      ${pkgs.oathToolkit}/bin/oathtool --totp --base32 {$otpcode}
     '';
 
     aws-credentials = ''
