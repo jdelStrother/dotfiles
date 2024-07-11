@@ -149,27 +149,8 @@ space rather than before."
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
 
 
-
-;; Apheleia can format ruby code with rubocop/prettier
-;; but it's quite slow due to launching a new rubocop process each time.
-;; Disable it and rely on solargraph formatting with LSP, on projects where lsp is enabled.
-;; (This seems like an oversight in doom's (:editor format +onsave) behaviour, maybe it'll be fixed sometime?)
-(defun use-lsp-instead-of-apheleia()
-  (message "maybe use lsp")
-  (when (derived-mode-p 'ruby-mode)
-    (message "ruby mode, use lsp!")
-    (setq-local apheleia-inhibit t)
-    (setq-local +format-with nil)
-    (apheleia-mode -1)
-    (message "hook <= %s" before-save-hook)
-    (add-hook 'before-save-hook #'+format/buffer nil t)
-    (message "hook => %s" before-save-hook)
-    ))
-
-(after! lsp-mode
-  (add-hook 'lsp-after-open-hook #'use-lsp-instead-of-apheleia))
-
-;; Or, if we _are_ using rubocop in apheleia, use bundle-exec and replace the deprecated --auto-correct flag
+;; If we're using rubocop in apheleia, use bundle-exec and replace the deprecated --auto-correct flag
+;; (Normally this won't get used - LSP will format it via solargraph/ruby-lsp instead)
 (after! apheleia
   (add-to-list 'apheleia-formatters
                '(rubocop . ("bundle" "exec" "rubocop" "--stdin" filepath "--autocorrect"
