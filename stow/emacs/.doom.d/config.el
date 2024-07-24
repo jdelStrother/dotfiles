@@ -296,6 +296,7 @@ space rather than before."
 (let ((dir (file-name-directory (or load-file-name (buffer-file-name)))))
   (load-file (expand-file-name "mine/cfn-mode.el" dir))
   (load-file (expand-file-name "mine/hlds-mode.el" dir))
+  (load-file (expand-file-name "mine/editor-frame.el" dir))
   (load-file (expand-file-name "mine/frame-recenter.el" dir))
   (load-file (expand-file-name "mine/ansible-lint.el" dir))
   (load-file (expand-file-name "mine/clipboard.el" dir)))
