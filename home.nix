@@ -41,6 +41,7 @@ in {
 
     pkgs.nix
     pkgs.home-manager
+    pkgs.devenv
 
     pkgs.awscli2
     # pkgs.awslogs

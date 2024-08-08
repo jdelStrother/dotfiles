@@ -14,11 +14,8 @@
   nix.nixPath = [ ("nixpkgs=" + toString pkgs.path) ];
   nix.settings = {
     sandbox = true;
-    substituters = [
-      "https://nix-community.cachix.org"
-
-      "https://devenv.cachix.org"
-    ];
+    substituters =
+      [ "https://nix-community.cachix.org" "https://devenv.cachix.org" ];
     trusted-public-keys = [
       "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
@@ -28,8 +25,6 @@
       "https://cachix.org/api/v1/cache/emacs"
       "https://cachix.org/api/v1/cache/nix-community"
     ];
-    # silence "ignoring untrusted substituter 'https://devenv.cachix.org'"
-    trusted-users = [ "root" "jon" ];
   };
   nixpkgs.config.allowUnfree = true;
 
