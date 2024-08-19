@@ -52,7 +52,6 @@ in {
     pkgs.gist
     pkgs.gnugrep # macos grep is weird
     pkgs.gnused # macos sed is weird
-    pkgs.graphviz # dot for emacs/roam
     pkgs.zstd # doom-emacs uses zstd for some optimizations
     pkgs.codespell # for flymake-codespell
 
@@ -79,13 +78,19 @@ in {
     pkgs.cmake
     pkgs._1password
 
-    pkgs.nodePackages.typescript-language-server # for emacs lsp
-
     (pkgs.callPackage ./pkgs/macos-trash { })
     (pkgs.callPackage ./pkgs/pngpaste { })
     (pkgs.callPackage ./pkgs/scmpuff { })
 
-    emacsWithPackages
+    (pkgs.symlinkJoin {
+      name = "emacs-and-deps";
+      paths = [
+        emacsWithPackages
+        pkgs.nodePackages.typescript-language-server
+        pkgs.graphviz
+        pkgs.multimarkdown
+      ];
+    })
   ];
 
   programs.direnv.enable = true;
