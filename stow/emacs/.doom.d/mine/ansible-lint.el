@@ -12,8 +12,7 @@
   (flycheck-define-checker ansible-ansiblelint
     "An Ansible linter using the ansible-lint tool.
         See URL `https://ansible-lint.readthedocs.io/en/latest/'."
-    ;; emacs-ansible provides ansible, not ansible-mode
-    :enabled (lambda () (bound-and-true-p ansible))
+    :enabled (lambda () (bound-and-true-p ansible-mode))
     :command ("ansible-lint" "--offline" "-v" "--nocolor" "-p" source-original)
     :working-directory flycheck-ansible--ansible-lint-find-default-directory
     :predicate flycheck-buffer-saved-p
