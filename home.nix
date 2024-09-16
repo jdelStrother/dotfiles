@@ -72,7 +72,6 @@ in {
     pkgs.rdbtools
     pkgs.go
     pkgs.tmux
-    # pkgs.oathToolkit
     pkgs.shellcheck
     pkgs.nixfmt-classic
     pkgs.cmake
@@ -244,10 +243,7 @@ in {
       pssh -H "$hosts" $argv
     '';
     aws-mfa = ''
-      # get the OTP URL from 1password, paste the secret code (after secret=...) into here:
-      # security add-generic-password -a jdelStrother -s "AWS OTP" -w
-      set otpcode (security find-generic-password -a jdelStrother -s 'AWS OTP' -w); or return $status
-      ${pkgs.oathToolkit}/bin/oathtool --totp --base32 {$otpcode}
+      op read 'op://Employee/Amazon AWS/mfacode?attribute=otp'
     '';
 
     aws-credentials = ''
