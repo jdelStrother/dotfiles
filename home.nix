@@ -1,7 +1,7 @@
-{ pkgs, ... }:
+{ pkgs, unstable, ... }:
 
 let
-  emacs = pkgs.emacs-unstable;
+  emacs = pkgs.emacs-git;
   emacsWithPackages = ((pkgs.emacsPackagesFor emacs).emacsWithPackages
     (epkgs: [ epkgs.vterm epkgs.treesit-grammars.with-all-grammars ]));
   # edit a dir/file in emacs, geared towards browsing third-party code
@@ -12,7 +12,7 @@ let
     pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
   git-recent =
     pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
-  ruby = pkgs.ruby_3_1;
+  ruby = pkgs.ruby_3_2;
 
 in {
   imports = [ ./home-manager-apps.nix ];
@@ -41,7 +41,7 @@ in {
 
     pkgs.nix
     pkgs.home-manager
-    pkgs.devenv
+    unstable.devenv
 
     pkgs.awscli2
     # pkgs.awslogs
@@ -303,9 +303,11 @@ in {
     ".config/fish/completions/aws.fish".text = ''
       complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)';
     '';
+
     ".config/fish/completions/git-lg.fish".text = ''
       complete --no-files -c git -a '(__fish_git_branches)' -n '__fish_git_using_command lg'
     '';
+
     ".config/fish/completions/rake.fish".text = ''
       function __get_rake_completions -d "Get rake completions"
         set tool rake
@@ -315,6 +317,10 @@ in {
         $tool -T 2>&1 | sed -e "s/^rake \([a-z:_0-9!\-]*\).*#\(.*\)/\1	\2/"
       end
       complete -c rake --no-files -a "(__get_rake_completions)"
+    '';
+
+    ".config/fish/completions/just.fish".text = ''
+      source (just --completions fish | psub)
     '';
   };
 }

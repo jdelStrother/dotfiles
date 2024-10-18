@@ -1,6 +1,6 @@
 # darwin-rebuild switch --flake ~/dotfiles
 
-{ pkgs, config, lib, ... }: {
+{ pkgs, config, lib, unstable, ... }: {
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = [ pkgs.vim pkgs.git pkgs.fish ];
@@ -62,6 +62,7 @@
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
+  home-manager.extraSpecialArgs = { inherit unstable; };
 
   home-manager.users.jon = import ./home.nix;
 }
