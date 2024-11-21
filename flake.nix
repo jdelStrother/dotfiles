@@ -22,7 +22,13 @@
         modules = [
           ./configuration.nix
           home-manager.darwinModules.home-manager
-          { nixpkgs.overlays = [ emacs-overlay.overlay ]; }
+          {
+            nixpkgs.overlays = [
+              emacs-overlay.overlay
+              # fix PATH in `nix shell` https://github.com/NixOS/nixpkgs/pull/352666
+              (self: super: { fish = unstable.legacyPackages.${system}.fish; })
+            ];
+          }
         ];
       };
     };
