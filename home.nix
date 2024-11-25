@@ -50,6 +50,7 @@ in {
     pkgs.coreutils
     pkgs.fzf
     pkgs.gist
+    pkgs.git-absorb
     pkgs.gnugrep # macos grep is weird
     pkgs.gnused # macos sed is weird
     pkgs.zstd # doom-emacs uses zstd for some optimizations
@@ -113,6 +114,7 @@ in {
       http.postBuffer = 524288000;
 
       core.untrackedCache = true;
+      rebase.updateRefs = true;
     };
   };
 
