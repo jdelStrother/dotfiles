@@ -24,7 +24,8 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-(setq doom-font (font-spec :family "monospace" :size 14))
+(setq doom-font (font-spec :family "Source Code Pro" :size 13))
+
 
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -44,11 +45,16 @@
 ;; Hit `SPC t l` to toggle relative line numbers on
 (setq display-line-numbers-type nil)
 
+(setq confirm-kill-emacs nil)
+
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Documents/org/")
-(setq org-roam-directory "~/Documents/org/roam")
-(setq org-agenda-files '("~/Documents/org/" "~/Documents/org/roam" "~/Documents/org/roam/daily" "~/Library/Mobile Documents/iCloud~com~agiletortoise~Drafts5/Documents/org" "~/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/inbox.org"))
+;; (setq org-roam-directory "~/Documents/org/roam")
+(setq org-agenda-files '("~/Documents/org/"
+                         ;; "~/Documents/org/roam" "~/Documents/org/roam/daily"
+                         "~/Library/Mobile Documents/iCloud~com~agiletortoise~Drafts5/Documents/org"
+                         "~/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/inbox.org"))
 ;; hide todos that are deferred to future dates
 (setq org-agenda-todo-ignore-scheduled 'future)
 (setq org-log-done 'time)
@@ -65,7 +71,7 @@
   (setq org-capture-templates
         '(("t" "Todo" entry
            (file+headline +org-capture-todo-file "Inbox")
-           "* [ ] %?\n%i\n%a\n%u\n" :prepend t)
+           "* [ ] %?\n%i\n%a\n%u\n\n" :prepend t)
           ("n" "Notes" entry
            (file+headline +org-capture-notes-file "Inbox")
            "* %u %?\n%i\n%a" :prepend t)
@@ -96,8 +102,8 @@ space rather than before."
 ;; Make window dividers more obvious
 (setq window-divider-default-bottom-width 3)
 
-;; use sh for spawning random subprocesses, but fish if you want a proper shell
-(setq shell-file-name "/bin/sh")
+;; use bash for spawning random subprocesses, but fish if you want a proper shell
+(setq shell-file-name (executable-find "bash"))
 (let ((fishpath (executable-find "fish")))
   (if fishpath
       (progn
@@ -178,6 +184,7 @@ space rather than before."
 (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
 
 (after! lsp-mode
+  (setq lsp-restart 'ignore) ;; don't prompt to restart a bunch of lsp servers every time I kill a project
   ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled.
   ;; Use lsp-workspace-folders-add instead.
   (setq lsp-auto-guess-root nil)
@@ -191,7 +198,8 @@ space rather than before."
                       (funcall orig))))))
 
   ;; steep tries to activate if 'bundle' is present in the path
-  (setq lsp-disabled-clients '(steep-ls typeprof-ls))
+  ;; disable ruby-ls (solargraph gem) in favour of ruby-lsp-ls (ruby-lsp gem)
+  (setq lsp-disabled-clients '(steep-ls typeprof-ls ruby-ls))
 
   (setq lsp-warn-no-matched-clients nil)
 
@@ -243,10 +251,24 @@ space rather than before."
 
 
 (add-to-list 'auto-mode-alist '("\\.nix" . nix-mode))
+(add-to-list 'auto-mode-alist '("\\.mdx" . markdown-mode))
 
 ;; don't steal focus when running rspec-compile
 (after! rspec-mode
-  (set-popup-rule! "\*rspec-compilation\*" :select #'ignore))
+  (set-popup-rule! "\*rspec-compilation\*" :select #'ignore)
+  (defun rspec-run-all-failed ()
+    "Run the `spec' rake task for the project of the current file."
+    (interactive)
+    (rspec-run (concat (rspec-core-options) " --only-failures ")))
+  (map! :localleader
+        :prefix "t"
+        :map (rspec-verifiable-mode-map rspec-mode-map)
+        "F" #'rspec-run-all-failed)
+
+  ;; i usually just run single specs in emacs, skip the formatters in .rspec
+  (setq rspec-use-opts-file-when-available nil)
+  (add-hook 'rspec-compilation-mode-hook (lambda () (text-scale-decrease 1)))
+  )
 
 (after! haml-mode
   (after! flycheck
@@ -422,26 +444,61 @@ space rather than before."
 ;;          (web-mode . maybe-use-prettier)
 ;;          (yaml-mode . maybe-use-prettier)))
 
-;; Fix stylelint v14:
-(flycheck-define-checker general-stylelint
-  "A checker for CSS and related languages using Stylelint"
-  :command ("stylelint"
-            (eval flycheck-stylelint-args)
-            (option-flag "--quiet" flycheck-stylelint-quiet)
-            (config-file "--config" flycheck-general-stylelintrc)
-            "--stdin-filename" (eval (or (buffer-file-name) "style.scss")))
-  :standard-input t
-  :error-parser flycheck-parse-stylelint
-  :predicate flycheck-buffer-nonempty-p
-  :modes (scss-mode))
-(flycheck-def-config-file-var flycheck-general-stylelintrc
-    (general-stylelint) nil)
-(add-to-list 'flycheck-checkers 'general-stylelint)
-(add-hook 'scss-mode-hook
-          (lambda ()
-            (flycheck-disable-checker 'scss-stylelint)))
+(after! robe
+  ;; Disable robe - i don't like it prompting me to launch a console on every jump-to-definition,
+  ;; and if i let it launch a console it makes a mess of autocompletion suggestions
+  (defun robe-jump (_)))
 
 ;; Avoid leaving a million dired buffers when navigating directories
 (setq dired-kill-when-opening-new-dired-buffer t)
 
+(use-package typescript-ts-mode
+  :mode (("\\.ts\\'" . typescript-ts-mode)
+         ("\\.tsx\\'" . tsx-ts-mode))
+  :config
+  (add-hook! '(typescript-ts-mode-hook tsx-ts-mode-hook) #'lsp!))
+
+
+;; -- String inflection: underscore -> UPCASE -> CamelCase conversion of names
+;; https://github.com/akicho8/string-inflection
+
+(use-package! string-inflection
+  :commands (string-inflection-all-cycle
+             string-inflection-toggle
+             string-inflection-java-style-cycle
+             string-inflection-python-style-cycle
+             string-inflection-elixir-style-cycle
+             string-inflection-ruby-style-cycle
+             string-inflection-camelcase
+             string-inflection-lower-camelcase
+             string-inflection-underscore
+             string-inflection-capital-underscore
+             string-inflection-upcase
+             string-inflection-kebab-case)
+
+  :init
+  (map! :prefix ("g SPC" . "Convert case")
+        :desc "cycle"              :nv "n"     #'string-inflection-all-cycle
+        :desc "toggle"             :nv "t"     #'string-inflection-toggle
+        :desc "PascalCase"         :nv "p"     #'string-inflection-camelcase
+        :desc "camelCase"          :nv "c"     #'string-inflection-lower-camelcase
+        :desc "kebab-case"         :nv "k"     #'string-inflection-kebab-case
+        :desc "snake_case"         :nv "s"     #'string-inflection-underscore
+        :desc "Capital_Snake_Case" :nv "S"     #'string-inflection-capital-underscore
+        :desc "UP_CASE"            :nv "u"     #'string-inflection-upcase))
+
+(use-package flymake-codespell
+  :ensure t
+  :hook (prog-mode . flymake-codespell-setup-backend))
+(add-hook 'prog-mode-hook #'flymake-mode)
+(after! lsp-mode
+  (setq lsp-diagnostics-provider :flymake))
+;; flymake reports a lot of bytecompile errors in my emacs config files which I'm not sure I care abut
+(add-hook 'emacs-lisp-mode-hook
+          (defun my-elisp-flymake-hook ()
+            (when (doom-real-buffer-p (current-buffer))
+              (when (seq-find (lambda (dir) (file-in-directory-p (buffer-file-name) dir))
+                              '("~/.config" "~/.doom.d" "~/.emacs.d/lisp" "~/.emacs.d/modules"))
+                (setq flymake-diagnostic-functions '(flymake-codespell-backend)))
+              (flymake-mode))))
 

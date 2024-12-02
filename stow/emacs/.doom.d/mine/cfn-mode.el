@@ -23,4 +23,5 @@ See `https://github.com/aws-cloudformation/cfn-python-lint'."
     :modes (cfn-mode))
 
   (add-to-list 'flycheck-checkers 'cfn-lint)
+  (map-put hs-special-modes-alist 'cfn-mode (map-elt hs-special-modes-alist 'yaml-mode))
   (add-hook 'cfn-mode-hook 'flycheck-mode))

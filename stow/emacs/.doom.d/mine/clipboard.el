@@ -20,6 +20,7 @@ E.g. for commands that copy particularly useful text."
             browse-at-remote-kill
             evil-collection-magit-yank-whole-line
             magit-copy-buffer-revision
+            magit-copy-section-value
             emacs-everywhere-initialise
             emacs-everywhere-finish)
   (let ((select-enable-clipboard t))

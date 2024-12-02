@@ -54,10 +54,15 @@
 (package! nginx-mode)
 (package! foreman-mode)
 (package! fish-mode)
+(package! just-mode)
 (package! yaml-mode)
 
 (package! explain-pause-mode
   :recipe (:host github :repo "lastquestion/explain-pause-mode"))
+
+(package! string-inflection)
+
+(package! flymake-codespell)
 
 ;; (package! magit
 ;;   :recipe

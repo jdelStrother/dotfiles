@@ -19,15 +19,15 @@
     :error-patterns
     (
      ;; ansible-lint v4 output
-     (error "CRITICAL Couldn't parse task at " (file-name) ":" line " " (message))
-     (warning line-start (file-name) ":" line ": [E" (id (+ digit)) "] " (message)
-              line-end)
+     ;; (error "CRITICAL Couldn't parse task at " (file-name) ":" line " " (message))
+     ;; (warning line-start (file-name) ":" line ": [E" (id (+ digit)) "] " (message)
+     ;;          line-end)
      ;; ansible-lint v5 output
      (error line-start (file-name) ":" line (optional ":" column) ": "
             (id (or "syntax-check" "internal-error" "parser-error" "load-failure"))
             ":" (message) line-end)
      (warning line-start (file-name) ":" line (optional ":" column) ": "
-              (id (+ (any "a-z-"))) ":" (message) line-end)
+              (id (+ (any "a-z-[]"))) ":" (message) line-end)
      )
     :error-explainer
     (lambda (err)
