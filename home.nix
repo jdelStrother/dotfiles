@@ -169,7 +169,9 @@ in {
   '';
 
   programs.fish.interactiveShellInit = ''
-    iterm2_shell_integration
+    if test "$TERM_PROGRAM" = iTerm.app
+      iterm2_shell_integration
+    end
 
     # completion for git-lg
     complete --no-files -c git -a '(__fish_git_branches)' -n '__fish_git_using_command lg'
@@ -181,7 +183,7 @@ in {
       set PINENTRY_USER_DATA "USE_CURSES=1"
     end
 
-    # I use 24 bit color in iterm, but that's not going to work on most ssh hosts...
+    # iterm/ghostty provide 24 bit color, but that's not going to work on most ssh hosts...
     alias ssh="TERM=xterm-256color command ssh"
 
     set -g theme_color_scheme base16
@@ -198,14 +200,6 @@ in {
   '';
 
   programs.fish.functions = {
-    ab-jenkins-whitelist-ip = ''
-      set groupid (aws ec2 describe-security-groups --filters 'Name=group-name,Values="amazon-ecs-cli-setup-jenkins-EcsSecurityGroup-1V2KTFR4JKWJ0"' --query 'SecurityGroups[0].GroupId' --output text)
-      set cidr (curl --silent ifconfig.me)/32
-      echo aws ec2 authorize-security-group-ingress --group-id $groupid --protocol tcp --port 443 --cidr $cidr
-      aws ec2 authorize-security-group-ingress --group-id $groupid --protocol tcp --port 443 --cidr $cidr
-      echo "IP Authorized! You should run this when you're done:"
-      echo aws ec2 revoke-security-group-ingress --group-id $groupid --protocol tcp --port 443 --cidr $cidr
-    '';
     abssh = ''
       if test "$argv[1]" = "staging"
         set --erase argv[1]
@@ -283,7 +277,7 @@ in {
       echo aws ec2 revoke-security-group-ingress --group-id "$groupid" --protocol tcp --port 22 --cidr "$myip/32"
     '';
     e = ''
-      TERM=xterm-24bit emacsclient -nw $argv
+      emacsclient -nw $argv
     '';
     webpack-analyze = ''
       if test -z "$argv[1]"

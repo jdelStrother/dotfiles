@@ -5,6 +5,9 @@
   # $ nix-env -qaP | grep wget
   environment.systemPackages = [ pkgs.vim pkgs.git pkgs.fish ];
   environment.shells = [ pkgs.fish ];
+  # Hack: https://github.com/ghostty-org/ghostty/discussions/2832
+  environment.variables.XDG_DATA_DIRS =
+    [ "$GHOSTTY_SHELL_INTEGRATION_XDG_DIR" ];
 
   # Auto upgrade nix package and the daemon service.
   services.nix-daemon.enable = true;
