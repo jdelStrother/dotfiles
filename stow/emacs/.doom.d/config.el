@@ -502,3 +502,6 @@ space rather than before."
                 (setq flymake-diagnostic-functions '(flymake-codespell-backend)))
               (flymake-mode))))
 
+
+;; just remove missing projects from the projectlist, mine come & go all the time due to opening third-party gems
+(setq treemacs-missing-project-action 'remove)
