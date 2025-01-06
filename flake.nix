@@ -1,12 +1,12 @@
 {
   description = "M1 Nix";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-24.05-darwin";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-24.11-darwin";
     unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     emacs-overlay.url = "github:nix-community/emacs-overlay";
 
-    home-manager.url = "github:nix-community/home-manager/release-24.05";
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
     darwin.url = "github:lnl7/nix-darwin/master";

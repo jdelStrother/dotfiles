@@ -1,7 +1,7 @@
 { pkgs, unstable, ... }:
 
 let
-  emacs = pkgs.emacs-git;
+  emacs = pkgs.emacs-unstable-nox;
   emacsWithPackages = ((pkgs.emacsPackagesFor emacs).emacsWithPackages
     (epkgs: [ epkgs.vterm epkgs.treesit-grammars.with-all-grammars ]));
   # edit a dir/file in emacs, geared towards browsing third-party code
@@ -12,7 +12,7 @@ let
     pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
   git-recent =
     pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
-  ruby = pkgs.ruby_3_2;
+  ruby = pkgs.ruby_3_4;
 
 in {
   imports = [ ./home-manager-apps.nix ];
@@ -76,7 +76,7 @@ in {
     pkgs.shellcheck
     pkgs.nixfmt-classic
     pkgs.cmake
-    pkgs._1password
+    pkgs._1password-cli
 
     (pkgs.callPackage ./pkgs/macos-trash { })
     (pkgs.callPackage ./pkgs/pngpaste { })
