@@ -312,7 +312,7 @@ space rather than before."
 (setq flycheck-global-modes '(not forge-post-mode))
 
 ;; Don't try to execute 'cvs' when visiting a directory that contains a csv directory
-(setq vc-handled-backends '(Git))
+(setq vc-handled-backends '(jj Git))
 
 ;; load-file-name is used when we're loaded normally, buffer-file-name for if we eval this buffer
 (let ((dir (file-name-directory (or load-file-name (buffer-file-name)))))

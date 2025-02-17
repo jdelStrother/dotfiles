@@ -63,12 +63,14 @@ in {
     pkgs.zstd # doom-emacs uses zstd for some optimizations
     pkgs.codespell # for flymake-codespell
 
+    unstable.jujutsu
+    unstable.meld # at least until magit gets jujutsu support
+    unstable.gg-jj
+
     pkgs.gnupg
     pkgs.pinentry_mac
-
     pkgs.jq
     pkgs.niv
-
     pkgs.parallel
     pkgs.pssh
     pkgs.ripgrep
@@ -107,10 +109,7 @@ in {
     enable = true;
     userName = "Jonathan del Strother";
     userEmail = "me@delstrother.com";
-    signing = {
-      key = "0F567E1A2C4EBD80";
-      signByDefault = true;
-    };
+
     aliases = { amend = "commit --amend -C HEAD"; };
     extraConfig = {
       core.editor = "vim";
@@ -120,8 +119,17 @@ in {
       # I keep getting http-408 errors on pushing to Github. Supposedly this fixes it.
       http.postBuffer = 524288000;
 
-      core.untrackedCache = true;
+      # seems problematic with `doom sync`
+      # core.untrackedCache = true;
       rebase.updateRefs = true;
+
+      # make it explicit so that jj picks it up
+      credential.helper = "osxkeychain";
+
+      commit.gpgsign = true;
+      gpg.format = "ssh";
+      gpg.ssh.allowedSignersFile = "~/.config/git/allowed_signers";
+      user.signingkey = "~/.ssh/id_ed25519.pub";
     };
   };
 
@@ -208,6 +216,10 @@ in {
     # I want ctrl-t to transpose characters, not invoke fzf's file-finder
     set -gx FZF_CTRL_T_COMMAND ""
     fzf_key_bindings
+
+    # load fish_prompt from bobthefish, then rewrite it to support jj
+    fish_prompt
+    source ${./fish/bobthefish_hacks_for_jj.fish};
   '';
 
   programs.fish.functions = {
@@ -310,7 +322,7 @@ in {
         set argv "-"
       end
       for f in $argv
-        ${pkgs.imagemagick}/bin/magick "$f" -resize '300x300>' - | ${pkgs.kitty}/bin/kitten icat --align left
+        ${pkgs.imagemagick}/bin/magick "$f" -resize '300x300>' - | ${unstable.kitty}/bin/kitten icat --align left
       end
     '';
   };
@@ -338,5 +350,8 @@ in {
     ".config/fish/completions/just.fish".text = ''
       source (just --completions fish | psub)
     '';
+
+    ".config/git/allowed_signers".text =
+      "* ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL9JCPvve0m6vPjbO25OGkqk3w4kEqBNmg1dJ3kCj4zR";
   };
 }

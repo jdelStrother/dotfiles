@@ -28,14 +28,23 @@ end
 dirs = dirs.sort.uniq
 
 
-def git_history_ignoring_rebases(previous_day, dir)
+def jj_history(previous_day, dir)
+  Dir.chdir(dir) do
+    Open3.capture2(
+      "jj", "log", "-T",  "builtin_log_oneline", "--no-graph", "--color", "always",
+      "-r", %{author_date(after:"#{previous_day}") & author_name("Jonathan del Strother") & ~ empty()},
+    )[0].strip
+  end
+end
+
+def git_history(previous_day, dir)
   Dir.chdir(dir) do
     # I do a lot of rebasing which probably isn't interesting to report for standup.
     # This alters the commit-date, so `git log --since={yesterday}` doesn't work.
     # Rebasing keeps the original author-date, though. Take a first pass to find commits where the author-date is
     # after yesterday's date, and then print out those commits with `git log --no-walk`
     datetime = previous_day.strftime("%Y-%m-%dT00:00:00")
-    commits = Open3.capture2("git", "log", "--all", "--pretty=%aI %H", "--since={#{datetime}}")[0]
+    commits = Open3.capture2("git", "log", "--exclude='refs/jj/*'", "--all", "--pretty=%aI %H", "--since={#{datetime}}")[0]
     recent_commits = commits.each_line.filter_map do |l|
       author_date, commit = l.chomp.split(" ")
       commit if author_date >= datetime
@@ -59,8 +68,13 @@ end
 
 dirs_with_git_history = {}
 (COMMON_DIRECTORIES + dirs).uniq.each do |dir|
-  next unless File.exist?("#{dir}/.git")
-  work = git_history_ignoring_rebases(previous_day, dir)
+  if File.exist?("#{dir}/.jj")
+    work = jj_history(previous_day, dir)
+  elsif File.exist?("#{dir}/.git")
+    work = git_history(previous_day, dir)
+  else
+    next
+  end
   if work && !work.empty?
     dirs_with_git_history[dir] = work
   end

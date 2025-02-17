@@ -64,6 +64,11 @@
 
 (package! flymake-codespell)
 
+;; (package! jujutsushi
+;;   :recipe (:host sourcehut :repo "puercopop/jujutsushi"))
+(package! vc-jj
+  :recipe (:host codeberg :repo "emacs-jj-vc/vc-jj.el"))
+
 ;; (package! magit
 ;;   :recipe
 ;;   (:host github
