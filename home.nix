@@ -13,6 +13,13 @@ let
   git-recent =
     pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
   ruby = pkgs.ruby_3_4;
+  fzf = pkgs.fzf.overrideAttrs (prev: {
+    # Prevent shell integrations from installing automatically.
+    # Otherwise fzf-key-bindings.fish gets sourced before we have opportunity to set FZF_CTRL_T_COMMAND=''
+    postInstall = prev.postInstall + ''
+      rm $out/share/fish/vendor_conf.d/load-fzf-key-bindings.fish
+    '';
+  });
 
 in {
   imports = [ ./home-manager-apps.nix ];
@@ -25,7 +32,7 @@ in {
     let gemHome = "$HOME/.gem/ruby/${builtins.baseNameOf ruby}";
     in {
       EDITOR = "emacsclient --tty --alternate-editor=''";
-      BUNDLER_EDITOR = "${emacsLauncher}/bin/edit";
+      # BUNDLER_EDITOR = "${emacsLauncher}/bin/edit";
 
       GEM_HOME = gemHome;
       GEM_PATH = gemHome;
@@ -36,6 +43,7 @@ in {
     emacsLauncher
     git-recent
     ruby
+    fzf
     pkgs.nodejs
     pkgs.php # for Alfred devdocs workflow
 
@@ -48,7 +56,6 @@ in {
     pkgs.aws-vault
     pkgs.clang
     pkgs.coreutils
-    pkgs.fzf
     pkgs.gist
     pkgs.git-absorb
     pkgs.gnugrep # macos grep is weird
@@ -197,6 +204,10 @@ in {
     if which scmpuff > /dev/null
       scmpuff init -s --shell=fish | source
     end
+
+    # I want ctrl-t to transpose characters, not invoke fzf's file-finder
+    set -gx FZF_CTRL_T_COMMAND ""
+    fzf_key_bindings
   '';
 
   programs.fish.functions = {
@@ -292,6 +303,15 @@ in {
     # eg `gemgrep 'google*' | xargs bundle update`
     gemgrep = ''
       ruby -rbundler -e "puts Bundler::LockfileParser.new(Bundler.read_file('Gemfile.lock')).specs.map(&:name).select{File.fnmatch(ARGV[0], _1)}" "$argv[1]"
+    '';
+
+    icat = ''
+      if ! count $argv > /dev/null ;
+        set argv "-"
+      end
+      for f in $argv
+        ${pkgs.imagemagick}/bin/magick "$f" -resize '300x300>' - | ${pkgs.kitty}/bin/kitten icat --align left
+      end
     '';
   };
 

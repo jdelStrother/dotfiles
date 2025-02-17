@@ -267,7 +267,7 @@ space rather than before."
 
   ;; i usually just run single specs in emacs, skip the formatters in .rspec
   (setq rspec-use-opts-file-when-available nil)
-  (add-hook 'rspec-compilation-mode-hook (lambda () (text-scale-decrease 1)))
+  (add-hook 'rspec-compilation-mode-hook (lambda () (when (display-graphic-p) (text-scale-decrease 1))))
   )
 
 (after! haml-mode
@@ -505,3 +505,21 @@ space rather than before."
 
 ;; just remove missing projects from the projectlist, mine come & go all the time due to opening third-party gems
 (setq treemacs-missing-project-action 'remove)
+(defun xterm-set-cwd (dir &optional terminal)
+  "Set the cwd of the Xterm TERMINAL."
+  (unless (display-graphic-p terminal)
+    (send-string-to-terminal
+     (format "\e]7;file://%s%s\a" (system-name) (url-encode-url dir))
+     terminal)))
+
+(defun my-buffer-select-handler (&optional _)
+  (let ((dir
+         (cond ((eq major-mode 'dired-mode) default-directory)
+               ((project-current) (project-root (project-current)))
+               ((buffer-file-name) (file-name-directory (buffer-file-name)))
+               )))
+    (when dir (xterm-set-cwd dir))))
+
+(add-to-list 'window-selection-change-functions #'my-buffer-select-handler)
+(add-hook 'find-file-hook #'my-buffer-select-handler)
+(add-hook 'dired-after-readin-hook #'my-buffer-select-handler)
