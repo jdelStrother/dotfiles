@@ -1,6 +1,6 @@
 # darwin-rebuild switch --flake ~/dotfiles
 
-{ pkgs, config, lib, unstable, ... }: {
+{ pkgs, config, lib, unstable, inputs, ... }: {
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = [ pkgs.vim pkgs.git pkgs.fish ];
@@ -29,6 +29,10 @@
       "https://cachix.org/api/v1/cache/nix-community"
     ];
   };
+  # expose 'nixpkgs' and 'unstable' to the registry list, so that they're searchable with, eg, `nix search {nixpkgs,unstable} foo`
+  nix.registry.nixpkgs.flake = inputs.nixpkgs;
+  nix.registry.unstable.flake = inputs.unstable;
+
   nixpkgs.config.allowUnfree = true;
 
   programs.zsh.enable = true;
