@@ -2,7 +2,7 @@
   description = "M1 Nix";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-24.11-darwin";
-    unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     emacs-overlay.url = "github:nix-community/emacs-overlay";
 
