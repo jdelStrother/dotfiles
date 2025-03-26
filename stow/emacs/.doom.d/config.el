@@ -316,7 +316,6 @@ space rather than before."
 
 ;; load-file-name is used when we're loaded normally, buffer-file-name for if we eval this buffer
 (let ((dir (file-name-directory (or load-file-name (buffer-file-name)))))
-  (load-file (expand-file-name "mine/cfn-mode.el" dir))
   (load-file (expand-file-name "mine/hlds-mode.el" dir))
   (load-file (expand-file-name "mine/editor-frame.el" dir))
   (load-file (expand-file-name "mine/frame-recenter.el" dir))
