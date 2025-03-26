@@ -314,13 +314,11 @@ space rather than before."
 ;; Don't try to execute 'cvs' when visiting a directory that contains a csv directory
 (setq vc-handled-backends '(jj Git))
 
-;; load-file-name is used when we're loaded normally, buffer-file-name for if we eval this buffer
-(let ((dir (file-name-directory (or load-file-name (buffer-file-name)))))
-  (load-file (expand-file-name "mine/hlds-mode.el" dir))
-  (load-file (expand-file-name "mine/editor-frame.el" dir))
-  (load-file (expand-file-name "mine/frame-recenter.el" dir))
-  (load-file (expand-file-name "mine/ansible-lint.el" dir))
-  (load-file (expand-file-name "mine/clipboard.el" dir)))
+(load! "mine/hlds-mode.el")
+(load! "mine/editor-frame.el")
+(load! "mine/frame-recenter.el")
+(load! "mine/ansible-lint.el")
+(load! "mine/clipboard.el")
 
 ;; (explain-pause-mode t)
 
