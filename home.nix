@@ -90,17 +90,10 @@ in {
     (pkgs.callPackage ./pkgs/macos-trash { })
     (pkgs.callPackage ./pkgs/pngpaste { })
     (pkgs.callPackage ./pkgs/scmpuff { })
-
-    (pkgs.symlinkJoin {
-      name = "emacs-and-deps";
-      paths = [
-        emacsWithPackages
-        pkgs.nodePackages.typescript-language-server
-        pkgs.graphviz
-        pkgs.multimarkdown
-      ];
-    })
   ];
+
+  programs.emacs.enable = true;
+  programs.emacs.package = emacsWithPackages;
 
   programs.direnv.enable = true;
   programs.direnv.nix-direnv.enable = true;
@@ -170,17 +163,6 @@ in {
 
     # Force these paths to take precedence over homebrew
     fish_add_path --prepend --global ~/bin ~/go/bin ~/.npm/bin
-
-    ### Add nix binary paths to the PATH
-    # Perhaps someday will be fixed in nix or nix-darwin itself
-    # https://github.com/LnL7/nix-darwin/issues/122
-    if test (uname) = Darwin
-      fish_add_path --prepend --global \
-        "$HOME/.nix-profile/bin" \
-        "/etc/profiles/per-user/$USER/bin" \
-        /nix/var/nix/profiles/default/bin \
-        /run/current-system/sw/bin
-    end
   '';
 
   programs.fish.interactiveShellInit = ''

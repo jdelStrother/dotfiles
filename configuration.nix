@@ -58,8 +58,8 @@
   security.pam.enableSudoTouchIdAuth = true;
 
   homebrew = {
-    enable = true;
     # Not actually using any homebrew packages right now
+    enable = false;
     brews = [ ];
     # Keep things deterministic.
     onActivation.autoUpdate = false;
@@ -72,4 +72,18 @@
   home-manager.extraSpecialArgs = { inherit unstable; };
 
   home-manager.users.jon = import ./home.nix;
+
+  # manually specifying launchd rather than just `services.emacs.enable = true` because I want to be able to override TERMINFO
+  launchd.user.agents.emacs = {
+    command =
+      "${config.home-manager.users.jon.programs.emacs.finalPackage}/bin/emacs --fg-daemon";
+    path = [ config.environment.systemPath ];
+    environment = {
+      TERMINFO = "/Applications/Ghostty.app/Contents/Resources/terminfo";
+    };
+    serviceConfig = {
+      KeepAlive = true;
+      RunAtLoad = true;
+    };
+  };
 }
