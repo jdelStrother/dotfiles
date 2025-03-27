@@ -13,7 +13,7 @@ let
   git-recent =
     pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
   ruby = pkgs.ruby_3_4;
-  fzf = pkgs.fzf.overrideAttrs (prev: {
+  fzf = unstable.fzf.overrideAttrs (prev: {
     # Prevent shell integrations from installing automatically.
     # Otherwise fzf-key-bindings.fish gets sourced before we have opportunity to set FZF_CTRL_T_COMMAND=''
     postInstall = prev.postInstall + ''
@@ -126,6 +126,12 @@ in {
     };
   };
 
+  programs.atuin.enable = true;
+  programs.atuin.flags = [ "--disable-up-arrow" ];
+  programs.atuin.settings = {
+    prefers_reduced_motion = true; # get rid of the live-updating timestamps
+  };
+
   programs.fish.enable = true;
   programs.fish.plugins = [
     {
@@ -196,8 +202,9 @@ in {
     end
 
     # I want ctrl-t to transpose characters, not invoke fzf's file-finder
-    set -gx FZF_CTRL_T_COMMAND ""
-    fzf_key_bindings
+    # But disabling for now while I try atuin...
+    # set -gx FZF_CTRL_T_COMMAND ""
+    # fzf_key_bindings
 
     # load fish_prompt from bobthefish, then rewrite it to support jj
     fish_prompt

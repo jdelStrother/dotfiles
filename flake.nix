@@ -28,8 +28,12 @@
           {
             nixpkgs.overlays = [
               emacs-overlay.overlay
-              # fix PATH in `nix shell` https://github.com/NixOS/nixpkgs/pull/352666
+              # fish 4
               (self: super: { fish = unstable.legacyPackages.${system}.fish; })
+              # atuin 18.4
+              (self: super: {
+                atuin = unstable.legacyPackages.${system}.atuin;
+              })
             ];
           }
         ];
