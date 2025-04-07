@@ -126,12 +126,6 @@ in {
     };
   };
 
-  programs.atuin.enable = true;
-  programs.atuin.flags = [ "--disable-up-arrow" ];
-  programs.atuin.settings = {
-    prefers_reduced_motion = true; # get rid of the live-updating timestamps
-  };
-
   programs.fish.enable = true;
   programs.fish.plugins = [
     {
@@ -202,9 +196,13 @@ in {
     end
 
     # I want ctrl-t to transpose characters, not invoke fzf's file-finder
-    # But disabling for now while I try atuin...
-    # set -gx FZF_CTRL_T_COMMAND ""
-    # fzf_key_bindings
+    set -gx FZF_CTRL_T_COMMAND ""
+    fzf_key_bindings
+    # However, the file-finder is quite useful. Bind it to alt-c (normally fzf-cd-widget, which I don't use)
+    bind \ec fzf-file-widget
+    bind -M insert \ec fzf-file-widget
+    # don't ignore node_modules in the file-finder
+    set -x FZF_CTRL_T_OPTS '--walker-skip .git'
 
     # load fish_prompt from bobthefish, then rewrite it to support jj
     fish_prompt
