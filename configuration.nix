@@ -80,6 +80,7 @@
     path = [ config.environment.systemPath ];
     environment = {
       TERMINFO = "/Applications/Ghostty.app/Contents/Resources/terminfo";
+      LSP_USE_PLISTS = "true";
     };
     serviceConfig = {
       KeepAlive = true;

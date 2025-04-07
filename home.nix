@@ -90,6 +90,8 @@ in {
     (pkgs.callPackage ./pkgs/macos-trash { })
     (pkgs.callPackage ./pkgs/pngpaste { })
     (pkgs.callPackage ./pkgs/scmpuff { })
+
+    pkgs.emacs-lsp-booster
   ];
 
   programs.emacs.enable = true;
@@ -207,6 +209,9 @@ in {
     # load fish_prompt from bobthefish, then rewrite it to support jj
     fish_prompt
     source ${./fish/bobthefish_hacks_for_jj.fish};
+
+    # for emacs-lsp-booster
+    set -x LSP_USE_PLISTS true;
   '';
 
   programs.fish.functions = {
