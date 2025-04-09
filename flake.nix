@@ -11,13 +11,10 @@
 
     darwin.url = "github:lnl7/nix-darwin/nix-darwin-24.11";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
-
-    emacs-lsp-booster.url = "github:slotThe/emacs-lsp-booster-flake";
-    emacs-lsp-booster.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, darwin, home-manager, nixpkgs, unstable, emacs-overlay
-    , emacs-lsp-booster, ... }@inputs: {
+  outputs = { self, darwin, home-manager, nixpkgs, unstable, emacs-overlay, ...
+    }@inputs: {
       darwinConfigurations."M1MBP" = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         # add 'unstable' & 'inputs' as arguments that gets passed to modules
@@ -31,7 +28,6 @@
           {
             nixpkgs.overlays = [
               emacs-overlay.overlay
-              emacs-lsp-booster.overlays.default
               # fish 4
               (self: super: { fish = unstable.legacyPackages.${system}.fish; })
               # atuin 18.4

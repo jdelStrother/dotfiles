@@ -21,26 +21,6 @@
         "type": "github"
       }
     },
-    "emacs-lsp-booster": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1744007427,
-        "narHash": "sha256-j6HoX1k4+alRX35/Z/K+kfqfWytNLcO+eBOnyoh42iw=",
-        "owner": "slotThe",
-        "repo": "emacs-lsp-booster-flake",
-        "rev": "007bdf3f48a28f611fdfe0b480534cc110637043",
-        "type": "github"
-      },
-      "original": {
-        "owner": "slotThe",
-        "repo": "emacs-lsp-booster-flake",
-        "type": "github"
-      }
-    },
     "emacs-overlay": {
       "inputs": {
         "nixpkgs": "nixpkgs",
@@ -132,7 +112,6 @@
     "root": {
       "inputs": {
         "darwin": "darwin",
-        "emacs-lsp-booster": "emacs-lsp-booster",
         "emacs-overlay": "emacs-overlay",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs_2",
@@ -141,11 +120,11 @@
     },
     "unstable": {
       "locked": {
-        "lastModified": 1744032190,
-        "narHash": "sha256-KSlfrncSkcu1YE+uuJ/PTURsSlThoGkRqiGDVdbiE/k=",
+        "lastModified": 1744096231,
+        "narHash": "sha256-kUfx3FKU1Etnua3EaKvpeuXs7zoFiAcli1gBwkPvGSs=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "b0b4b5f8f621bfe213b8b21694bab52ecfcbf30b",
+        "rev": "b2b0718004cc9a5bca610326de0a82e6ea75920b",
         "type": "github"
       },
       "original": {
