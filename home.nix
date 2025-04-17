@@ -139,12 +139,20 @@ in {
     }
     {
       name = "theme-bobthefish";
-      src = pkgs.fetchFromGitHub {
-        owner = "oh-my-fish";
-        repo = "theme-bobthefish";
-        rev = "2dcfcab653ae69ae95ab57217fe64c97ae05d8de";
-        sha256 = "118hj100c4bb8hyhr22mrsjhg97pyd24cwb1l39bhryd0k9yc5lc";
-      };
+      src = (let
+        src = pkgs.fetchFromGitHub {
+          owner = "oh-my-fish";
+          repo = "theme-bobthefish";
+          rev = "2dcfcab653ae69ae95ab57217fe64c97ae05d8de";
+          sha256 = "118hj100c4bb8hyhr22mrsjhg97pyd24cwb1l39bhryd0k9yc5lc";
+        };
+      in pkgs.runCommand "bobthefish-jj" { } ''
+        cp -R ${src} $out
+        chmod -R +w $out
+        cat ${
+          ./fish/bobthefish_hacks_for_jj.fish
+        } >> $out/functions/fish_prompt.fish
+      '');
     }
     {
       name = "iterm2_shell_integration";
@@ -203,10 +211,6 @@ in {
     bind -M insert \ec fzf-file-widget
     # don't ignore node_modules in the file-finder
     set -x FZF_CTRL_T_OPTS '--walker-skip .git'
-
-    # load fish_prompt from bobthefish, then rewrite it to support jj
-    fish_prompt
-    source ${./fish/bobthefish_hacks_for_jj.fish};
   '';
 
   programs.fish.functions = {
