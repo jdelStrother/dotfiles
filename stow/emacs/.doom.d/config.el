@@ -157,10 +157,10 @@ space rather than before."
 
 ;; If we're using rubocop in apheleia, use bundle-exec and replace the deprecated --auto-correct flag
 ;; (Normally this won't get used - LSP will format it via solargraph/ruby-lsp instead)
-(after! apheleia
-  (add-to-list 'apheleia-formatters
-               '(rubocop . ("bundle" "exec" "rubocop" "--stdin" filepath "--autocorrect"
-                            "--stderr" "--format" "quiet" "--fail-level" "fatal"))))
+;; (after! apheleia
+;;   (add-to-list 'apheleia-formatters
+;;                '(rubocop . ("bundle" "exec" "rubocop" "--stdin" filepath "--autocorrect"
+;;                             "--stderr" "--format" "quiet" "--fail-level" "fatal"))))
 
 ;; disabling apheleia in web-mode, because it then tries to format all .html.erb files with npx-prettier.
 ;; I'd tried to define a new erb derived mode below, but no luck with it yet
@@ -183,11 +183,15 @@ space rather than before."
 
 (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
 
+(after! eglot
+  (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "ruby-lsp")))
+
 (after! lsp-mode
   (setq lsp-restart 'ignore) ;; don't prompt to restart a bunch of lsp servers every time I kill a project
   ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled.
   ;; Use lsp-workspace-folders-add instead.
   (setq lsp-auto-guess-root nil)
+  (setq lsp-signature-render-documentation nil)
   (add-function :around (symbol-function 'lsp-file-watch-ignored-directories)
                 (lambda (orig)
                   (let ((root (lsp--workspace-root (cl-first (lsp-workspaces)))))
@@ -247,8 +251,38 @@ space rather than before."
                           "Restore the original sideline value"
                           (lsp-ui-sideline-enable original-lsp-sideline-value))
                         nil t)))
+
+
+  ;; lsp hover functions convert the lsp description to markdown, and it's sometimes 100kb of junk, which gives big pauses
+  ;; when moving over constants like `Rails` or `Stripe`. Let's assume we only need 1kb.
+  (defun lsp--truncate-render-string (orig-fun str language)
+    "Truncate CONTENTS to 1000 characters before calling ORIG-FUN."
+    (when (> (length str) 1000)
+      (setq str (concat (substring str 0 997) "...")))
+    (funcall orig-fun str language))
+  (advice-add 'lsp--render-string :around #'lsp--truncate-render-string)
+
+
   )
 
+
+;; I can't get lsp formatting to work well with typescript stuff
+;; https://github.com/doomemacs/doomemacs/issues/8182
+(add-hook! '+format-with-lsp-mode-hook
+  (defun +turn-off-format-with-lsp-mode-for-modes ()
+    (when +format-with-lsp-mode
+      (when (memq major-mode '(typescript-mode
+                               typescript-ts-mode
+                               tsx-ts-mode
+                               rjsx-mode
+                               js-mode
+                               js2-mode
+                               js-ts-mode))
+        (+format-with-lsp-mode -1)))))
+
+
+(after! lsp-ruby-lsp
+  (set-lsp-priority! 'ruby-lsp-ls 10))
 
 (add-to-list 'auto-mode-alist '("\\.nix" . nix-mode))
 (add-to-list 'auto-mode-alist '("\\.mdx" . markdown-mode))
@@ -313,6 +347,22 @@ space rather than before."
 
 ;; Don't try to execute 'cvs' when visiting a directory that contains a csv directory
 (setq vc-handled-backends '(jj Git))
+
+(defun jds/check-jj-directory ()
+  "Check for the presence of a .jj directory in the project workspace.
+Returns t if the .jj directory exists, nil otherwise."
+  (interactive)
+  (when-let* ((project (project-current))
+              (project-root (project-root project))
+              (jj-dir (expand-file-name ".jj" project-root)))
+    (file-directory-p jj-dir)))
+
+(defun jds/magit-or-jj ()
+  " runs jj-dashboard if .jj is present, or magit otherwise"
+  (interactive)
+  (if (jds/check-jj-directory) (jj-dashboard) (magit-status)))
+
+(map! :leader :desc "magit/jj" :n "g g" #'jds/magit-or-jj)
 
 (load! "mine/hlds-mode.el")
 (load! "mine/editor-frame.el")
@@ -485,7 +535,6 @@ space rather than before."
         :desc "UP_CASE"            :nv "u"     #'string-inflection-upcase))
 
 (use-package flymake-codespell
-  :ensure t
   :hook (prog-mode . flymake-codespell-setup-backend))
 (add-hook 'prog-mode-hook #'flymake-mode)
 (after! lsp-mode
@@ -502,6 +551,22 @@ space rather than before."
 
 ;; just remove missing projects from the projectlist, mine come & go all the time due to opening third-party gems
 (setq treemacs-missing-project-action 'remove)
+
+
+(defun my-find-alternate-file (newfile)
+  "switch to new file, then kill old buffer"
+  (remove-hook 'kill-buffer-hook 'server-kill-buffer t)
+  (let ((my-old-buffer (current-buffer)))
+    (find-file newfile)
+    (kill-buffer my-old-buffer)))
+
+(defun my-dired-find-alternate-file ()
+  "open a new file from dired, then kill the old dired buffer"
+  (interactive)
+  (my-find-alternate-file (dired-get-file-for-visit)))
+
+
+
 (defun xterm-set-cwd (dir &optional terminal)
   "Set the cwd of the Xterm TERMINAL."
   (unless (display-graphic-p terminal)
@@ -509,14 +574,66 @@ space rather than before."
      (format "\e]7;file://%s%s\a" (system-name) (url-encode-url dir))
      terminal)))
 
-(defun my-buffer-select-handler (&optional _)
-  (let ((dir
-         (cond ((eq major-mode 'dired-mode) default-directory)
-               ((project-current) (project-root (project-current)))
-               ((buffer-file-name) (file-name-directory (buffer-file-name)))
-               )))
-    (when dir (xterm-set-cwd dir))))
+;; (defun my-buffer-select-handler (&optional _)
+;;   (let ((dir
+;;          (cond ((eq major-mode 'dired-mode) default-directory)
+;;                ((project-current) (project-root (project-current)))
+;;                ((buffer-file-name) (file-name-directory (buffer-file-name)))
+;;                )))
+;;     (when dir (xterm-set-cwd dir))))
 
-(add-to-list 'window-selection-change-functions #'my-buffer-select-handler)
-(add-hook 'find-file-hook #'my-buffer-select-handler)
-(add-hook 'dired-after-readin-hook #'my-buffer-select-handler)
+;; (add-to-list 'window-selection-change-functions #'my-buffer-select-handler)
+;; (add-hook 'find-file-hook #'my-buffer-select-handler)
+;; (add-hook 'dired-after-readin-hook #'my-buffer-select-handler)
+
+
+(defun jds/ediff-merge-files-with-ancestor (file-A file-B file-ancestor startup-hooks merge-buffer-file)
+  "Merge two files with ancestor, setting up sensible hooks to launch as a one-shot from the CLI"
+  (setq apheleia-global-mode -1)
+  (setq apheleia-mode -1)
+  (setq apheleia-inhibit t)
+  (setq lsp-auto-guess-root nil)
+  (setq lsp-auto-configure nil)
+  (setq ediff-quit-hook
+        (lambda ()
+          (let ((buf (current-buffer)))
+            (ediff-cleanup-mess)
+            (when (file-exists-p merge-buffer-file)
+              (save-buffer))
+            (server-edit)
+            (delete-frame))))
+  (ediff-merge-files-with-ancestor file-A file-B file-ancestor startup-hooks merge-buffer-file))
+
+
+(defadvice! +direnv--skip-in-vcs (&rest _)
+  "Don't try to load direnv when editing .git/COMMIT_MSG & co, to speed up commit messages from the terminal"
+  :before-until #'envrc-global-mode
+  (string-match-p "\\.git\\|\\.jj" (or buffer-file-name "")))
+
+(after! recentf
+  (add-to-list 'recentf-exclude "\\.jjdescription$"))
+
+
+;; jj-vc.el sets up log-edit mode on jjdescription files, but that then fails if you're editing a jjdescription file
+;; from the command line via emacsclient, because it expects log-edit-callback to have been set to a function to perform the commit.
+;; Add a fake commit-function that just saves & exits:
+(defun log-edit-save-and-quit ()
+  (interactive)
+  (save-buffer)
+  (kill-buffer))
+
+(defadvice! ensure-log-edit-callback (&rest _)
+  "Ensures log-edit-callback is set up for `jj describe` from the terminal."
+  :before #'log-edit-done
+  (unless (local-variable-p 'log-edit-callback)
+    (setq-local log-edit-callback 'log-edit-save-and-quit)))
+
+;; `C-x v d` is a useful alternative to `jj status` or whatever,
+;; but a) requires you to select the directory, and b) shows a giant list of up-to-date files which I don't care about
+;; Auto-select the project root and hide up-to-date stuff.
+(defun jds/vc-dir ()
+  (interactive)
+  (vc-dir (projectile-project-root))
+  (vc-dir-hide-up-to-date))
+(after! vc
+  (define-key (current-global-map) (kbd "C-x v d") 'jds/vc-dir))

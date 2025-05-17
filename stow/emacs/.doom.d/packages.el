@@ -69,6 +69,9 @@
 (package! vc-jj
   :recipe (:host codeberg :repo "emacs-jj-vc/vc-jj.el"))
 
+;; (package! jj-describe-mode
+;;   :recipe (:host github :repo "hrehfeld/emacs-jj-describe-mode"))
+
 ;; (package! magit
 ;;   :recipe
 ;;   (:host github
@@ -84,3 +87,5 @@
 ;;    :branch "patch-1"
 ;;    :repo "jdelStrother/eglot"
 ;;    :files ("*.el")))
+
+(package! benchmark-init)
