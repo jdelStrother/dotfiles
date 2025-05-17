@@ -84,6 +84,7 @@
     serviceConfig = {
       KeepAlive = true;
       RunAtLoad = true;
+      ProcessType = "Interactive";
     };
   };
 }
