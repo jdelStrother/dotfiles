@@ -13,8 +13,8 @@ pkgs.stdenv.mkDerivation {
   };
 
   buildInputs = [
-    pkgs.darwin.apple_sdk.frameworks.Cocoa
-    pkgs.darwin.apple_sdk.frameworks.ScriptingBridge
+    #pkgs.darwin.apple_sdk.frameworks.Cocoa
+    #pkgs.darwin.apple_sdk.frameworks.ScriptingBridge
     pkgs.perl
   ];
 
@@ -31,7 +31,5 @@ pkgs.stdenv.mkDerivation {
     cp trash.1 $out/share/man/man1
   '';
 
-  meta = with lib; {
-    platforms = [ "aarch64-darwin" "x86_64-darwin" ];
-  };
+  meta = with lib; { platforms = [ "aarch64-darwin" "x86_64-darwin" ]; };
 }

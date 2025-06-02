@@ -1,15 +1,15 @@
 {
   description = "M1 Nix";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-24.11-darwin";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-25.05-darwin";
     unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     emacs-overlay.url = "github:nix-community/emacs-overlay";
 
-    home-manager.url = "github:nix-community/home-manager/release-24.11";
+    home-manager.url = "github:nix-community/home-manager/release-25.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
 
-    darwin.url = "github:lnl7/nix-darwin/nix-darwin-24.11";
+    darwin.url = "github:lnl7/nix-darwin/nix-darwin-25.05";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -28,12 +28,9 @@
           {
             nixpkgs.overlays = [
               emacs-overlay.overlay
-              # fish 4
-              (self: super: { fish = unstable.legacyPackages.${system}.fish; })
-              # atuin 18.4
-              (self: super: {
-                atuin = unstable.legacyPackages.${system}.atuin;
-              })
+              # # fish 4
+              # (self: super: { fish = unstable.legacyPackages.${system}.fish; })
+              # # atuin 18.4
             ];
           }
         ];

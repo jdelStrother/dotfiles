@@ -9,8 +9,6 @@
   environment.variables.XDG_DATA_DIRS =
     [ "$GHOSTTY_SHELL_INTEGRATION_XDG_DIR" ];
 
-  # Auto upgrade nix package and the daemon service.
-  services.nix-daemon.enable = true;
   nix.package = pkgs.nix;
   # add the current version of pkgs to the search path,
   # so that they consistently refer to the same thing (eg for `home-manager switch`)
@@ -44,6 +42,7 @@
     # Use `chsh -s /run/current-system/sw/bin/fish` instead
     shell = pkgs.fish;
   };
+  system.primaryUser = "jon";
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
@@ -55,7 +54,7 @@
       "com.apple.CrashReporter" = { "UseUNC" = 1; };
     };
   };
-  security.pam.enableSudoTouchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = true;
 
   homebrew = {
     # Not actually using any homebrew packages right now

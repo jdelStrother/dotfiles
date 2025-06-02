@@ -1,7 +1,7 @@
 { pkgs, unstable, ... }:
 
 let
-  emacs = pkgs.emacs-unstable-nox;
+  emacs = pkgs.emacs-unstable; # build from latest tag
   emacsWithPackages = ((pkgs.emacsPackagesFor emacs).emacsWithPackages
     (epkgs: [ epkgs.vterm epkgs.treesit-grammars.with-all-grammars ]));
   # edit a dir/file in emacs, geared towards browsing third-party code
@@ -64,12 +64,15 @@ in {
     pkgs.codespell # for flymake-codespell
 
     unstable.jujutsu
-    unstable.meld # at least until magit gets jujutsu support
+    unstable.meld
     unstable.gg-jj
+    pkgs.difftastic
 
+    pkgs.gh
     pkgs.gnupg
     pkgs.pinentry_mac
     pkgs.jq
+    unstable.llm
     pkgs.niv
     pkgs.parallel
     pkgs.pssh
