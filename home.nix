@@ -72,7 +72,7 @@ in {
     pkgs.gnupg
     pkgs.pinentry_mac
     pkgs.jq
-    unstable.llm
+    (unstable.llm.override { enable-llm-anthropic = true; })
     pkgs.niv
     pkgs.parallel
     pkgs.pssh
@@ -107,6 +107,8 @@ in {
     userEmail = "me@delstrother.com";
 
     aliases = { amend = "commit --amend -C HEAD"; };
+    ignores =
+      [ ".claude" ".devenv" ".DS_Store" ".env" ".projectile" ".dir-locals.el" ];
     extraConfig = {
       core.editor = "vim";
       github.user = "jdelStrother";

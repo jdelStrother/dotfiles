@@ -47,6 +47,9 @@
 
 (setq confirm-kill-emacs nil)
 
+;; disable file autosaves, I don't think I've ever found them useful
+(setq auto-save-default nil)
+
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Documents/org/")
@@ -548,6 +551,10 @@ Returns t if the .jj directory exists, nil otherwise."
                 (setq flymake-diagnostic-functions '(flymake-codespell-backend)))
               (flymake-mode))))
 
+(use-package claude-code
+  :bind-keymap ("C-c c" . claude-code-command-map)
+  :config (claude-code-mode))
+
 
 ;; just remove missing projects from the projectlist, mine come & go all the time due to opening third-party gems
 (setq treemacs-missing-project-action 'remove)
@@ -611,6 +618,7 @@ Returns t if the .jj directory exists, nil otherwise."
   (string-match-p "\\.git\\|\\.jj" (or buffer-file-name "")))
 
 (after! recentf
+  (add-to-list 'recentf-exclude "/jj-resolve-") ;; merge conflicts
   (add-to-list 'recentf-exclude "\\.jjdescription$"))
 
 
@@ -637,3 +645,18 @@ Returns t if the .jj directory exists, nil otherwise."
   (vc-dir-hide-up-to-date))
 (after! vc
   (define-key (current-global-map) (kbd "C-x v d") 'jds/vc-dir))
+
+
+;; Save-all-without-prompting when you quit an ediff session
+(defun disable-y-or-n-p (orig-fun &rest args)
+  (cl-letf (((symbol-function 'y-or-n-p) (lambda (prompt) t)))
+    (apply orig-fun args)))
+(advice-add 'ediff-quit :around #'disable-y-or-n-p)
+
+
+;; Clean up background buffers that haven't been touched in a while
+(use-package! buffer-terminator
+  :custom
+  (buffer-terminator-verbose nil)
+  :config
+  (buffer-terminator-mode 1))

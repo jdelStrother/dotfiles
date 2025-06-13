@@ -56,6 +56,7 @@
 (package! fish-mode)
 (package! just-mode)
 (package! yaml-mode)
+(package! buffer-terminator)
 
 (package! explain-pause-mode
   :recipe (:host github :repo "lastquestion/explain-pause-mode"))
@@ -89,3 +90,5 @@
 ;;    :files ("*.el")))
 
 (package! benchmark-init)
+
+(package! claude-code :recipe (:host github :repo "stevemolitor/claude-code.el"))

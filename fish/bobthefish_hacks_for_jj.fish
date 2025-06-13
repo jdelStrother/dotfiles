@@ -3,19 +3,22 @@
 functions --copy __bobthefish_prompt_git __bobthefish_prompt_just_git
 
 function __bobthefish_describe_jj
-    set -l jj_status (jj log --ignore-working-copy --no-graph --color never -r @ -T '
-      separate(
-          " ",
-          bookmarks.join(", "),
-          change_id.shortest(),
-          commit_id.shortest(),
-          if(conflict, "(conflict)"),
-          if(empty, "(empty)"),
-          if(divergent, "(divergent)"),
-          if(hidden, "(hidden)"),
-      )
-  ')
-    echo $branch_glyph $jj_status
+    set -l info "$(
+        set -l op_id (jj op log --ignore-working-copy --no-graph --color=never --limit=1 --template 'self.id().short()' 2>/dev/null) ; or return 1
+        jj log --ignore-working-copy --no-graph --color=never --revisions=@ --template "
+            separate(
+                ' ',
+                label('operation id', '$op_id'),
+                bookmarks.join(', '),
+                if(conflict, label('conflict', '×')),
+                if(empty, label('empty', '(empty)')),
+                if(divergent, label('divergent', '(divergent)')),
+                if(hidden, label('hidden', '(hidden)')),
+            )
+        "
+    )"
+    or return 1
+    echo $branch_glyph $info
 end
 
 function __bobthefish_prompt_git --description 'Display the actual jj/git state' --no-scope-shadowing --argument git_root_dir real_pwd
@@ -24,7 +27,6 @@ function __bobthefish_prompt_git --description 'Display the actual jj/git state'
         __bobthefish_prompt_just_git $git_root_dir $real_pwd
         return
     end
-
 
     set -l dirty ''
     set -l staged ''
