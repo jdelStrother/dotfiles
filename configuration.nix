@@ -30,6 +30,8 @@
   # expose 'nixpkgs' and 'unstable' to the registry list, so that they're searchable with, eg, `nix search {nixpkgs,unstable} foo`
   nix.registry.nixpkgs.flake = inputs.nixpkgs;
   nix.registry.unstable.flake = inputs.unstable;
+  nix.gc.automatic = true; # runs `nix-collect-garbage` on sunday nights
+  nix.optimise.automatic = true; # runs `nix store optimise` on sunday nights
 
   nixpkgs.config.allowUnfree = true;
 
