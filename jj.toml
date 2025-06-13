@@ -1,0 +1,112 @@
+[user]
+name = "Jonathan del Strother"
+email = "me@delstrother.com"
+
+[ui]
+default-command = "logstatus"
+pager = ":builtin"
+# conflict-marker-style = "git"
+diff-editor = ":builtin"
+
+[signing]
+behavior = "drop"
+backend = "ssh"
+key = "~/.ssh/id_ed25519.pub"
+
+[git]
+sign-on-push = true
+private-commits = '''description(glob:'private:*')'''
+push-new-bookmarks = true # don't require --allow-new
+write-change-id-header = true
+
+
+[aliases]
+logstatus = ["util", "exec", "--", "bash", "-c", """
+    jj log -r "ancestors(reachable(@, ~(::trunk())), 2)" --no-pager
+    jj status
+"""]
+pr = ["util", "exec", "--", "bash", "-c", """
+#!/usr/bin/env bash
+set -euo pipefail
+rev="non_empty_head"
+if [ "$#" -gt 0 ]; then
+  if [ "$1" = "-r" ]; then
+    shift
+    rev="$1"
+    shift
+  fi
+fi
+if [ "$#" -gt 0 ]; then
+  name="$1"
+else
+  name="$( jj log -r "trunk()..$rev ~empty()" --no-graph -T 'description.escape_json()++"\n"' | jq -s | llm -x "Suggest a really short git branch name from the list of commits on stdin in json format. Pay special attention to the first line in each commit. Don't use any 'fix'/'feat'/etc prefixes. Output just the branch name, no quotes" )"
+fi
+bookmark="$(jj config get jds.pr-prefix)$name"
+jj git push --named "$bookmark=$rev"
+gh pr create --head "$bookmark" --web
+""", ""]
+tug = ["bookmark", "move", "--from", "closest_bookmark(non_empty_head)", "--to", "non_empty_head"]
+
+# "Back" button for the working directory: go back to the last change that @ was
+# editing.
+back = ["util", "exec", "--", "bash", "-c", """
+    resolve () { jj log --no-graph -r@ -T'change_id.short() ++ "\\n"' "$@"; }
+    current=$(resolve)
+    jj op log --no-graph -T 'id.short() ++ "\\n"' | while read op; do
+        old=$(resolve --at-op $op)
+        if [[ $old != $current ]]; then
+            if ! jj edit $old 2>/dev/null; then
+                old_commit=$(jj evolog -r $old --at-op $op --no-graph -T 'commit_id.short() ++ "\\n"' | sed -n '1p')
+                jj edit $old_commit
+            fi
+            exit 0
+        fi
+    done
+""", "jj-back"]
+
+# Assumes the existence of a 'megamerge' bookmark and 'trunk()' resolving
+# properly to a single commit. Then 'jj sandwich xyz' to move xyz into the
+# megamerge in parallel to everything else.
+sandwich = [ "rebase", "-B", "megamerge()", "-A", "trunk()", "-r"]
+
+[revsets]
+'log' = 'present(@) | ancestors((immutable_heads()|dead_bookmarks).., 2) | present(trunk())'
+
+[revset-aliases]
+'remote' = '::remote_bookmarks()'
+'closest_bookmark(to)' = 'heads(::to & bookmarks())'
+'non_empty_head' = 'latest((@ | @-) & ~empty())'
+# overridden in each repository to hide old branches
+'dead_bookmarks' = 'none()'
+'live_bookmarks' = 'bookmarks() ~ dead_bookmarks'
+# assumes you're editing a commit within the stack of mutable commits and there's a single megamerge combining them all
+'megamerge()' = 'reachable(@, mutable()) & merges()'
+'megamerge(n)' = 'reachable(n, mutable()) & merges()'
+
+[merge-tools.ediff]
+program = 'sh'
+merge-args = ['-x', '-c', 'emacsclient -c --eval "(jds/ediff-merge-files-with-ancestor \"$0\" \"$1\" \"$2\" nil \"$3\")"', '$left', '$right', '$base', '$output']
+
+[merge-tools.difft]
+diff-args = ["--color=always", "--sort-paths", "$left", "$right"]
+
+[colors]
+"diff removed token" = { fg = "bright red", bg = "#400000", underline = false }
+"diff added token" = { fg = "bright green", bg = "#003000", underline = false }
+
+
+[templates]
+draft_commit_description = '''
+    concat(
+    coalesce(description, "\n"),
+    surround(
+        "\nJJ: This commit contains the following changes:\n", "",
+        indent("JJ:     ", diff.stat(72)),
+    ),
+    "\nJJ: ignore-rest\n",
+    diff.git(),
+    )
+'''
+
+[jds]
+pr-prefix = ""

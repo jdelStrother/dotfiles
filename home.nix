@@ -323,31 +323,31 @@ in {
     '';
   };
 
-  home.file = {
-    ".config/fish/completions/aws.fish".text = ''
-      complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)';
-    '';
+  xdg.configFile."fish/completions/aws.fish".text = ''
+    complete --command aws --no-files --arguments '(begin; set --local --export COMP_SHELL fish; set --local --export COMP_LINE (commandline); aws_completer | sed \'s/ $//\'; end)';
+  '';
 
-    ".config/fish/completions/git-lg.fish".text = ''
-      complete --no-files -c git -a '(__fish_git_branches)' -n '__fish_git_using_command lg'
-    '';
+  xdg.configFile."fish/completions/git-lg.fish".text = ''
+    complete --no-files -c git -a '(__fish_git_branches)' -n '__fish_git_using_command lg'
+  '';
 
-    ".config/fish/completions/rake.fish".text = ''
-      function __get_rake_completions -d "Get rake completions"
-        set tool rake
-        if test -f bin/rake
-          set tool bin/rake
-        end
-        $tool -T 2>&1 | sed -e "s/^rake \([a-z:_0-9!\-]*\).*#\(.*\)/\1	\2/"
+  xdg.configFile."fish/completions/rake.fish".text = ''
+    function __get_rake_completions -d "Get rake completions"
+      set tool rake
+      if test -f bin/rake
+        set tool bin/rake
       end
-      complete -c rake --no-files -a "(__get_rake_completions)"
-    '';
+      $tool -T 2>&1 | sed -e "s/^rake \([a-z:_0-9!\-]*\).*#\(.*\)/\1	\2/"
+    end
+    complete -c rake --no-files -a "(__get_rake_completions)"
+  '';
 
-    ".config/fish/completions/just.fish".text = ''
-      source (just --completions fish | psub)
-    '';
+  xdg.configFile."fish/completions/just.fish".text = ''
+    source (just --completions fish | psub)
+  '';
 
-    ".config/git/allowed_signers".text =
-      "* ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL9JCPvve0m6vPjbO25OGkqk3w4kEqBNmg1dJ3kCj4zR";
-  };
+  xdg.configFile."git/allowed_signers".text =
+    "* ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL9JCPvve0m6vPjbO25OGkqk3w4kEqBNmg1dJ3kCj4zR";
+
+  xdg.configFile."jj/config.toml".source = ./jj.toml;
 }
