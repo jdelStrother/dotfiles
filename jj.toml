@@ -6,7 +6,9 @@ email = "me@delstrother.com"
 default-command = "logstatus"
 pager = ":builtin"
 # conflict-marker-style = "git"
-diff-editor = ":builtin"
+# diff-editor = ":builtin"
+diff-editor = "gitpatch"
+merge-editor = "ksdiff"
 
 [signing]
 behavior = "drop"
@@ -19,16 +21,15 @@ private-commits = '''description(glob:'private:*')'''
 push-new-bookmarks = true # don't require --allow-new
 write-change-id-header = true
 
-
 [aliases]
 logstatus = ["util", "exec", "--", "bash", "-c", """
-    jj log -r "ancestors(reachable(@, ~(::trunk())), 2)" --no-pager
+    jj log -r 'ancestors(reachable(@, ~(::trunk())), 2)' --no-pager
     jj status
 """]
 pr = ["util", "exec", "--", "bash", "-c", """
 #!/usr/bin/env bash
 set -euo pipefail
-rev="non_empty_head"
+rev=non_empty_head
 if [ "$#" -gt 0 ]; then
   if [ "$1" = "-r" ]; then
     shift
@@ -39,13 +40,20 @@ fi
 if [ "$#" -gt 0 ]; then
   name="$1"
 else
-  name="$( jj log -r "trunk()..$rev ~empty()" --no-graph -T 'description.escape_json()++"\n"' | jq -s | llm -x "Suggest a really short git branch name from the list of commits on stdin in json format. Pay special attention to the first line in each commit. Don't use any 'fix'/'feat'/etc prefixes. Output just the branch name, no quotes" )"
+  prompt="Suggest a really short git branch name from the list of commits on stdin in json format. Pay special attention to the first line in each commit. Don't use any 'fix'/'feat'/etc prefixes. Output just the branch name, no quotes"
+  name="$( jj log -r "trunk()..$rev ~empty()" --no-graph -T 'description.escape_json()++"\n"' | jq -s | llm -x "$prompt" )"
 fi
 bookmark="$(jj config get jds.pr-prefix)$name"
 jj git push --named "$bookmark=$rev"
 gh pr create --head "$bookmark" --web
 """, ""]
-tug = ["bookmark", "move", "--from", "closest_bookmark(non_empty_head)", "--to", "non_empty_head"]
+tug = ["util", "exec", "--", "bash", "-c", """
+  jj bookmark move --from "closest_bookmark(${1:-non_empty_head})" --to "${1:-non_empty_head}"
+""", ""]
+sync = ["util", "exec", "--", "bash", "-c", """
+  jj git fetch --branch master --branch 'glob:jon/*' && jj rebase -d master && jj simplify-parents
+""", ""]
+
 
 # "Back" button for the working directory: go back to the last change that @ was
 # editing.
@@ -64,10 +72,24 @@ back = ["util", "exec", "--", "bash", "-c", """
     done
 """, "jj-back"]
 
-# Assumes the existence of a 'megamerge' bookmark and 'trunk()' resolving
+# Assumes the existence of a 'megamerge' revset alias and 'trunk()' resolving
 # properly to a single commit. Then 'jj sandwich xyz' to move xyz into the
 # megamerge in parallel to everything else.
-sandwich = [ "rebase", "-B", "megamerge()", "-A", "trunk()", "-r"]
+sandwich = [ "rebase", "-B", "megamerge", "-A", "trunk()", "-r"]
+
+# Usage: jj addparent <child aka mergerev> <newparent>
+#
+# jj rebase -s <mergerev> -d <mergerev>- -d <newparent>
+addparent = ["util", "exec", "--", "bash", "-c", '''
+    jj rebase -s $1 -d "$1-" -d $2
+''', "jj-addparent"]
+
+# Usage: jj rmparent <child aka mergerev> <oldparent>
+#
+# jj rebase -s <mergerev> -d "<mergerev>- ~ <oldparent>"
+rmparent = ["util", "exec", "--", "bash", "-c", '''
+    jj rebase -s $1 -d "$1- ~ $2"
+''', "jj-rmparent"]
 
 [revsets]
 'log' = 'present(@) | ancestors((immutable_heads()|dead_bookmarks).., 2) | present(trunk())'
@@ -79,20 +101,41 @@ sandwich = [ "rebase", "-B", "megamerge()", "-A", "trunk()", "-r"]
 # overridden in each repository to hide old branches
 'dead_bookmarks' = 'none()'
 'live_bookmarks' = 'bookmarks() ~ dead_bookmarks'
-# assumes you're editing a commit within the stack of mutable commits and there's a single megamerge combining them all
-'megamerge()' = 'reachable(@, mutable()) & merges()'
-'megamerge(n)' = 'reachable(n, mutable()) & merges()'
 
 [merge-tools.ediff]
 program = 'sh'
-merge-args = ['-x', '-c', 'emacsclient -c --eval "(jds/ediff-merge-files-with-ancestor \"$0\" \"$1\" \"$2\" nil \"$3\")"', '$left', '$right', '$base', '$output']
+merge-args = ['-x', '-c', 'emacsclient -nw -c --eval "(jds/ediff-merge-files-with-ancestor \"$0\" \"$1\" \"$2\" nil \"$3\")"', '$left', '$right', '$base', '$output']
 
 [merge-tools.difft]
 diff-args = ["--color=always", "--sort-paths", "$left", "$right"]
 
+[merge-tools.ksdiff]
+diff-invocation-mode = "file-by-file"
+diff-args = ["--partial-changeset", "$left", "$right"]
+merge-args = ["--merge", "--output", "$output", "--base", "$base", "$left", "$right"]
+
+[merge-tools.gitpatch]
+program = "sh"
+edit-args = ["-c", '''
+  set -eu
+  rm -f "$right/JJ-INSTRUCTIONS"
+  git -C "$left" init -q
+  git -C "$left" add -A
+  git -C "$left" commit -q -m baseline --allow-empty
+  mv "$left/.git" "$right"
+  git -C "$right" add --intent-to-add --ignore-removal . # tell git to include new files in interactive patch mode
+  git -C "$right" add -p
+  git -C "$right" diff-index --quiet --cached HEAD && { echo "No changes done, aborting split."; exit 1; }
+  git -C "$right" commit -q -m split
+  git -C "$right" reset -q --hard # undo changes in modified files, remove added files
+''',
+]
+merge-args = ["-c", "echo gitpatch cannot be used as a diff tool"]
+diff-args = ["-c", "echo gitpatch cannot be used as a diff tool"]
+
 [colors]
-"diff removed token" = { fg = "bright red", bg = "#400000", underline = false }
-"diff added token" = { fg = "bright green", bg = "#003000", underline = false }
+# "diff removed token" = { fg = "bright red", bg = "#400000", underline = false }
+# "diff added token" = { fg = "bright green", bg = "#003000", underline = false }
 
 
 [templates]
