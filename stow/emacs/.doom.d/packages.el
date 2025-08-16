@@ -92,3 +92,4 @@
 (package! benchmark-init)
 
 (package! claude-code :recipe (:host github :repo "stevemolitor/claude-code.el"))
+(package! eat)

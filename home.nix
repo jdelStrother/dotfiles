@@ -60,8 +60,11 @@ in {
     pkgs.git-absorb
     pkgs.gnugrep # macos grep is weird
     pkgs.gnused # macos sed is weird
+
+    # emacs deps. Could maybe be siloed into emacs, but YOLO
     pkgs.zstd # doom-emacs uses zstd for some optimizations
     pkgs.codespell # for flymake-codespell
+    pkgs.typescript-language-server
 
     unstable.jujutsu
     unstable.meld
@@ -311,6 +314,15 @@ in {
     # eg `gemgrep 'google*' | xargs bundle update`
     gemgrep = ''
       ruby -rbundler -e "puts Bundler::LockfileParser.new(Bundler.read_file('Gemfile.lock')).specs.map(&:name).select{File.fnmatch(ARGV[0], _1)}" "$argv[1]"
+    '';
+
+    # a dumb hack to make sure emacs see gems as projects. Surely we could do this in lisp?
+    bundle = ''
+      command bundle $argv && begin
+        if ! count $argv > /dev/null || test $argv[1] = "install"
+          for f in $GEM_HOME/gems/*; touch $f/.projectile; end
+        end
+      end
     '';
 
     icat = ''

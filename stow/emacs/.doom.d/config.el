@@ -108,11 +108,9 @@ space rather than before."
 ;; use bash for spawning random subprocesses, but fish if you want a proper shell
 (setq shell-file-name (executable-find "bash"))
 (let ((fishpath (executable-find "fish")))
-  (if fishpath
-      (progn
-        (setq explicit-shell-file-name fishpath)
-        (setq vterm-shell fishpath)
-        )))
+  (when fishpath
+    (setq explicit-shell-file-name fishpath
+          vterm-shell fishpath)))
 ;; set EDITOR to use the current emacs instance in a shell
 (add-hook 'shell-mode-hook  'with-editor-export-editor)
 (add-hook 'vterm-mode-hook  'with-editor-export-editor)
@@ -135,17 +133,20 @@ space rather than before."
 (when (modulep! :completion company)
   (setq company-idle-delay nil))
 
-(after! magit
-  ;; Stop magit complaining about too-long summary lines
-  (setq git-commit-style-convention-checks
-        (remove 'overlong-summary-line git-commit-style-convention-checks))
+(use-package magit
+  :config
   ;; Show timestamps rather than relative dates
   (setq magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18))
-  ;; Try to speed up status buffer refreshes
-  (remove-hook 'magit-status-headers-hook 'magit-insert-tags-header)
   ;; Allegedly helps to hard-code the path rather than force magit to look it up on each execution
   (setq magit-git-executable (executable-find "git"))
+  ;; Try to speed up status buffer refreshes
+  (remove-hook 'magit-status-headers-hook 'magit-insert-tags-header)
   )
+(use-package git-commit
+  :config
+  ;; Stop magit complaining about too-long summary lines
+  (setq git-commit-style-convention-checks
+        (remove 'overlong-summary-line git-commit-style-convention-checks)))
 
 (setq projectile-project-search-path '("~/Developer/" "~/Developer/vendor/"))
 (setq projectile-rails-expand-snippet-with-magic-comment t)
@@ -187,6 +188,10 @@ space rather than before."
 (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
 
 (after! eglot
+  (setq eglot-code-action-indicator "!" ;; the default emoji is too wide for a fringe
+        eglot-code-action-indications '(margin) ;; just use the margin, stop spamming minibuffer
+        eldoc-echo-area-use-multiline-p 1 ;; use K if you need to see more
+        )
   (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "ruby-lsp")))
 
 (after! lsp-mode
@@ -213,7 +218,10 @@ space rather than before."
   (setq lsp-file-watch-ignored-directories
         (append lsp-file-watch-ignored-directories
                 '(
+                  "[/\\\\]\\.devenv\\'"
                   "[/\\\\]\\.direnv\\'"
+                  "[/\\\\]\\.jj\\'"
+                  "[/\\\\]cdk\\.out\\'"
                   ;; Bunch of audioboom-specific things because lsp doesn't work great with dir-locals (https://www.reddit.com/r/emacs/comments/jeenx4/til_how_to_load_file_or_dirlocals_before_a_minor/)
                   "[/\\\\]\\.sass-cache\\'"
                   "[/\\\\]\\.services\\'"
@@ -224,18 +232,20 @@ space rather than before."
                   "[/\\\\]tmp\\'"
                   "[/\\\\]vendor\\'"
                   "[/\\\\]webpack\\'"
+                  ;; for volt
+                  "[/\\\\]resources/gems\\'"
                   )))
 
   (lsp-defun my/filter-typescript ((params &as &PublishDiagnosticsParams :diagnostics)
                                    _workspace)
-    (lsp:set-publish-diagnostics-params-diagnostics
-     params
-     (or (seq-filter (-lambda ((&Diagnostic :source? :code?))
-                       ;; Silence "This may be converted to an async function" from typescript
-                       (not (and (eq 80006 code?) (string= "typescript" source?))))
-                     diagnostics)
-         []))
-    params)
+             (lsp:set-publish-diagnostics-params-diagnostics
+              params
+              (or (seq-filter (-lambda ((&Diagnostic :source? :code?))
+                                ;; Silence "This may be converted to an async function" from typescript
+                                (not (and (eq 80006 code?) (string= "typescript" source?))))
+                              diagnostics)
+                  []))
+             params)
 
   (setq lsp-diagnostic-filter 'my/filter-typescript )
 
@@ -265,6 +275,11 @@ space rather than before."
     (funcall orig-fun str language))
   (advice-add 'lsp--render-string :around #'lsp--truncate-render-string)
 
+
+  ;; I don't think I get any benefit from lsp's multi-root behaviour, it just sets up a million file watchers in directories
+  ;; I haven't visited in months. This apparently fixes it..?
+  ;; https://emacs-lsp.github.io/lsp-mode/page/faq/#how-do-i-force-lsp-mode-to-forget-the-workspace-folders-for-multi-root-servers-so-the-workspace-folders-are-added-on-demand
+  (advice-add 'lsp :before (lambda (&rest _args) (eval '(setf (lsp-session-server-id->folders (lsp-session)) (ht)))))
 
   )
 
@@ -374,12 +389,6 @@ Returns t if the .jj directory exists, nil otherwise."
 (load! "mine/clipboard.el")
 
 ;; (explain-pause-mode t)
-
-;; (use-package eglot
-;;   :config
-;;   (setq eglot-connect-timeout 60) ;; solargraph is slow to start
-;;   (map-put eglot-server-programs '(js-mode js2-mode rjsx-mode) '("flow" "lsp" "--from" "emacs" "--autostop"))
-;;   )
 
 (after! project
   (defvar project-root-markers '("package.json")
@@ -504,6 +513,7 @@ Returns t if the .jj directory exists, nil otherwise."
 
 (use-package typescript-ts-mode
   :mode (("\\.ts\\'" . typescript-ts-mode)
+         ("\\.mts\\'" . typescript-ts-mode)
          ("\\.tsx\\'" . tsx-ts-mode))
   :config
   (add-hook! '(typescript-ts-mode-hook tsx-ts-mode-hook) #'lsp!))
@@ -596,20 +606,22 @@ Returns t if the .jj directory exists, nil otherwise."
 
 (defun jds/ediff-merge-files-with-ancestor (file-A file-B file-ancestor startup-hooks merge-buffer-file)
   "Merge two files with ancestor, setting up sensible hooks to launch as a one-shot from the CLI"
-  (setq apheleia-global-mode -1)
-  (setq apheleia-mode -1)
-  (setq apheleia-inhibit t)
-  (setq lsp-auto-guess-root nil)
-  (setq lsp-auto-configure nil)
-  (setq ediff-quit-hook
-        (lambda ()
-          (let ((buf (current-buffer)))
-            (ediff-cleanup-mess)
-            (when (file-exists-p merge-buffer-file)
-              (save-buffer))
-            (server-edit)
-            (delete-frame))))
+  (setq
+   lsp-auto-guess-root nil
+   lsp-auto-configure nil
+   ediff-quit-hook (lambda ()
+                     (let ((buf (current-buffer)))
+                       (ediff-cleanup-mess)
+                       (when (file-exists-p merge-buffer-file)
+                         (save-buffer))
+                       (server-edit)
+                       (delete-frame))))
   (ediff-merge-files-with-ancestor file-A file-B file-ancestor startup-hooks merge-buffer-file))
+
+(defadvice! +apheleia--skip-in-tmpdir (&rest _)
+  "Don't try to enable apheleia mode when editing files in $TMPDIR (like, eg, jj-resolve files), to avoid an error about npx-prettier not being found"
+  :before-until #'apheleia-mode
+  (string-prefix-p (file-truename (getenv "TMPDIR")) (file-truename (or buffer-file-name ""))))
 
 
 (defadvice! +direnv--skip-in-vcs (&rest _)
@@ -659,4 +671,53 @@ Returns t if the .jj directory exists, nil otherwise."
   :custom
   (buffer-terminator-verbose nil)
   :config
-  (buffer-terminator-mode 1))
+  (buffer-terminator-mode 1)
+  (add-to-list 'buffer-terminator-rules-alist
+               `(call-function . ,(lambda ()
+                                    (message "think about killing %s...." (buffer-name))
+                                    (if (memq 'server-kill-buffer kill-buffer-hook)
+                                        :keep
+                                      nil))))
+  )
+
+
+(defun parse-colon-notation (filename)
+  "Parse FILENAME in the format expected by `server-visit-files'.
+
+Modify it so that `filename:line:column' is is reformatted the
+way Emacs expects."
+  (let ((name (car filename)))
+    (if (string-match "^\\(.*?\\):\\([0-9]+\\)\\(?::\\([0-9]+\\)\\)?$" name)
+        (cons
+         (match-string 1 name)
+         (cons (string-to-number (match-string 2 name))
+               (string-to-number (or (match-string 3 name) ""))))
+      filename)))
+
+(defun wrap-colon-notation (f &rest args)
+  "Wrap F (`server-visit-files') and modify ARGS to support colon notation.
+
+Open files with emacsclient with cursors according to colon
+notation.  When the file name has line numbers and optionally
+columns specified like `filename:line:column', parse those and
+return them in the Emacs format."
+  (message "%s" args)
+  (apply f (cons (mapcar #'parse-colon-notation (car args)) (cdr args))))
+
+;; Make `emacsclient' support line:column notation.
+(advice-add 'server-visit-files :around #'wrap-colon-notation)
+
+(defun jds/git-commit-setup ()
+  (git-commit-setup-font-lock)
+  (git-commit-propertize-diff))
+(after! log-edit
+  (add-hook 'log-edit-mode-hook #'jds/git-commit-setup)
+  (map! :map log-edit-mode-map
+        :n "Z Q" #'log-edit-kill-buffer
+        :n "Z Z" #'log-edit-done))
+
+(advice-add 'bundle-list-gems :around #'envrc-propagate-environment)
+(advice-add 'bundle-open :around #'envrc-propagate-environment)
+
+;; Implicit /g flag, because I rarely use it without
+(setq evil-ex-substitute-global t)
