@@ -633,21 +633,6 @@ Returns t if the .jj directory exists, nil otherwise."
   (add-to-list 'recentf-exclude "/jj-resolve-") ;; merge conflicts
   (add-to-list 'recentf-exclude "\\.jjdescription$"))
 
-
-;; jj-vc.el sets up log-edit mode on jjdescription files, but that then fails if you're editing a jjdescription file
-;; from the command line via emacsclient, because it expects log-edit-callback to have been set to a function to perform the commit.
-;; Add a fake commit-function that just saves & exits:
-(defun log-edit-save-and-quit ()
-  (interactive)
-  (save-buffer)
-  (kill-buffer))
-
-(defadvice! ensure-log-edit-callback (&rest _)
-  "Ensures log-edit-callback is set up for `jj describe` from the terminal."
-  :before #'log-edit-done
-  (unless (local-variable-p 'log-edit-callback)
-    (setq-local log-edit-callback 'log-edit-save-and-quit)))
-
 ;; `C-x v d` is a useful alternative to `jj status` or whatever,
 ;; but a) requires you to select the directory, and b) shows a giant list of up-to-date files which I don't care about
 ;; Auto-select the project root and hide up-to-date stuff.
