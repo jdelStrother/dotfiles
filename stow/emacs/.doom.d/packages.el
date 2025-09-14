@@ -69,6 +69,8 @@
 ;;   :recipe (:host sourcehut :repo "puercopop/jujutsushi"))
 (package! vc-jj
   :recipe (:host codeberg :repo "emacs-jj-vc/vc-jj.el"))
+(package! jj-mode :recipe (:host github :repo "bolivier/jj-mode.el"))
+
 
 ;; (package! jj-describe-mode
 ;;   :recipe (:host github :repo "hrehfeld/emacs-jj-describe-mode"))
@@ -93,3 +95,5 @@
 
 (package! claude-code :recipe (:host github :repo "stevemolitor/claude-code.el"))
 (package! eat)
+
+(package! yasnippet)

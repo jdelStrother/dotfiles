@@ -188,10 +188,13 @@ space rather than before."
 (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
 
 (after! eglot
-  (setq eglot-code-action-indicator "!" ;; the default emoji is too wide for a fringe
-        eglot-code-action-indications '(margin) ;; just use the margin, stop spamming minibuffer
-        eldoc-echo-area-use-multiline-p 1 ;; use K if you need to see more
-        )
+  (setq
+   eglot-code-action-indicator "!" ;; the default emoji is too wide for a fringe
+   eglot-code-action-indications '(margin) ;; just use the margin, stop spamming minibuffer
+   ;;  eldoc-echo-area-use-multiline-p 1 ;; use K if you need to see more
+   )
+  ;; onTypeFormatting seems buggy with ruby-lsp - if you type `if foo<enter>` it'll add an `end`, but leaves the cursor after the `end`, which is pretty annoying
+  (add-to-list 'eglot-ignored-server-capabilities :documentOnTypeFormattingProvider)
   (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "ruby-lsp")))
 
 (after! lsp-mode
@@ -325,17 +328,17 @@ space rather than before."
 (after! haml-mode
   (after! flycheck
     (flycheck-define-checker haml-lint
-      "A haml syntax checker using the haml-lint tool."
-      :command ("bundle"
-                "exec"
-                "haml-lint"
-                source-inplace)
-      :working-directory flycheck-ruby--find-project-root
-      :error-patterns
-      ((info line-start (file-name) ":" line " [C] " (message) line-end)
-       (warning line-start (file-name) ":" line " [W] " (message) line-end)
-       (error line-start (file-name) ":" line " [" (or "E" "F") "] " (message) line-end))
-      :modes (haml-mode))
+                             "A haml syntax checker using the haml-lint tool."
+                             :command ("bundle"
+                                       "exec"
+                                       "haml-lint"
+                                       source-inplace)
+                             :working-directory flycheck-ruby--find-project-root
+                             :error-patterns
+                             ((info line-start (file-name) ":" line " [C] " (message) line-end)
+                              (warning line-start (file-name) ":" line " [W] " (message) line-end)
+                              (error line-start (file-name) ":" line " [" (or "E" "F") "] " (message) line-end))
+                             :modes (haml-mode))
     (add-to-list 'flycheck-checkers 'haml-lint)
     (flycheck-add-next-checker 'haml '(warning . haml-lint))
 
@@ -630,6 +633,7 @@ Returns t if the .jj directory exists, nil otherwise."
   (string-match-p "\\.git\\|\\.jj" (or buffer-file-name "")))
 
 (after! recentf
+  (add-to-list 'recentf-exclude "^/$") ;; not sure what keeps adding '/' to recent files
   (add-to-list 'recentf-exclude "/jj-resolve-") ;; merge conflicts
   (add-to-list 'recentf-exclude "\\.jjdescription$"))
 
@@ -657,12 +661,12 @@ Returns t if the .jj directory exists, nil otherwise."
   (buffer-terminator-verbose nil)
   :config
   (buffer-terminator-mode 1)
-  (add-to-list 'buffer-terminator-rules-alist
-               `(call-function . ,(lambda ()
-                                    (message "think about killing %s...." (buffer-name))
-                                    (if (memq 'server-kill-buffer kill-buffer-hook)
-                                        :keep
-                                      nil))))
+  ;; (add-to-list 'buffer-terminator-rules-alist
+  ;;              `(call-function . ,(lambda ()
+  ;;                                   (message "think about killing %s...." (buffer-name))
+  ;;                                   (if (memq 'server-kill-buffer kill-buffer-hook)
+  ;;                                       :keep
+  ;;                                     nil))))
   )
 
 
@@ -698,7 +702,7 @@ return them in the Emacs format."
 (after! log-edit
   (add-hook 'log-edit-mode-hook #'jds/git-commit-setup)
   (map! :map log-edit-mode-map
-        :n "Z Q" #'log-edit-kill-buffer
+        :n "Z Q" #'with-editor-cancel ;; borrow with-editor's method that kills the buffer without prompting, and returns a exit code telling jj/git/whatever to abort
         :n "Z Z" #'log-edit-done))
 
 (advice-add 'bundle-list-gems :around #'envrc-propagate-environment)
@@ -706,3 +710,5 @@ return them in the Emacs format."
 
 ;; Implicit /g flag, because I rarely use it without
 (setq evil-ex-substitute-global t)
+(after! evil-escape
+  (setq evil-escape-key-sequence "jk"))

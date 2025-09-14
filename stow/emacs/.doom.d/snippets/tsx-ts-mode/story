@@ -1,0 +1,18 @@
+# -*- mode: snippet -*-
+# name: story
+# condition: (string-match-p "stories" buffer-file-name)
+# expand-env: ((name (s-replace-regexp "\.stories.*" "" (file-name-nondirectory buffer-file-name))))
+# --
+
+import * as React from "react";
+import type { StoryObj, Meta } from "@storybook/react";
+import ${1:`(s-upper-camel-case name)`} from "./${2:`name`}";
+
+const meta: Meta<typeof $1> = {
+  title: "Components/$1",
+  component: $1
+};
+export default meta;
+type Story = StoryObj<typeof $1>;
+
+export const Example: Story = {};
