@@ -1,27 +1,24 @@
 { pkgs, unstable, ... }:
 
 let
-  emacs = pkgs.emacs-unstable; # build from latest tag
-  emacsWithPackages = ((pkgs.emacsPackagesFor emacs).emacsWithPackages
-    (epkgs: [ epkgs.vterm epkgs.treesit-grammars.with-all-grammars ]));
+  # emacs = pkgs.emacs-unstable; # build from latest tag
+  emacs = pkgs.emacs-git; # build from latest master
+  emacsWithPackages = (
+    (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
+      epkgs.vterm
+      epkgs.treesit-grammars.with-all-grammars
+    ])
+  );
   # edit a dir/file in emacs, geared towards browsing third-party code
   # so opens in a temp workspace and sets up projectile to isolate just that directory.
   # (As opposed to opening node_modules/bootstrap and finding that, eg, `SPC SPC` tries to browse
   # the top-level project folder.
-  emacsLauncher =
-    pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
-  git-recent =
-    pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
+  emacsLauncher = pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
+  git-recent = pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
   ruby = pkgs.ruby_3_4;
-  fzf = unstable.fzf.overrideAttrs (prev: {
-    # Prevent shell integrations from installing automatically.
-    # Otherwise fzf-key-bindings.fish gets sourced before we have opportunity to set FZF_CTRL_T_COMMAND=''
-    postInstall = prev.postInstall + ''
-      rm $out/share/fish/vendor_conf.d/load-fzf-key-bindings.fish
-    '';
-  });
 
-in {
+in
+{
   imports = [ ./home-manager-apps.nix ];
 
   home.username = "jon";
@@ -29,8 +26,10 @@ in {
   home.stateVersion = "22.11";
 
   home.sessionVariables =
-    let gemHome = "$HOME/.gem/ruby/${builtins.baseNameOf ruby}";
-    in {
+    let
+      gemHome = "$HOME/.gem/ruby/${builtins.baseNameOf ruby}";
+    in
+    {
       EDITOR = "emacsclient --tty --alternate-editor=''";
       # BUNDLER_EDITOR = "${emacsLauncher}/bin/edit";
 
@@ -43,7 +42,7 @@ in {
     emacsLauncher
     git-recent
     ruby
-    fzf
+    unstable.fzf
     pkgs.nodejs
     pkgs.php # for Alfred devdocs workflow
 
@@ -55,6 +54,7 @@ in {
     # pkgs.awslogs
     pkgs.aws-vault
     pkgs.clang
+    pkgs.clang-tools # for clangd lsp
     pkgs.coreutils
     pkgs.gist
     pkgs.git-absorb
@@ -68,7 +68,8 @@ in {
 
     unstable.jujutsu
     unstable.meld
-    unstable.gg-jj
+    unstable.mergiraf
+    pkgs.gg-jj
     pkgs.difftastic
 
     pkgs.gh
@@ -89,7 +90,8 @@ in {
     pkgs.go
     pkgs.tmux
     pkgs.shellcheck
-    pkgs.nixfmt-classic
+    pkgs.nixfmt-rfc-style
+    pkgs.nil # nix lsp
     pkgs.cmake
     pkgs._1password-cli
 
@@ -109,9 +111,17 @@ in {
     userName = "Jonathan del Strother";
     userEmail = "me@delstrother.com";
 
-    aliases = { amend = "commit --amend -C HEAD"; };
-    ignores =
-      [ ".claude" ".devenv" ".DS_Store" ".env" ".projectile" ".dir-locals.el" ];
+    aliases = {
+      amend = "commit --amend -C HEAD";
+    };
+    ignores = [
+      ".claude"
+      ".devenv"
+      ".DS_Store"
+      ".env"
+      ".projectile"
+      ".dir-locals.el"
+    ];
     extraConfig = {
       core.editor = "vim";
       github.user = "jdelStrother";
@@ -147,20 +157,21 @@ in {
     }
     {
       name = "theme-bobthefish";
-      src = (let
-        src = pkgs.fetchFromGitHub {
-          owner = "oh-my-fish";
-          repo = "theme-bobthefish";
-          rev = "2dcfcab653ae69ae95ab57217fe64c97ae05d8de";
-          sha256 = "118hj100c4bb8hyhr22mrsjhg97pyd24cwb1l39bhryd0k9yc5lc";
-        };
-      in pkgs.runCommand "bobthefish-jj" { } ''
-        cp -R ${src} $out
-        chmod -R +w $out
-        cat ${
-          ./fish/bobthefish_hacks_for_jj.fish
-        } >> $out/functions/fish_prompt.fish
-      '');
+      src = (
+        let
+          src = pkgs.fetchFromGitHub {
+            owner = "oh-my-fish";
+            repo = "theme-bobthefish";
+            rev = "2dcfcab653ae69ae95ab57217fe64c97ae05d8de";
+            sha256 = "118hj100c4bb8hyhr22mrsjhg97pyd24cwb1l39bhryd0k9yc5lc";
+          };
+        in
+        pkgs.runCommand "bobthefish-jj" { } ''
+          cp -R ${src} $out
+          chmod -R +w $out
+          cat ${./fish/bobthefish_hacks_for_jj.fish} >> $out/functions/fish_prompt.fish
+        ''
+      );
     }
     {
       name = "iterm2_shell_integration";
@@ -213,7 +224,7 @@ in {
 
     # I want ctrl-t to transpose characters, not invoke fzf's file-finder
     set -gx FZF_CTRL_T_COMMAND ""
-    fzf_key_bindings
+    fzf --fish | source
     # However, the file-finder is quite useful. Bind it to alt-c (normally fzf-cd-widget, which I don't use)
     bind \ec fzf-file-widget
     bind -M insert \ec fzf-file-widget
@@ -280,6 +291,8 @@ in {
       # by default aws-vault generates session names with timestamps,
       # which is annoying for Quicksight which then sees every login as a fresh user
       export AWS_ROLE_SESSION_NAME=jdelStrother
+      # I'm not clear on the different, but just using `aws-vault login --duration=8h` only gives an hour-long session
+      export AWS_SESSION_TOKEN_TTL=8h
 
       # url-encode the login url and use https://addons.mozilla.org/en-GB/firefox/addon/open-url-in-container/
       # to open it in a specific container
@@ -319,7 +332,7 @@ in {
     # a dumb hack to make sure emacs see gems as projects. Surely we could do this in lisp?
     bundle = ''
       command bundle $argv && begin
-        if ! count $argv > /dev/null || test $argv[1] = "install"
+        if ! count $argv > /dev/null || test $argv[1] = "install" || test $argv[1] = "add"
           for f in $GEM_HOME/gems/*; touch $f/.projectile; end
         end
       end
@@ -352,6 +365,17 @@ in {
       $tool -T 2>&1 | sed -e "s/^rake \([a-z:_0-9!\-]*\).*#\(.*\)/\1	\2/"
     end
     complete -c rake --no-files -a "(__get_rake_completions)"
+  '';
+
+  xdg.configFile."fish/completions/rails.fish".text = ''
+    function __get_rails_completions -d "Get rails completions"
+      set tool rails
+      if test -f bin/rails
+        set tool bin/rails
+      end
+      $tool -T 2>&1 | sed -e "s/^\(bin\/\)\?rails \([a-z:_0-9!\-]*\).*#\(.*\)/\2	\3/"
+    end
+    complete -c rails --no-files -a "(__get_rails_completions)"
   '';
 
   xdg.configFile."fish/completions/just.fish".text = ''

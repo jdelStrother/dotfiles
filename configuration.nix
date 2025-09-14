@@ -1,13 +1,23 @@
 # darwin-rebuild switch --flake ~/dotfiles
-
-{ pkgs, config, lib, unstable, inputs, ... }: {
+{
+  pkgs,
+  config,
+  lib,
+  unstable,
+  inputs,
+  ...
+}:
+{
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
-  environment.systemPackages = [ pkgs.vim pkgs.git pkgs.fish ];
+  environment.systemPackages = [
+    pkgs.vim
+    pkgs.git
+    pkgs.fish
+  ];
   environment.shells = [ pkgs.fish ];
   # Hack: https://github.com/ghostty-org/ghostty/discussions/2832
-  environment.variables.XDG_DATA_DIRS =
-    [ "$GHOSTTY_SHELL_INTEGRATION_XDG_DIR" ];
+  environment.variables.XDG_DATA_DIRS = [ "$GHOSTTY_SHELL_INTEGRATION_XDG_DIR" ];
 
   nix.package = pkgs.nix;
   # add the current version of pkgs to the search path,
@@ -15,8 +25,10 @@
   nix.nixPath = [ ("nixpkgs=" + toString pkgs.path) ];
   nix.settings = {
     sandbox = true;
-    substituters =
-      [ "https://nix-community.cachix.org" "https://devenv.cachix.org" ];
+    substituters = [
+      "https://nix-community.cachix.org"
+      "https://devenv.cachix.org"
+    ];
     trusted-public-keys = [
       "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
@@ -53,7 +65,9 @@
   system.defaults = {
     CustomUserPreferences = {
       # suppress crash popups, put them in Notification Center instead
-      "com.apple.CrashReporter" = { "UseUNC" = 1; };
+      "com.apple.CrashReporter" = {
+        "UseUNC" = 1;
+      };
     };
   };
   security.pam.services.sudo_local.touchIdAuth = true;
@@ -76,8 +90,7 @@
 
   # manually specifying launchd rather than just `services.emacs.enable = true` because I want to be able to override TERMINFO
   launchd.user.agents.emacs = {
-    command =
-      "${config.home-manager.users.jon.programs.emacs.finalPackage}/bin/emacs --fg-daemon";
+    command = "${config.home-manager.users.jon.programs.emacs.finalPackage}/bin/emacs --fg-daemon";
     path = [ config.environment.systemPath ];
     environment = {
       TERMINFO = "/Applications/Ghostty.app/Contents/Resources/terminfo";

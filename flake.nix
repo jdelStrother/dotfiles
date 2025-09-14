@@ -13,8 +13,17 @@
     darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, darwin, home-manager, nixpkgs, unstable, emacs-overlay, ...
-    }@inputs: {
+  outputs =
+    {
+      self,
+      darwin,
+      home-manager,
+      nixpkgs,
+      unstable,
+      emacs-overlay,
+      ...
+    }@inputs:
+    {
       darwinConfigurations."M1MBP" = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         # add 'unstable' & 'inputs' as arguments that gets passed to modules
