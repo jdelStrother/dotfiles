@@ -6,8 +6,7 @@ email = "me@delstrother.com"
 default-command = "logstatus"
 pager = ":builtin"
 # conflict-marker-style = "git"
-# diff-editor = ":builtin"
-diff-editor = "gitpatch"
+diff-editor = ":builtin"
 merge-editor = "ksdiff"
 
 [signing]
@@ -22,34 +21,79 @@ push-new-bookmarks = true # don't require --allow-new
 write-change-id-header = true
 
 [aliases]
+gitpatch = ["commit", "-i", "--tool", "gitpatch"]
+solve = ["resolve", "--tool", "mergiraf"]
+
 logstatus = ["util", "exec", "--", "bash", "-c", """
     jj log -r 'ancestors(reachable(@, ~(::trunk())), 2)' --no-pager
     jj status
 """]
 pr = ["util", "exec", "--", "bash", "-c", """
-#!/usr/bin/env bash
-set -euo pipefail
-rev=non_empty_head
-if [ "$#" -gt 0 ]; then
-  if [ "$1" = "-r" ]; then
-    shift
-    rev="$1"
-    shift
-  fi
-fi
-if [ "$#" -gt 0 ]; then
-  name="$1"
-else
-  prompt="Suggest a really short git branch name from the list of commits on stdin in json format. Pay special attention to the first line in each commit. Don't use any 'fix'/'feat'/etc prefixes. Output just the branch name, no quotes"
-  name="$( jj log -r "trunk()..$rev ~empty()" --no-graph -T 'description.escape_json()++"\n"' | jq -s | llm -x "$prompt" )"
-fi
-bookmark="$(jj config get jds.pr-prefix)$name"
-jj git push --named "$bookmark=$rev"
-gh pr create --head "$bookmark" --web
+    set -euo pipefail
+    rev=non_empty_head
+    dry_run=false
+    name=""
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        -r)
+          shift
+          rev="$1"
+          shift
+          ;;
+        -n|--dry-run)
+          dry_run=true
+          shift
+          ;;
+        *)
+          name="$1"
+          shift
+          break
+          ;;
+      esac
+    done
+    # automatically sandwich the revision(s) if they're not contained within megamerge
+    revtip=$(jj log -T'change_id' --no-graph -n1 -r "$rev") # in case rev is a range, get a single commit from the tip
+    if [ "$(jj log -n1 -r megamerge..$revtip)" != '' ]; then
+      jj sandwich "$rev"
+    fi
+    rev="$revtip"
+
+    if [ -z "$name" ]; then
+      prompt="You are a git branch naming assistant. Given a series of git commits, generate a concise, descriptive branch name that captures the overall theme or purpose of the changes.
+        Guidelines for branch names:
+        - Use lowercase letters, numbers, and hyphens only
+        - Keep it short (2-5 words, max 40 characters)
+        - Be descriptive but concise
+        - Don't use prefixes like feature/, fix/, refactor/, cleanup/, etc.
+        - Focus on WHAT is being changed, not HOW
+
+        Examples of good branch names:
+        - 'cleanup-unused-code'
+        - 'fix-user-authentication'
+        - 'refactor-share-buttons'
+        - 'add-podcast-analytics'
+        - 'update-session-handling'
+
+        Input format: JSON array of commit messages (subject + description separated by newlines)
+
+        Task: Read the commits from stdin, analyze them all together to identify the common theme, then output ONLY the branch name (no explanation, no prefix like 'feature/')."
+      name="$( jj log -r "trunk()..$rev ~empty()" --no-graph -T 'description.escape_json()++"\n"' | jq -s | llm -x "$prompt" )"
+    fi
+    bookmark="$(jj config get jds.pr-prefix)$name"
+    if "$dry_run"; then
+      echo Dry run! Would have run:
+      echo jj git push --named "$bookmark=$rev"
+      echo gh pr create --head "$bookmark" --web
+    else
+      jj git push --named "$bookmark=$rev"
+      gh pr create --head "$bookmark" --web
+    fi
 """, ""]
+
 tug = ["util", "exec", "--", "bash", "-c", """
   jj bookmark move --from "closest_bookmark(${1:-non_empty_head})" --to "${1:-non_empty_head}"
 """, ""]
+
 sync = ["util", "exec", "--", "bash", "-c", """
   jj git fetch --branch master --branch 'glob:jon/*' && jj rebase -d master && jj simplify-parents
 """, ""]
@@ -64,7 +108,7 @@ back = ["util", "exec", "--", "bash", "-c", """
         old=$(resolve --at-op $op)
         if [[ $old != $current ]]; then
             if ! jj edit $old 2>/dev/null; then
-                old_commit=$(jj evolog -r $old --at-op $op --no-graph -T 'commit_id.short() ++ "\\n"' | sed -n '1p')
+                old_commit=$(jj evolog -r $old --at-op $op --no-graph -T 'commit.commit_id().short() ++ "\\n"' | sed -n '1p')
                 jj edit $old_commit
             fi
             exit 0

@@ -1,2 +1,3 @@
 stow/vim/.vim/bundle
 stow/emacs/**/*.elc
+.jj
