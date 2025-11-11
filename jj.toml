@@ -95,7 +95,7 @@ tug = ["util", "exec", "--", "bash", "-c", """
 """, ""]
 
 sync = ["util", "exec", "--", "bash", "-c", """
-  jj git fetch --branch master --branch 'glob:jon/*' && jj rebase -d master && jj simplify-parents
+  jj git fetch --branch master --branch 'glob:jon/*' && jj rebase -d 'trunk()' --skip-emptied && jj simplify-parents
 """, ""]
 
 
