@@ -59,13 +59,6 @@ def git_history(previous_day, dir)
   end
 end
 
-def git_history(previous_day, dir)
-  Dir.chdir(dir) do
-    datetime = previous_day.strftime("%Y-%m-%dT00:00:00")
-    return Open3.capture2("git", "lg", "--author=Jon", "--since={#{datetime}}", "--branches", "--remotes")[0].strip
-  end
-end
-
 dirs_with_git_history = {}
 (COMMON_DIRECTORIES + dirs).uniq.each do |dir|
   if File.exist?("#{dir}/.jj")
