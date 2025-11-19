@@ -59,25 +59,55 @@ pr = ["util", "exec", "--", "bash", "-c", """
     rev="$revtip"
 
     if [ -z "$name" ]; then
-      prompt="You are a git branch naming assistant. Given a series of git commits, generate a concise, descriptive branch name that captures the overall theme or purpose of the changes.
-        Guidelines for branch names:
-        - Use lowercase letters, numbers, and hyphens only
-        - Keep it short (2-5 words, max 40 characters)
-        - Be descriptive but concise
-        - Don't use prefixes like feature/, fix/, refactor/, cleanup/, etc.
-        - Focus on WHAT is being changed, not HOW
+      prompt="You are a git branch naming assistant. Given a series of git commits, generate a suitable branch name that captures the overall theme or purpose of the changes."'
+Input format:
+```json
+{
+  "commits": ["example commit subject 1\\n\\nexample commit description", "example commit 2"]
+}
+```
 
-        Examples of good branch names:
-        - 'cleanup-unused-code'
-        - 'fix-user-authentication'
-        - 'refactor-share-buttons'
-        - 'add-podcast-analytics'
-        - 'update-session-handling'
+Output format:
+```json
+{ "name": "your-branch-name" }
+```
+'"
+IMPORTANT: Return ONLY valid JSON. No additional text, explanations, or markdown formatting.
 
-        Input format: JSON array of commit messages (subject + description separated by newlines)
+Guidelines for branch names:
+- Use lowercase letters, numbers, and hyphens only
+- Keep it short (2-5 words, max 40 characters)
+- Be descriptive but concise
+- Don't use directory-style prefixes (feature/, bugfix/, hotfix/, etc.)
+- You can start with action words like 'fix', 'add', 'update', 'refactor', 'cleanup', 'remove'
+- Focus on WHAT is being changed, not HOW
 
-        Task: Read the commits from stdin, analyze them all together to identify the common theme, then output ONLY the branch name (no explanation, no prefix like 'feature/')."
-      name="$( jj log -r "trunk()..$rev ~empty()" --no-graph -T 'description.escape_json()++"\n"' | jq -s | llm -x "$prompt" )"
+Examples of good branch names:
+- 'cleanup-unused-code'
+- 'fix-user-auth'
+- 'refactor-share-buttons'
+- 'add-podcast-analytics'
+- 'update-session-handling'
+- 'remove-deprecated-endpoints'
+
+Examples of bad branch names:
+- 'feature/user-auth' (uses directory prefix)
+- 'fixes' (too vague)
+- 'update-code-to-fix-bug-in-user-authentication-system' (too long, >40 chars)
+- 'WIP-stuff' (unclear, uses capitals)
+- 'myBranch123' (uses camelCase)
+
+Special cases:
+- If commits are unrelated, focus on the most significant or impactful change
+- If commit messages are unclear or generic, extract the most descriptive elements available
+- For a single commit, mirror the commit subject but conform to the naming rules above
+- If changes span multiple areas, prioritize the user-facing or business-critical aspect
+"
+      name="$( jj log -r "trunk()..$rev ~empty()" --no-graph -T 'description.escape_json()++"\n"' | jq -s '{commits: .}' | llm -x "$prompt" | jq --raw-output .name )"
+      if [[ ! "$name" =~ ^[a-z][-a-z]+$ ]]; then
+        echo "Bad bookmark from the stupid llm: '$name'"
+        exit 1
+      fi
     fi
     bookmark="$(jj config get jds.pr-prefix)$name"
     if "$dry_run"; then
