@@ -3,7 +3,7 @@ name = "Jonathan del Strother"
 email = "me@delstrother.com"
 
 [ui]
-default-command = "logstatus"
+default-command = "log_with_status"
 pager = ":builtin"
 # conflict-marker-style = "git"
 diff-editor = ":builtin"
@@ -23,6 +23,7 @@ write-change-id-header = true
 [aliases]
 gitpatch = ["commit", "-i", "--tool", "gitpatch"]
 solve = ["resolve", "--tool", "mergiraf"]
+log_with_status = ["log", "-T", "log_with_status"]
 
 logstatus = ["util", "exec", "--", "bash", "-c", """
     jj log -r 'ancestors(reachable(@, ~(::trunk())), 2)' --no-pager
@@ -175,6 +176,13 @@ rmparent = ["util", "exec", "--", "bash", "-c", '''
 # overridden in each repository to hide old branches
 'dead_bookmarks' = 'none()'
 'live_bookmarks' = 'bookmarks() ~ dead_bookmarks'
+'diff_set' = '@ | (@ & description(exact:""))-'
+
+[template-aliases]
+log_with_status = '''
+  builtin_log_compact(self)
+  ++ if(self.contained_in("diff_set"), diff.summary())
+'''
 
 [merge-tools.ediff]
 program = 'sh'
