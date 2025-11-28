@@ -715,4 +715,8 @@ return them in the Emacs format."
 (after! evil-escape
   (setq evil-escape-key-sequence "jk"))
 
-(use-package! majutsu)
+(use-package! majutsu
+  :config
+  ;; majutsu uses pop-to-buffer, but that results in `jj describe` opening doom dashboard and the description buffer side-by-side.
+  (setf (alist-get majutsu-jjdescription-regexp with-editor-server-window-alist nil nil #'string=) 'switch-to-buffer)
+  )
