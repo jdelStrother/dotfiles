@@ -29,97 +29,7 @@ logstatus = ["util", "exec", "--", "bash", "-c", """
     jj log -r 'ancestors(reachable(@, ~(::trunk())), 2)' --no-pager
     jj status
 """]
-pr = ["util", "exec", "--", "bash", "-c", """
-    set -euo pipefail
-    rev=non_empty_head
-    dry_run=false
-    name=""
-    while [ "$#" -gt 0 ]; do
-      case "$1" in
-        -r)
-          shift
-          rev="$1"
-          shift
-          ;;
-        -n|--dry-run)
-          dry_run=true
-          shift
-          ;;
-        *)
-          name="$1"
-          shift
-          break
-          ;;
-      esac
-    done
-    # automatically sandwich the revision(s) if they're not contained within megamerge
-    revtip=$(jj log -T'change_id' --no-graph -n1 -r "$rev") # in case rev is a range, get a single commit from the tip
-    if [ "$(jj log -n1 -r megamerge..$revtip)" != '' ]; then
-      jj sandwich "$rev"
-    fi
-    rev="$revtip"
-
-    if [ -z "$name" ]; then
-      prompt="You are a git branch naming assistant. Given a series of git commits, generate a suitable branch name that captures the overall theme or purpose of the changes."'
-Input format:
-```json
-{
-  "commits": ["example commit subject 1\\n\\nexample commit description", "example commit 2"]
-}
-```
-
-Output format:
-```json
-{ "name": "your-branch-name" }
-```
-'"
-IMPORTANT: Return ONLY valid JSON. No additional text, explanations, or markdown formatting.
-
-Guidelines for branch names:
-- Use lowercase letters, numbers, and hyphens only
-- Keep it short (2-5 words, max 40 characters)
-- Be descriptive but concise
-- Don't use directory-style prefixes (feature/, bugfix/, hotfix/, etc.)
-- You can start with action words like 'fix', 'add', 'update', 'refactor', 'cleanup', 'remove'
-- Focus on WHAT is being changed, not HOW
-
-Examples of good branch names:
-- 'cleanup-unused-code'
-- 'fix-user-auth'
-- 'refactor-share-buttons'
-- 'add-podcast-analytics'
-- 'update-session-handling'
-- 'remove-deprecated-endpoints'
-
-Examples of bad branch names:
-- 'feature/user-auth' (uses directory prefix)
-- 'fixes' (too vague)
-- 'update-code-to-fix-bug-in-user-authentication-system' (too long, >40 chars)
-- 'WIP-stuff' (unclear, uses capitals)
-- 'myBranch123' (uses camelCase)
-
-Special cases:
-- If commits are unrelated, focus on the most significant or impactful change
-- If commit messages are unclear or generic, extract the most descriptive elements available
-- For a single commit, mirror the commit subject but conform to the naming rules above
-- If changes span multiple areas, prioritize the user-facing or business-critical aspect
-"
-      name="$( jj log -r "trunk()..$rev ~empty()" --no-graph -T 'description.escape_json()++"\n"' | jq -s '{commits: .}' | llm -x "$prompt" | jq --raw-output .name )"
-      if [[ ! "$name" =~ ^[a-z][-a-z]+$ ]]; then
-        echo "Bad bookmark from the stupid llm: '$name'"
-        exit 1
-      fi
-    fi
-    bookmark="$(jj config get jds.pr-prefix)$name"
-    if "$dry_run"; then
-      echo Dry run! Would have run:
-      echo jj git push --named "$bookmark=$rev"
-      echo gh pr create --head "$bookmark" --web
-    else
-      jj git push --named "$bookmark=$rev"
-      gh pr create --head "$bookmark" --web
-    fi
-""", ""]
+pr = ["util", "exec", "--", "jj-pr"]
 
 tug = ["util", "exec", "--", "bash", "-c", """
   jj bookmark move --from "closest_bookmark(${1:-non_empty_head})" --to "${1:-non_empty_head}"
@@ -170,13 +80,13 @@ rmparent = ["util", "exec", "--", "bash", "-c", '''
 'log' = 'present(@) | ancestors((immutable_heads()|dead_bookmarks).., 2) | present(trunk())'
 
 [revset-aliases]
-'remote' = '::remote_bookmarks()'
+remote = '::remote_bookmarks()'
 'closest_bookmark(to)' = 'heads(::to & bookmarks())'
-'non_empty_head' = 'latest((@ | @-) & ~empty())'
+non_empty_head = 'latest((@ | @-) & ~empty())'
 # overridden in each repository to hide old branches
-'dead_bookmarks' = 'none()'
-'live_bookmarks' = 'bookmarks() ~ dead_bookmarks'
-'diff_set' = '@ | (@ & description(exact:""))-'
+dead_bookmarks = 'none()'
+live_bookmarks = 'bookmarks() ~ dead_bookmarks'
+diff_set = '@ | (@ & description(exact:""))-'
 
 [template-aliases]
 log_with_status = '''

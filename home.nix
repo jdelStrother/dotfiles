@@ -20,6 +20,7 @@ let
   # the top-level project folder.
   emacsLauncher = pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
   git-recent = pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
+  jj-pr = pkgs.writeScriptBin "jj-pr" (builtins.readFile ./bin/jj-pr);
   ruby = pkgs.ruby_3_4;
   dotfiles = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles";
 
@@ -47,6 +48,7 @@ in
   home.packages = [
     emacsLauncher
     git-recent
+    jj-pr
     ruby
     unstable.fzf
     pkgs.nodejs
