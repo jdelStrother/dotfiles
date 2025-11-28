@@ -1,4 +1,9 @@
-{ pkgs, unstable, ... }:
+{
+  config,
+  pkgs,
+  unstable,
+  ...
+}:
 
 let
   # emacs = pkgs.emacs-unstable; # build from latest tag
@@ -16,6 +21,7 @@ let
   emacsLauncher = pkgs.writeShellScriptBin "edit" (builtins.readFile ./bin/edit);
   git-recent = pkgs.writeScriptBin "git-recent" (builtins.readFile ./bin/git-recent);
   ruby = pkgs.ruby_3_4;
+  dotfiles = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/dotfiles";
 
 in
 {
@@ -413,5 +419,5 @@ in
   xdg.configFile."git/allowed_signers".text =
     "* ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIL9JCPvve0m6vPjbO25OGkqk3w4kEqBNmg1dJ3kCj4zR";
 
-  xdg.configFile."jj/config.toml".source = ./jj.toml;
+  xdg.configFile."jj/config.toml".source = "${dotfiles}/jj.toml";
 }
