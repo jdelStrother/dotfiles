@@ -69,7 +69,8 @@
 ;;   :recipe (:host sourcehut :repo "puercopop/jujutsushi"))
 (package! vc-jj
   :recipe (:host codeberg :repo "emacs-jj-vc/vc-jj.el"))
-(package! jj-mode :recipe (:host github :repo "bolivier/jj-mode.el"))
+;; (package! jj-mode :recipe (:host github :repo "bolivier/jj-mode.el"))
+(package! majutsu :recipe (:host github :repo "0WD0/majutsu"))
 
 
 ;; (package! jj-describe-mode

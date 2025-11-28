@@ -148,6 +148,8 @@ space rather than before."
   (setq git-commit-style-convention-checks
         (remove 'overlong-summary-line git-commit-style-convention-checks)))
 
+;; Disable projectile's file cache, it needs constant manual invalidation and doesn't seem faster
+(setq projectile-enable-caching nil)
 (setq projectile-project-search-path '("~/Developer/" "~/Developer/vendor/"))
 (setq projectile-rails-expand-snippet-with-magic-comment t)
 ;; Enter multiedit, then in visual mode hit return to remove all other matches.
@@ -379,9 +381,9 @@ Returns t if the .jj directory exists, nil otherwise."
     (file-directory-p jj-dir)))
 
 (defun jds/magit-or-jj ()
-  " runs jj-dashboard if .jj is present, or magit otherwise"
+  " runs majutsu-log if .jj is present, or magit otherwise"
   (interactive)
-  (if (jds/check-jj-directory) (jj-dashboard) (magit-status)))
+  (if (jds/check-jj-directory) (majutsu-log) (magit-status)))
 
 (map! :leader :desc "magit/jj" :n "g g" #'jds/magit-or-jj)
 
@@ -712,3 +714,5 @@ return them in the Emacs format."
 (setq evil-ex-substitute-global t)
 (after! evil-escape
   (setq evil-escape-key-sequence "jk"))
+
+(use-package! majutsu)
