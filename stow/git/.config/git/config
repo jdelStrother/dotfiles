@@ -10,7 +10,6 @@
   grep = auto
 [core]
 	legacyheaders = false
-	excludesfile = /Users/jon/.gitglobalignore
 	editor = vim
 [repack]
 	usedeltabaseoffset = true
@@ -44,13 +43,8 @@
     httpd = webrick
     port = 4321
     browser = open
-[sendemail]
-	smtpserver = mail.bestbefore.tv
-	smtpuser = jon.delStrother
-	smtppass = Jade613A
 [rebase]
   autosquash = true
-
 [mergetool "p4merge"]
     # I put p4merge and DiffMerge in /Applications/Utilities, but you might have them in /Applications.
     cmd = "/Applications/Utilities/p4merge.app/Contents/Resources/launchp4merge  $PWD/$BASE  $PWD/$REMOTE  $PWD/$LOCAL  $PWD/$MERGED"

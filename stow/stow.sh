@@ -1,7 +1,7 @@
 #! /bin/bash
 
 if [ "$#" -eq 0 ]; then
-  args="docker emacs fish git tmux tools vim"
+  args="docker emacs git tmux tools vim"
 else
   args="$@"
 fi

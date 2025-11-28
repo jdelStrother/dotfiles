@@ -32,7 +32,7 @@ def jj_history(previous_day, dir)
   Dir.chdir(dir) do
     Open3.capture2(
       "jj", "log", "-T",  "builtin_log_oneline", "--no-graph", "--color", "always",
-      "-r", %{author_date(after:"#{previous_day}") & author_name("Jonathan del Strother") & ~ empty()},
+      "-r", %{author_date(after:"#{previous_day}") & author_name(exact:"Jonathan del Strother") & ~ empty()},
     )[0].strip
   end
 end
@@ -44,18 +44,22 @@ def git_history(previous_day, dir)
     # Rebasing keeps the original author-date, though. Take a first pass to find commits where the author-date is
     # after yesterday's date, and then print out those commits with `git log --no-walk`
     datetime = previous_day.strftime("%Y-%m-%dT00:00:00")
-    commits = Open3.capture2("git", "log", "--exclude='refs/jj/*'", "--all", "--pretty=%aI %H", "--since={#{datetime}}")[0]
+    commits = Open3.capture2("git", "log", "--no-merges", "--exclude='refs/jj/*'", "--all", "--pretty=%aI\t%H\t%s", "--since={#{datetime}}")[0]
+    seen_messages = Set.new
     recent_commits = commits.each_line.filter_map do |l|
-      author_date, commit = l.chomp.split(" ")
+      author_date, commit, subject = l.chomp.split("\t")
+      next if !subject || seen_messages.include?(subject) # exclude identical subjects (crops up a lot if we use git_history on a jj repo)
+      seen_messages << subject
       commit if author_date >= datetime
     end
     return if recent_commits.empty?
 
-    Open3.capture2(
+    s = Open3.capture2(
       "git", "log", "--author=Jon", "--no-walk", "--color", "--date=relative",
       "--pretty=format:%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%aN, %cd)%Creset",
       *recent_commits
-    )[0].strip
+    )
+    s[0].strip
   end
 end
 
