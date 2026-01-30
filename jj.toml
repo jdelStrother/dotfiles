@@ -4,7 +4,7 @@ email = "me@delstrother.com"
 
 [ui]
 default-command = "log_with_status"
-pager = ":builtin"
+pager = ["less", "-FRXi"]
 # conflict-marker-style = "git"
 diff-editor = ":builtin"
 merge-editor = "ksdiff"
@@ -17,13 +17,12 @@ key = "~/.ssh/id_ed25519.pub"
 [git]
 sign-on-push = true
 private-commits = '''description(glob:'private:*')'''
-push-new-bookmarks = true # don't require --allow-new
 write-change-id-header = true
 
 [aliases]
 gitpatch = ["commit", "-i", "--tool", "gitpatch"]
 solve = ["resolve", "--tool", "mergiraf"]
-log_with_status = ["log", "-T", "log_with_status"]
+log_with_status = ["log", "-T", "log_with_status", "-r", "ancestors(reachable(@, ~(::trunk())), 2)"]
 
 logstatus = ["util", "exec", "--", "bash", "-c", """
     jj log -r 'ancestors(reachable(@, ~(::trunk())), 2)' --no-pager
@@ -36,7 +35,9 @@ tug = ["util", "exec", "--", "bash", "-c", """
 """, ""]
 
 sync = ["util", "exec", "--", "bash", "-c", """
-  jj git fetch --branch master --branch 'glob:jon/*' && jj rebase -d 'trunk()' --skip-emptied && jj simplify-parents
+  jj git fetch --branch 'glob:master*' --branch 'glob:main*' --branch 'glob:jon/*' &&
+  jj rebase -d 'trunk()' --skip-emptied && 
+  jj simplify-parents
 """, ""]
 
 
@@ -86,7 +87,10 @@ non_empty_head = 'latest((@ | @-) & ~empty())'
 # overridden in each repository to hide old branches
 dead_bookmarks = 'none()'
 live_bookmarks = 'bookmarks() ~ dead_bookmarks'
-diff_set = '@ | (@ & description(exact:""))-'
+# The person I grabbed this from shows the diff on both @, and @- if the current description is empty.
+# I'm not sure that's useful for my workflow
+# diff_set = '@ | (@ & description(exact:""))-'
+diff_set = '@'
 
 [template-aliases]
 log_with_status = '''
@@ -145,3 +149,6 @@ draft_commit_description = '''
 
 [jds]
 pr-prefix = ""
+
+[remotes.origin]
+auto-track-bookmarks = "glob:jon/*"

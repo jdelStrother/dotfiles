@@ -217,7 +217,7 @@
 
       # ctrl-g to insert a commit id into the command line
       __fzf_jj_ref = ''
-        set template 'format_short_change_id_with_hidden_and_divergent_info(self) ++ " " ++ format_short_signature_oneline(self.author()) ++ " "++ self.description().first_line() ++ "\0" ++ commit_id'
+        set template 'format_short_change_id_with_change_offset(self) ++ " " ++ format_short_signature_oneline(self.author()) ++ " "++ self.description().first_line() ++ "\0" ++ format_short_change_id_with_change_offset(self)'
         set refs (jj log --color=always -T $template | fzf --with-nth 1 --accept-nth 2 --delimiter '\0' \
             --height 50% --tmux 90%,70% \
             --layout reverse --multi --min-height 20+ \
