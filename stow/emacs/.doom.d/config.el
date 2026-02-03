@@ -61,7 +61,7 @@
 ;; hide todos that are deferred to future dates
 (setq org-agenda-todo-ignore-scheduled 'future)
 (setq org-log-done 'time)
-(after! org
+(with-eval-after-load 'org
   ;; auto-save after toggling todo state
   (add-hook 'org-trigger-hook 'save-buffer)
   (org-link-set-parameters "message" :follow
@@ -154,7 +154,7 @@ space rather than before."
 (setq projectile-rails-expand-snippet-with-magic-comment t)
 ;; Enter multiedit, then in visual mode hit return to remove all other matches.
 ;; This is the recommended multiedit keybinding, but doom-emacs doesn't bind it by default.
-(after! evil-multiedit
+(with-eval-after-load 'evil-multiedit
   (define-key evil-motion-state-map (kbd "RET") 'evil-multiedit-toggle-or-restrict-region))
 
 ;; don't enable smartparens by default - when it doesn't work, it's really frustrating
@@ -163,7 +163,7 @@ space rather than before."
 
 ;; If we're using rubocop in apheleia, use bundle-exec and replace the deprecated --auto-correct flag
 ;; (Normally this won't get used - LSP will format it via solargraph/ruby-lsp instead)
-;; (after! apheleia
+;; (with-eval-after-load 'apheleia
 ;;   (add-to-list 'apheleia-formatters
 ;;                '(rubocop . ("bundle" "exec" "rubocop" "--stdin" filepath "--autocorrect"
 ;;                             "--stderr" "--format" "quiet" "--fail-level" "fatal"))))
@@ -174,12 +174,12 @@ space rather than before."
   apheleia-inhibit t
   +format-with nil)
 
-(after! web-mode
+(with-eval-after-load 'web-mode
   ;; add a derived erb-mode so that flycheck/apheleia can distinguish it from all the other web-mode files
   (define-derived-mode erb-mode web-mode "Web[erb]")
   (add-to-list 'auto-mode-alist '("\\.erb\\'" . erb-mode)))
 
-;; (after! apheleia
+;; (with-eval-after-load 'apheleia
 ;;   (push '(erblint . ("bundle" "exec" "erblint" "--autocorrect" inplace ))
 ;;         apheleia-formatters)
 ;;   (setf (alist-get 'erb-mode apheleia-mode-alist)
@@ -189,7 +189,7 @@ space rather than before."
 
 (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode)
 
-(after! eglot
+(with-eval-after-load 'eglot
   (setq
    eglot-code-action-indicator "!" ;; the default emoji is too wide for a fringe
    eglot-code-action-indications '(margin) ;; just use the margin, stop spamming minibuffer
@@ -199,7 +199,7 @@ space rather than before."
   (add-to-list 'eglot-ignored-server-capabilities :documentOnTypeFormattingProvider)
   (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "ruby-lsp")))
 
-(after! lsp-mode
+(with-eval-after-load 'lsp-mode
   (setq lsp-restart 'ignore) ;; don't prompt to restart a bunch of lsp servers every time I kill a project
   ;; I can't get lsp to correctly use our webpack subdirectory as a project if auto-guess-root is enabled.
   ;; Use lsp-workspace-folders-add instead.
@@ -304,14 +304,14 @@ space rather than before."
         (+format-with-lsp-mode -1)))))
 
 
-(after! lsp-ruby-lsp
+(with-eval-after-load 'lsp-ruby-lsp
   (set-lsp-priority! 'ruby-lsp-ls 10))
 
 (add-to-list 'auto-mode-alist '("\\.nix" . nix-mode))
 (add-to-list 'auto-mode-alist '("\\.mdx" . markdown-mode))
 
 ;; don't steal focus when running rspec-compile
-(after! rspec-mode
+(with-eval-after-load 'rspec-mode
   (set-popup-rule! "\*rspec-compilation\*" :select #'ignore)
   (defun rspec-run-all-failed ()
     "Run the `spec' rake task for the project of the current file."
@@ -327,8 +327,8 @@ space rather than before."
   (add-hook 'rspec-compilation-mode-hook (lambda () (when (display-graphic-p) (text-scale-decrease 1))))
   )
 
-(after! haml-mode
-  (after! flycheck
+(with-eval-after-load 'haml-mode
+  (with-eval-after-load 'flycheck
     (flycheck-define-checker haml-lint
                              "A haml syntax checker using the haml-lint tool."
                              :command ("bundle"
@@ -353,8 +353,6 @@ space rather than before."
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
-;; - `use-package' for configuring packages
-;; - `after!' for running code after a package has loaded
 ;; - `add-load-path!' for adding directories to the `load-path', where Emacs
 ;;   looks when you load packages with `require' or `use-package'.
 ;; - `map!' for binding new keys
@@ -395,7 +393,7 @@ Returns t if the .jj directory exists, nil otherwise."
 
 ;; (explain-pause-mode t)
 
-(after! project
+(with-eval-after-load 'project
   (defvar project-root-markers '("package.json")
     "Files or directories that indicate the root of a project.")
   (defun jds/project-find-root (path)
@@ -478,7 +476,7 @@ Returns t if the .jj directory exists, nil otherwise."
 ;; (map! :leader
 ;; :desc "Search for symbol in project" "*" #'+jdelStrother/search-project-for-symbol-at-point)
 
-;; (use-package! dash)
+;; (use-package dash)
 
 
 (defun doom/ediff-init-and-example ()
@@ -508,7 +506,7 @@ Returns t if the .jj directory exists, nil otherwise."
 ;;          (web-mode . maybe-use-prettier)
 ;;          (yaml-mode . maybe-use-prettier)))
 
-(after! robe
+(with-eval-after-load 'robe
   ;; Disable robe - i don't like it prompting me to launch a console on every jump-to-definition,
   ;; and if i let it launch a console it makes a mess of autocompletion suggestions
   (defun robe-jump (_)))
@@ -527,7 +525,7 @@ Returns t if the .jj directory exists, nil otherwise."
 ;; -- String inflection: underscore -> UPCASE -> CamelCase conversion of names
 ;; https://github.com/akicho8/string-inflection
 
-(use-package! string-inflection
+(use-package string-inflection
   :commands (string-inflection-all-cycle
              string-inflection-toggle
              string-inflection-java-style-cycle
@@ -555,7 +553,7 @@ Returns t if the .jj directory exists, nil otherwise."
 (use-package flymake-codespell
   :hook (prog-mode . flymake-codespell-setup-backend))
 (add-hook 'prog-mode-hook #'flymake-mode)
-(after! lsp-mode
+(with-eval-after-load 'lsp-mode
   (setq lsp-diagnostics-provider :flymake))
 ;; flymake reports a lot of bytecompile errors in my emacs config files which I'm not sure I care abut
 (add-hook 'emacs-lisp-mode-hook
@@ -634,7 +632,7 @@ Returns t if the .jj directory exists, nil otherwise."
   :before-until #'envrc-global-mode
   (string-match-p "\\.git\\|\\.jj" (or buffer-file-name "")))
 
-(after! recentf
+(with-eval-after-load 'recentf
   (add-to-list 'recentf-exclude "^/$") ;; not sure what keeps adding '/' to recent files
   (add-to-list 'recentf-exclude "/jj-resolve-") ;; merge conflicts
   (add-to-list 'recentf-exclude "\\.jjdescription$"))
@@ -646,7 +644,7 @@ Returns t if the .jj directory exists, nil otherwise."
   (interactive)
   (vc-dir (projectile-project-root))
   (vc-dir-hide-up-to-date))
-(after! vc
+(with-eval-after-load 'vc
   (define-key (current-global-map) (kbd "C-x v d") 'jds/vc-dir))
 
 
@@ -658,7 +656,7 @@ Returns t if the .jj directory exists, nil otherwise."
 
 
 ;; Clean up background buffers that haven't been touched in a while
-(use-package! buffer-terminator
+(use-package buffer-terminator
   :custom
   (buffer-terminator-verbose nil)
   :config
@@ -701,7 +699,7 @@ return them in the Emacs format."
 (defun jds/git-commit-setup ()
   (git-commit-setup-font-lock)
   (git-commit-propertize-diff))
-(after! log-edit
+(with-eval-after-load 'log-edit
   (add-hook 'log-edit-mode-hook #'jds/git-commit-setup)
   (map! :map log-edit-mode-map
         :n "Z Q" #'with-editor-cancel ;; borrow with-editor's method that kills the buffer without prompting, and returns a exit code telling jj/git/whatever to abort
@@ -712,10 +710,10 @@ return them in the Emacs format."
 
 ;; Implicit /g flag, because I rarely use it without
 (setq evil-ex-substitute-global t)
-(after! evil-escape
+(with-eval-after-load 'evil-escape
   (setq evil-escape-key-sequence "jk"))
 
-(use-package! majutsu
+(use-package majutsu
   :config
   ;; majutsu uses pop-to-buffer, but that results in `jj describe` opening doom dashboard and the description buffer side-by-side.
   (setf (alist-get majutsu-jjdescription-regexp with-editor-server-window-alist nil nil #'string=) 'switch-to-buffer)
