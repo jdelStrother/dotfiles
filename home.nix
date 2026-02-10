@@ -57,13 +57,11 @@ in
     pkgs.nodejs
     pkgs.php # for Alfred devdocs workflow
 
-    pkgs.nix
     pkgs.home-manager
     unstable.devenv
 
     pkgs.awscli2
-    # pkgs.awslogs
-    pkgs.aws-vault
+    unstable.aws-vault # unstable has the Byteness fork, which is the newer 'official' one
     pkgs.clang
     pkgs.clang-tools # for clangd lsp
     pkgs.coreutils
@@ -87,7 +85,6 @@ in
     pkgs.gnupg
     pkgs.pinentry_mac
     pkgs.jq
-    (unstable.llm.override { enable-llm-anthropic = true; })
     pkgs.niv
     pkgs.parallel
     pkgs.pssh
@@ -101,7 +98,7 @@ in
     pkgs.go
     pkgs.tmux
     pkgs.shellcheck
-    pkgs.nixfmt-rfc-style
+    pkgs.nixfmt
     pkgs.nil # nix lsp
     pkgs.cmake
     pkgs._1password-cli
@@ -133,8 +130,14 @@ in
       ".projectile"
       ".dir-locals.el"
     ];
-    extraConfig = {
-      core.editor = "vim";
+    settings = {
+      user.name = "Jonathan del Strother";
+      user.email = "me@delstrother.com";
+      user.signingkey = "~/.ssh/id_ed25519.pub";
+      alias = {
+        amend = "commit --amend -C HEAD";
+      };
+      # core.editor = "vim";
       github.user = "jdelStrother";
       init.defaultBranch = "main";
       pull.ff = "only";
@@ -151,7 +154,6 @@ in
       commit.gpgsign = true;
       gpg.format = "ssh";
       gpg.ssh.allowedSignersFile = "~/.config/git/allowed_signers";
-      user.signingkey = "~/.ssh/id_ed25519.pub";
     };
   };
 

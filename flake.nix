@@ -1,16 +1,23 @@
 {
-  description = "M1 Nix";
+  description = "Jon's Nix";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-25.05-darwin";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-26.05-darwin";
     unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-    emacs-overlay.url = "github:nix-community/emacs-overlay";
+    emacs-overlay = {
+      url = "github:nix-community/emacs-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    home-manager.url = "github:nix-community/home-manager/release-25.05";
-    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager = {
+      url = "github:nix-community/home-manager/release-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
-    darwin.url = "github:lnl7/nix-darwin/nix-darwin-25.05";
-    darwin.inputs.nixpkgs.follows = "nixpkgs";
+    darwin = {
+      url = "github:lnl7/nix-darwin/nix-darwin-26.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -23,8 +30,8 @@
       emacs-overlay,
       ...
     }@inputs:
-    {
-      darwinConfigurations."M1MBP" = darwin.lib.darwinSystem rec {
+    let
+      darwinConfig = darwin.lib.darwinSystem rec {
         system = "aarch64-darwin";
         # add 'unstable' & 'inputs' as arguments that gets passed to modules
         specialArgs = {
@@ -37,12 +44,13 @@
           {
             nixpkgs.overlays = [
               emacs-overlay.overlay
-              # # fish 4
-              # (self: super: { fish = unstable.legacyPackages.${system}.fish; })
-              # # atuin 18.4
             ];
           }
         ];
       };
+    in
+    {
+      darwinConfigurations."M1MBP" = darwinConfig;
+      darwinConfigurations."M5MBP" = darwinConfig;
     };
 }

@@ -1,4 +1,7 @@
-# darwin-rebuild switch --flake ~/dotfiles
+# On a fresh machine, bootstrap with
+#   nix shell nix-darwin/master#darwin-rebuild --command sudo darwin-rebuild switch --flake ~/dotfiles
+# Afterwards, just
+#   sudo darwin-rebuild switch --flake ~/dotfiles
 {
   pkgs,
   config,
@@ -25,6 +28,12 @@
   nix.nixPath = [ ("nixpkgs=" + toString pkgs.path) ];
   nix.settings = {
     sandbox = true;
+    # On Tahoe I seem to need these to get Emacs to compile
+    # https://github.com/NixOS/nixpkgs/issues/520441
+    extra-sandbox-paths = [
+      "/private/etc/ssl/certs/"
+      "/private/etc/static/ssl/certs/"
+    ];
     substituters = [
       "https://nix-community.cachix.org"
       "https://devenv.cachix.org"
@@ -60,7 +69,7 @@
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
-  system.stateVersion = 4;
+  system.stateVersion = 6;
 
   system.defaults = {
     CustomUserPreferences = {
