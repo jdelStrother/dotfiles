@@ -27,13 +27,12 @@ let
 in
 {
   imports = [
-    ./home-manager-apps.nix
     ./fish
   ];
 
   home.username = "jon";
   home.homeDirectory = "/Users/jon";
-  home.stateVersion = "22.11";
+  home.stateVersion = "26.05";
 
   home.sessionVariables =
     let
