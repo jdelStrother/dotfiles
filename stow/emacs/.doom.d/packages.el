@@ -65,36 +65,14 @@
 
 (package! flymake-codespell)
 
-;; (package! jujutsushi
-;;   :recipe (:host sourcehut :repo "puercopop/jujutsushi"))
 (package! vc-jj
   :recipe (:host codeberg :repo "emacs-jj-vc/vc-jj.el"))
-;; (package! jj-mode :recipe (:host github :repo "bolivier/jj-mode.el"))
 (package! majutsu :recipe (:host github :repo "0WD0/majutsu"))
-
-
-;; (package! jj-describe-mode
-;;   :recipe (:host github :repo "hrehfeld/emacs-jj-describe-mode"))
-
-;; (package! magit
-;;   :recipe
-;;   (:host github
-;;    :branch "reset-keep"
-;;    :repo "jdelStrother/magit"
-;;    :files ("*.el" "lisp/*.el")))
 
 ;; (package! magit :recipe (:local-repo "path/to/local/magit" :no-byte-compile t))
 
-;; (package! eglot
-;;   :recipe
-;;   (:host github
-;;    :branch "patch-1"
-;;    :repo "jdelStrother/eglot"
-;;    :files ("*.el")))
-
-(package! benchmark-init)
-
-(package! claude-code :recipe (:host github :repo "stevemolitor/claude-code.el"))
-(package! eat)
-
 (package! yasnippet)
+
+(package! shell-maker)
+(package! acp)
+(package! agent-shell)

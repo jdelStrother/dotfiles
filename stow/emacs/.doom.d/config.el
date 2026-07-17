@@ -589,11 +589,6 @@ Returns t if the .jj directory exists, nil otherwise."
                 (setq flymake-diagnostic-functions '(flymake-codespell-backend)))
               (flymake-mode))))
 
-(use-package claude-code
-  :bind-keymap ("C-c c" . claude-code-command-map)
-  :config (claude-code-mode))
-
-
 ;; just remove missing projects from the projectlist, mine come & go all the time due to opening third-party gems
 (setq treemacs-missing-project-action 'remove)
 
@@ -744,8 +739,6 @@ return them in the Emacs format."
 (custom-set-faces!
   '(font-lock-function-call-face :slant normal :foreground unspecified))
 
-(require 'acp)
-(require 'agent-shell)
 (use-package! gptel
   :config
   (setq

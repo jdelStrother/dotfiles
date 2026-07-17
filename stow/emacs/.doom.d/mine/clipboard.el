@@ -17,6 +17,7 @@ E.g. for commands that copy particularly useful text."
   :around '(+default/yank-buffer-path
             +default/yank-buffer-contents
             +default/yank-buffer-path-relative-to-project
+            agent-shell-yank-dwim
             browse-at-remote-kill
             evil-collection-magit-yank-whole-line
             magit-copy-buffer-revision
