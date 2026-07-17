@@ -6,14 +6,21 @@
 }:
 
 let
-  # emacs = pkgs.emacs-unstable; # build from latest tag
-  emacs = pkgs.emacs-git; # build from latest master
-  emacsWithPackages = (
-    (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
-      epkgs.vterm
-      epkgs.treesit-grammars.with-all-grammars
-    ])
-  );
+  emacsSrc = pkgs.emacs-unstable; # build from latest tag
+  # emacsSrc = pkgs.emacs-git; # build from latest master
+  emacs = emacsSrc.overrideAttrs (old: rec {
+    # eglot+ruby-lsp makes it very easy to blow past the 1024 open file limit,
+    # since it sets up watchers for every subdirectory of the project, for each of ruby-lsp, rubocop, and workspace-watcher
+    # We can redefine FD_SETSIZE to allow more open files
+    configureFlags = old.configureFlags ++ [ "CFLAGS=-DFD_SETSIZE=20000" ];
+    # Avoid squircle jail
+    postInstall = old.postInstall + ''
+      cp ${./icons/Emacs.icns} $out/Applications/Emacs.app/Contents/Resources/Emacs.icns
+    '';
+  });
+  emacsWithPackages = (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
+    epkgs.treesit-grammars.with-all-grammars
+  ]);
   # edit a dir/file in emacs, geared towards browsing third-party code
   # so opens in a temp workspace and sets up projectile to isolate just that directory.
   # (As opposed to opening node_modules/bootstrap and finding that, eg, `SPC SPC` tries to browse
