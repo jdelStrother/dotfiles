@@ -53,9 +53,7 @@
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/Documents/org/")
-;; (setq org-roam-directory "~/Documents/org/roam")
 (setq org-agenda-files '("~/Documents/org/"
-                         ;; "~/Documents/org/roam" "~/Documents/org/roam/daily"
                          "~/Library/Mobile Documents/iCloud~com~agiletortoise~Drafts5/Documents/org"
                          "~/Library/Mobile Documents/iCloud~is~workflow~my~workflows/Documents/inbox.org"))
 ;; hide todos that are deferred to future dates
@@ -84,23 +82,6 @@
 
 ;; I never touch Emac's gross menubar mess
 (menu-bar-mode -1)
-
-;; Better insert behaviour with evil
-;; https://github.com/syl20bnr/spacemacs/issues/14137
-(defadvice org-roam-insert (around append-if-in-evil-normal-mode activate compile)
-  "If in evil normal mode and cursor is on a whitespace character, then go into
-append mode first before inserting the link. This is to put the link after the
-space rather than before."
-  (let ((is-in-evil-normal-mode (and (bound-and-true-p evil-mode)
-                                     (not (bound-and-true-p evil-insert-state-minor-mode))
-                                     (looking-at "[[:blank:]]"))))
-    (if (not is-in-evil-normal-mode)
-        ad-do-it
-      (evil-append 0)
-      ad-do-it
-      (evil-normal-state))))
-
-(map! :leader :desc "capture today" "n r C" #'org-roam-dailies-capture-today)
 
 ;; Make window dividers more obvious
 (setq window-divider-default-bottom-width 3)
