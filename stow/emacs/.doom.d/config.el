@@ -106,8 +106,6 @@
 (define-key evil-normal-state-map (kbd "-") 'dired-jump)
 
 (setq-default tab-width 2)
-(setq-default scroll-margin 5)
-(pixel-scroll-precision-mode)
 
 ;; Company completion popups are slow.  Hit C-SPC if you want one
 ;;
