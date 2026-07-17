@@ -83,20 +83,25 @@
 
       set --erase fish_greeting
 
-      if which scmpuff > /dev/null
+      if which scmpuff &>/dev/null
         scmpuff init -s --shell=fish | source
       end
 
-      # I want ctrl-t to transpose characters, not invoke fzf's file-finder
-      set -gx FZF_CTRL_T_COMMAND ""
-      fzf --fish | source
-      # However, the file-finder is quite useful. Bind it to alt-c (normally fzf-cd-widget, which I don't use)
-      bind \ec fzf-file-widget
-      bind -M insert \ec fzf-file-widget
-      # don't ignore node_modules in the file-finder
-      set -x FZF_CTRL_T_OPTS '--walker-skip .git'
+      if which fzf &>/dev/null
+        # I want ctrl-t to transpose characters, not invoke fzf's file-finder
+        set -gx FZF_CTRL_T_COMMAND ""
+        fzf --fish | source
+        # However, the file-finder is quite useful. Bind it to alt-c (normally fzf-cd-widget, which I don't use)
+        bind \ec fzf-file-widget
+        bind -M insert \ec fzf-file-widget
+        # don't ignore node_modules in the file-finder
+        set -x FZF_CTRL_T_OPTS '--walker-skip .git'
+        # Don't show the right-hand preview pane in history
+        set -gx FZF_CTRL_R_OPTS '--bind="focus,multi,resize:hide-preview"'
 
-      bind \cg __fzf_jj_ref
+        bind \cg __fzf_jj_ref
+      end
+
       bind \cu __push_line
     '';
 

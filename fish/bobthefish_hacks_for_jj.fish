@@ -23,7 +23,7 @@ end
 
 function __bobthefish_prompt_git --description 'Display the actual jj/git state' --no-scope-shadowing --argument git_root_dir real_pwd
 
-    if [ \! -d "$git_root_dir/.jj" ]
+    if [ \! -d "$git_root_dir/.jj" ] || ! which jj &>/dev/null
         __bobthefish_prompt_just_git $git_root_dir $real_pwd
         return
     end
