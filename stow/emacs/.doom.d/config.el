@@ -26,7 +26,6 @@
 ;;
 (setq doom-font (font-spec :family "Source Code Pro" :size 13))
 
-
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
 ;; refresh your font settings. If Emacs still can't find your font, it likely
@@ -93,9 +92,9 @@
     (setq explicit-shell-file-name fishpath
           vterm-shell fishpath)))
 ;; set EDITOR to use the current emacs instance in a shell
-(add-hook 'shell-mode-hook  'with-editor-export-editor)
-(add-hook 'vterm-mode-hook  'with-editor-export-editor)
-
+(add-hook 'shell-mode-hook 'with-editor-export-editor)
+(add-hook 'vterm-mode-hook 'with-editor-export-editor)
+;; (add-hook 'ghostel-pre-spawn-hook 'with-editor-export-editor) https://github.com/dakra/ghostel/pull/227
 
 ;; Default window size on startup
 (add-to-list 'default-frame-alist '(width . 160))
@@ -565,15 +564,16 @@ Returns t if the .jj directory exists, nil otherwise."
              string-inflection-kebab-case)
 
   :init
-  (map! :prefix ("g SPC" . "Convert case")
-        :desc "cycle"              :nv "n"     #'string-inflection-all-cycle
-        :desc "toggle"             :nv "t"     #'string-inflection-toggle
-        :desc "PascalCase"         :nv "p"     #'string-inflection-camelcase
-        :desc "camelCase"          :nv "c"     #'string-inflection-lower-camelcase
-        :desc "kebab-case"         :nv "k"     #'string-inflection-kebab-case
-        :desc "snake_case"         :nv "s"     #'string-inflection-underscore
-        :desc "Capital_Snake_Case" :nv "S"     #'string-inflection-capital-underscore
-        :desc "UP_CASE"            :nv "u"     #'string-inflection-upcase))
+  (map! :leader :prefix "c~"
+        :desc "inflections"       :nv ""  nil
+        :desc "cycle"              :nv "n" #'string-inflection-all-cycle
+        :desc "toggle"             :nv "t" #'string-inflection-toggle
+        :desc "PascalCase"         :nv "p" #'string-inflection-camelcase
+        :desc "camelCase"          :nv "c" #'string-inflection-lower-camelcase
+        :desc "kebab-case"         :nv "k" #'string-inflection-kebab-case
+        :desc "snake_case"         :nv "s" #'string-inflection-underscore
+        :desc "Capital_Snake_Case" :nv "S" #'string-inflection-capital-underscore
+        :desc "UP_CASE"            :nv "u" #'string-inflection-upcase))
 
 (use-package flymake-codespell
   :hook (prog-mode . flymake-codespell-setup-backend))
@@ -738,8 +738,17 @@ return them in the Emacs format."
 (with-eval-after-load 'evil-escape
   (setq evil-escape-key-sequence "jk"))
 
-(use-package majutsu
+;; Recent doom-themes makes function-calls italic, which is pretty terrible for ruby, IMO
+;; Restore old styling
+;; https://github.com/doomemacs/themes/commit/547ae7593d0ba373ead9b1017edb8dfa58430606
+(custom-set-faces!
+  '(font-lock-function-call-face :slant normal :foreground unspecified))
+
+(require 'acp)
+(require 'agent-shell)
+(use-package! gptel
   :config
-  ;; majutsu uses pop-to-buffer, but that results in `jj describe` opening doom dashboard and the description buffer side-by-side.
-  (setf (alist-get majutsu-jjdescription-regexp with-editor-server-window-alist nil nil #'string=) 'switch-to-buffer)
-  )
+  (setq
+   gptel-model 'claude-opus-4-6
+   gptel-backend (gptel-make-anthropic "Claude"
+                   :stream t :key gptel-api-key)))
