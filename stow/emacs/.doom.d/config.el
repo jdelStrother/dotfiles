@@ -174,9 +174,55 @@
    eglot-code-action-indications '(margin) ;; just use the margin, stop spamming minibuffer
    ;;  eldoc-echo-area-use-multiline-p 1 ;; use K if you need to see more
    )
+  ;; (setq! eglot-events-buffer-config '(:size 200000 :format full))
   ;; onTypeFormatting seems buggy with ruby-lsp - if you type `if foo<enter>` it'll add an `end`, but leaves the cursor after the `end`, which is pretty annoying
   (add-to-list 'eglot-ignored-server-capabilities :documentOnTypeFormattingProvider)
-  (add-to-list 'eglot-server-programs '((ruby-mode ruby-ts-mode) "ruby-lsp")))
+  (add-to-list 'eglot-server-programs
+               (list '(ruby-mode ruby-ts-mode)
+                     "ruby-lsp"
+                     :initializationOptions
+                     ;; stop prompting to run migrations when I'm in the middle of writing them
+                     (let ((addon-settings (make-hash-table :test 'equal)))
+                       (puthash "Ruby LSP Rails" '(:enablePendingMigrationsPrompt :json-false) addon-settings)
+                       (list :addonSettings addon-settings))))
+
+  ;; eglot is very slow at formatting large markdown docs, which you'll get if you hover over a symbol like `RSpec`.
+  ;; Truncate them:
+  (defun my/eglot--truncate-markup (args)
+    "Truncate markup content to 1kb before `eglot--format-markup' processes it."       
+    (let* ((markup (car args))                                                         
+           (limit 1024)
+           (truncated                                                                  
+            (cond       
+             ((stringp markup)
+              (if (> (length markup) limit)
+                  (substring markup 0 limit)                                           
+                markup))
+             (t                                                                        
+              ;; MarkedString or MarkupContent — value is in :value
+              (let ((value (plist-get markup :value)))                                 
+                (if (and (stringp value) (> (length value) limit))
+                    (plist-put (copy-sequence markup) :value                           
+                               (substring value 0 limit))                              
+                  markup))))))
+      (cons truncated (cdr args))))
+  (advice-add 'eglot--format-markup :filter-args #'my/eglot--truncate-markup)
+
+  (cl-defmethod eglot-handle-notification :around
+    (server (method (eql textDocument/publishDiagnostics))
+            &rest args &key diagnostics &allow-other-keys)
+    "Silence TS 80006 (\"This may be converted to an async function\")."
+    (apply #'cl-call-next-method server method
+           (plist-put (copy-sequence args)
+                      :diagnostics
+                      (vconcat                      ; <-- back to a vector
+                       (seq-remove
+                        (lambda (diag)
+                          (and (eql (plist-get diag :code) 80006)
+                               (equal (plist-get diag :source) "typescript")))
+                        diagnostics)))))
+  
+  )
 
 (with-eval-after-load 'lsp-mode
   (setq lsp-restart 'ignore) ;; don't prompt to restart a bunch of lsp servers every time I kill a project
