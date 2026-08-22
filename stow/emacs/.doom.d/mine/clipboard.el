@@ -59,4 +59,12 @@ E.g. for commands that copy particularly useful text."
   (interactive)
   (let ((select-enable-clipboard t))
     (yank)))
-(global-set-key [remap yank] 'jds-paste)
+(global-set-key [remap yank] #'jds-paste)
+
+(defun jds-org-paste ()
+  "paste from the system clipboard for org-mode"
+  (interactive)
+  (let ((select-enable-clipboard t))
+    (org-yank)))
+(after! org
+  (define-key org-mode-map (kbd "s-v") #'jds-org-paste))

@@ -83,7 +83,7 @@ Special cases:
 "
   printf "PR-ing\n%s" "$(jj log --color always -r "trunk()..$rev ~empty()")"
   name="$( jj log -r "trunk()..$rev ~empty()" --no-graph -T 'description.escape_json()++"\n"' | jq -s '{commits: .}' |
-    claude --model haiku -p "$prompt" --json-schema '{"type":"object","properties":{"branch":{"type":"string"}},"required":["branch"]}' --output-format json |
+    claude --no-session-persistence --model haiku -p "$prompt" --json-schema '{"type":"object","properties":{"branch":{"type":"string"}},"required":["branch"]}' --output-format json |
     jq --raw-output .structured_output.branch )"
   if [[ "$name" == "null" || ! "$name" =~ ^[a-z][-a-z0-9.]+$ ]]; then
     echo "Bad bookmark from the stupid llm: '$name'"

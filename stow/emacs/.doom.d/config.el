@@ -94,7 +94,6 @@
 ;; set EDITOR to use the current emacs instance in a shell
 (add-hook 'shell-mode-hook 'with-editor-export-editor)
 (add-hook 'vterm-mode-hook 'with-editor-export-editor)
-;; (add-hook 'ghostel-pre-spawn-hook 'with-editor-export-editor) https://github.com/dakra/ghostel/pull/227
 
 ;; Default window size on startup
 (add-to-list 'default-frame-alist '(width . 160))
@@ -334,9 +333,10 @@
 (add-to-list 'auto-mode-alist '("\\.nix" . nix-mode))
 (add-to-list 'auto-mode-alist '("\\.mdx" . markdown-mode))
 
-;; don't steal focus when running rspec-compile
 (with-eval-after-load 'rspec-mode
+  ;; don't steal focus when running rspec-compile
   (set-popup-rule! "\*rspec-compilation\*" :select #'ignore)
+
   (defun rspec-run-all-failed ()
     "Run the `spec' rake task for the project of the current file."
     (interactive)
@@ -346,9 +346,24 @@
         :map (rspec-verifiable-mode-map rspec-mode-map)
         "F" #'rspec-run-all-failed)
 
-  ;; i usually just run single specs in emacs, skip the formatters in .rspec
+  ;; Use the default `--format doc, not formatters from the .rspec file
   (setq rspec-use-opts-file-when-available nil)
-  (add-hook 'rspec-compilation-mode-hook (lambda () (when (display-graphic-p) (text-scale-decrease 1))))
+
+  (add-hook 'rspec-compilation-mode-hook
+            (lambda ()
+              (when (display-graphic-p) (text-scale-decrease 1))
+              (add-hook 'compilation-finish-functions 'jds/rspec-scroll-to-failures nil t)
+              ))
+
+  (defun jds/rspec-scroll-to-failures (buffer msg)
+    "After rspec compilation, jump to the Failure summary"
+    (with-selected-window (get-buffer-window buffer)
+      (goto-char (point-min))
+      (if (search-forward-regexp "^Failures" nil t)
+          (progn (beginning-of-line) (recenter 0))
+        ;; Or if it succeeded, just leave the 'Finished' summary line centered
+        (search-forward-regexp "^Finished" nil t)
+        )))
   )
 
 (with-eval-after-load 'haml-mode
@@ -745,3 +760,5 @@ return them in the Emacs format."
    gptel-model 'claude-opus-4-6
    gptel-backend (gptel-make-anthropic "Claude"
                    :stream t :key gptel-api-key)))
+
+(setq agent-shell-preferred-agent-config 'claude-code)

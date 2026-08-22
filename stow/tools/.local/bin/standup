@@ -25,8 +25,15 @@ File.foreach(File.expand_path("~/.local/share/z/data")) do |line|
     dirs << name
   end
 end
-dirs = dirs.sort.uniq
-
+dirs = dirs.sort.map { |d|
+  # avoid dupe histories from worktrees
+  jj_worktree_indicator = "#{d}/.jj/repo"
+  if File.file?(jj_worktree_indicator)
+    File.read(jj_worktree_indicator).delete_suffix("/.jj/repo")
+  else
+    d
+  end
+}.uniq
 
 def jj_history(previous_day, dir)
   Dir.chdir(dir) do

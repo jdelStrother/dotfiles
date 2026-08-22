@@ -9,6 +9,9 @@ pager = ["less", "-FRXi"]
 diff-editor = ":builtin"
 merge-editor = "ksdiff"
 
+[merge]
+hunk-level = "word" 
+
 [signing]
 behavior = "drop"
 backend = "ssh"
@@ -34,12 +37,24 @@ tug = ["util", "exec", "--", "bash", "-c", """
   jj bookmark move --from "closest_bookmark(${1:-non_empty_head})" --to "${1:-non_empty_head}"
 """, ""]
 
+# rebase defaults to `-b @`, which is equivalent to `-r '(trunk()..@)::' -o 'trunk()'`.
+# Here I've tweaked it to only try & rebase mutable commits, which is useful when trying to rebase my megamerges
+# and one of the branches in the megamerge has entered the github merge queue
 sync = ["util", "exec", "--", "bash", "-c", """
-  jj git fetch --branch 'glob:master*' --branch 'glob:main*' --branch 'glob:jon/*' &&
-  jj rebase -d 'trunk()' --skip-emptied && 
-  jj simplify-parents
+  jj git fetch &&
+  jj rebase -r '(trunk()..@):: & mutable()' -o 'trunk()' --skip-emptied --simplify-parents
 """, ""]
 
+
+adopt = ["util", "exec", "--", "bash", "-c", """
+  branch="$1"
+  rev="${2:-non_empty_head}"
+  # capture the tip of the requested range as a change-id, in case it's a non-stable reference like '@-'
+  tip="$(jj log -G -T change_id -r "heads($rev)")"
+  [[ -z "$tip" ]] && { echo "no tip?"; exit 1; }
+  jj rebase -r "$rev" --after "$branch" &&
+    jj tug "$tip"
+""", "jj-adopt"]
 
 # "Back" button for the working directory: go back to the last change that @ was
 # editing.
@@ -67,18 +82,19 @@ sandwich = [ "rebase", "-B", "megamerge", "-A", "trunk()", "-r"]
 #
 # jj rebase -s <mergerev> -d <mergerev>- -d <newparent>
 addparent = ["util", "exec", "--", "bash", "-c", '''
-    jj rebase -s $1 -d "$1-" -d $2
+    jj rebase -s $1 -o "$1-" -d $2
 ''', "jj-addparent"]
 
 # Usage: jj rmparent <child aka mergerev> <oldparent>
 #
 # jj rebase -s <mergerev> -d "<mergerev>- ~ <oldparent>"
 rmparent = ["util", "exec", "--", "bash", "-c", '''
-    jj rebase -s $1 -d "$1- ~ $2"
+    jj rebase -s $1 -o "$1- ~ $2"
 ''', "jj-rmparent"]
 
 [revsets]
 'log' = 'present(@) | ancestors((immutable_heads()|dead_bookmarks).., 2) | present(trunk())'
+bookmark-advance-to = 'closest_pushable(@)'
 
 [revset-aliases]
 remote = '::remote_bookmarks()'
@@ -87,15 +103,15 @@ non_empty_head = 'latest((@ | @-) & ~empty())'
 # overridden in each repository to hide old branches
 dead_bookmarks = 'none()'
 live_bookmarks = 'bookmarks() ~ dead_bookmarks'
-# The person I grabbed this from shows the diff on both @, and @- if the current description is empty.
-# I'm not sure that's useful for my workflow
-# diff_set = '@ | (@ & description(exact:""))-'
-diff_set = '@'
+# Closest revision that is mutable, described and either non-empty or a merge
+'closest_pushable(to)' = '''
+  heads(::to & mutable() & ~description(exact:"") & (~empty() | merges()))
+'''
 
 [template-aliases]
 log_with_status = '''
   builtin_log_compact(self)
-  ++ if(self.contained_in("diff_set"), diff.summary())
+  ++ if(self.contained_in("@"), diff.summary())
 '''
 
 [merge-tools.ediff]
@@ -130,8 +146,8 @@ merge-args = ["-c", "echo gitpatch cannot be used as a diff tool"]
 diff-args = ["-c", "echo gitpatch cannot be used as a diff tool"]
 
 [colors]
-# "diff removed token" = { fg = "bright red", bg = "#400000", underline = false }
-# "diff added token" = { fg = "bright green", bg = "#003000", underline = false }
+"diff removed token" = { fg = "bright red", bg = "#400000", underline = false }
+"diff added token" = { fg = "bright green", bg = "#003000", underline = false }
 
 
 [templates]
@@ -152,3 +168,6 @@ pr-prefix = ""
 
 [remotes.origin]
 auto-track-bookmarks = "glob:jon/*"
+
+[gg.ui]
+recent-workspaces = ["/Users/jon/Developer/web", "/Users/jon/dotfiles"]

@@ -52,6 +52,8 @@ in
       GEM_HOME = gemHome;
       GEM_PATH = gemHome;
       PATH = "${gemHome}/bin:$PATH";
+
+      DOCKER_CLI_HINTS = "false";
     };
 
   home.packages = [
@@ -59,7 +61,6 @@ in
     git-recent
     jj-pr
     ruby
-    unstable.fzf
     pkgs.nodejs
     pkgs.php # for Alfred devdocs workflow
 
@@ -122,15 +123,13 @@ in
 
   programs.git = {
     enable = true;
-    userName = "Jonathan del Strother";
-    userEmail = "me@delstrother.com";
-
-    aliases = {
-      amend = "commit --amend -C HEAD";
-    };
     ignores = [
+      ".agent-shell"
       ".claude"
       ".devenv"
+      ".devenv*"
+      ".direnv"
+      "devenv.local.nix"
       ".DS_Store"
       ".env"
       ".projectile"

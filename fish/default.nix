@@ -7,9 +7,12 @@
 }:
 
 {
-  home.packages = with pkgs; [ fish ];
+  home.packages = [
+    unstable.fzf
+  ];
   programs.fish = {
     enable = true;
+    package = pkgs.fish;
     plugins = [
       {
         name = "z";
@@ -54,16 +57,13 @@
       end
 
       # Force these paths to take precedence over homebrew
-      fish_add_path --prepend --global ~/bin ~/go/bin ~/.npm/bin
+      fish_add_path --prepend --global ~/.local/bin ~/.npm/bin
     '';
 
     interactiveShellInit = ''
       if test "$TERM_PROGRAM" = iTerm.app
         iterm2_shell_integration
       end
-
-      # completion for git-lg
-      complete --no-files -c git -a '(__fish_git_branches)' -n '__fish_git_using_command lg'
 
       # Allow gpg signing via the terminal if we connect over ssh
       # (Otherwise pinentry-mac will pop up a GUI window)
@@ -75,13 +75,21 @@
       # iterm/ghostty provide 24 bit color, but that's not going to work on most ssh hosts...
       alias ssh="TERM=xterm-256color command ssh"
 
-      set -g theme_color_scheme base16
+      # for bob-the-fish prompt
+      # set -g theme_color_scheme base16
+      set -g theme_color_scheme catppuccin-macchiato
       set -g theme_display_aws_vault_profile yes
       set -g theme_display_git_untracked no
       set -g theme_display_ruby no
       set -g theme_nerd_fonts yes
+      set -g theme_display_date no
 
-      set --erase fish_greeting
+      # for pure prompt
+      set -g pure_enable_git false
+      set -g pure_show_system_time true
+      set -g pure_enable_single_line_prompt true
+
+      set -g fish_greeting
 
       if which scmpuff &>/dev/null
         scmpuff init -s --shell=fish | source
@@ -167,6 +175,11 @@
         # I'm not clear on the different, but just using `aws-vault login --duration=8h` only gives an hour-long session
         export AWS_SESSION_TOKEN_TTL=8h
 
+        if test -z $argv[1]
+          echo "Specify a profile" >&2
+          return 1
+        end
+
         # url-encode the login url and use https://addons.mozilla.org/en-GB/firefox/addon/open-url-in-container/
         # to open it in a specific container
         set -l loginurl (aws-vault login --duration=8h --stdout "$argv[1]" | jq -sRr @uri)
@@ -216,7 +229,7 @@
           set argv "-"
         end
         for f in $argv
-          ${pkgs.imagemagick}/bin/magick "$f" -resize '300x300>' - | ${unstable.kitty}/bin/kitten icat --align left
+          ${pkgs.imagemagick}/bin/magick "$f" -resize '300x300>' - | ${pkgs.kitty}/bin/kitten icat --align left
         end
       '';
 
