@@ -28,12 +28,6 @@
   nix.nixPath = [ ("nixpkgs=" + toString pkgs.path) ];
   nix.settings = {
     sandbox = true;
-    # On Tahoe I seem to need these to get Emacs to compile
-    # https://github.com/NixOS/nixpkgs/issues/520441
-    extra-sandbox-paths = [
-      "/private/etc/ssl/certs/"
-      "/private/etc/static/ssl/certs/"
-    ];
     substituters = [
       "https://nix-community.cachix.org"
       "https://devenv.cachix.org"

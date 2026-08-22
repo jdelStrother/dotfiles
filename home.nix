@@ -9,6 +9,10 @@ let
   emacsSrc = pkgs.emacs-unstable; # build from latest tag
   # emacsSrc = pkgs.emacs-git; # build from latest master
   emacs = emacsSrc.overrideAttrs (old: rec {
+    # fix building in sandbox https://github.com/NixOS/nixpkgs/issues/520441#issuecomment-5085239665
+    postPatch = old.postPatch + ''
+      substituteInPlace lisp/gnus/smime.el --replace-fail '(car (gnutls-trustfiles))' '"/etc/ssl/cert.pem"'
+    '';
     # eglot+ruby-lsp makes it very easy to blow past the 1024 open file limit,
     # since it sets up watchers for every subdirectory of the project, for each of ruby-lsp, rubocop, and workspace-watcher
     # We can redefine FD_SETSIZE to allow more open files
